@@ -16,12 +16,13 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 ###############################################################################
 # General UI/UX                                                               #
 ###############################################################################
+echo "Beginning UI/UX updates."
 
 # Set computer name (as done via System Preferences → Sharing)
-sudo scutil --set ComputerName "MacBook Ifor"
-sudo scutil --set HostName "MacBook Ifor"
-sudo scutil --set LocalHostName "MacBook Ifor"
-sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "MacBook Ifor"
+sudo scutil --set ComputerName "MacBookIfor"
+sudo scutil --set HostName "MacBookIfor"
+sudo scutil --set LocalHostName "MacBookIfor"
+sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "MacBook-Ifor"
 
 # Disable the sound effects on boot
 sudo nvram SystemAudioVolume=" "
@@ -117,6 +118,8 @@ defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
 #rm -rf ~/Library/Application Support/Dock/desktoppicture.db
 #sudo rm -rf /System/Library/CoreServices/DefaultDesktop.jpg
 #sudo ln -s /path/to/your/image /System/Library/CoreServices/DefaultDesktop.jpg
+
+echo "UI/UX Updated."
 
 ###############################################################################
 # Trackpad, mouse, keyboard, Bluetooth accessories, and input                 #
