@@ -8,13 +8,14 @@ tap 'homebrew/bundle'
 # Binaries
 brew 'awscli'
 brew 'bash' # Latest Bash version
-brew 'bat' # "cat" on steroids
+# brew 'bat' # "cat" on steroids
 brew 'coreutils' # Those that come with macOS are outdated
 brew 'git'
-brew 'gnupg2'
+# brew 'gnupg2' # GNU privacy guard.
 brew 'grep'
 brew 'httpie'
-brew 'hub'
+brew 'iterm2'
+# brew 'hub' # Git command line helper.
 brew 'mackup'
 brew 'mas' # Mac App Store manager
 brew 'pkg-config' # https://github.com/driesvints/dotfiles/issues/20
@@ -35,38 +36,25 @@ brew 'redis'
 brew 'yarn'
 
 # Apps
-cask '1password'
-cask 'aerial'
-cask 'alfred'
-cask 'bartender'
-cask 'caffeine'
-cask 'discord'
-cask 'docker'
+# cask 'bartender'
+# cask 'caffeine'
+# cask 'docker'
 cask 'firefox'
 cask 'github'
-cask 'google-backup-and-sync'
 cask 'google-chrome'
-cask 'gpg-suite'
 cask 'insomnia'
 cask 'java'
-cask 'mysqlworkbench'
+# cask 'mysqlworkbench'
 cask 'phpstorm'
-cask 'screenflow'
-cask 'sip'
-cask 'skype'
-cask 'slack'
+cask 'sequel-pro'
 cask 'sublime-text'
-cask 'tableplus'
-cask 'telegram-desktop'
+# cask 'tableplus'
 cask 'the-unarchiver'
-cask 'tor-browser'
 cask 'transmission'
-cask 'transmit'
 cask 'vagrant'
 cask 'virtualbox' # Might need to allow access in Security settings
 cask 'virtualbox-extension-pack'
 cask 'vlc'
-cask 'whatsapp'
 
 # Quicklook
 cask 'qlcolorcode'
@@ -76,19 +64,20 @@ cask 'quicklook-csv'
 cask 'qlstephen'
 
 # Fonts
-cask 'font-lato'
-cask 'font-open-sans'
-cask 'font-roboto'
-cask 'font-roboto-condensed'
-cask 'font-source-code-pro-for-powerline'
-cask 'font-source-code-pro'
-cask 'font-source-sans-pro'
-cask 'font-source-serif-pro'
+# cask 'font-lato'
+# cask 'font-open-sans'
+# cask 'font-roboto'
+# cask 'font-roboto-condensed'
+# cask 'font-source-code-pro-for-powerline'
+# cask 'font-source-code-pro'
+# cask 'font-source-sans-pro'
+# cask 'font-source-serif-pro'
 
 # Mac App Store
-mas 'Byword', id: 420212497
-mas 'Giphy Capture', id: 668208984
-mas 'Keynote', id: 409183694
-mas 'Spark', id: 1176895641
-mas 'Things', id: 904280696
-mas 'Tweetbot', id: 1384080005
+mas 'Bandwidth+', id: 490461369
+mas 'Clocker', id: 1056643111
+mas 'Microsoft Excel', id: 462058435
+mas 'Microsoft PowerPoint', id: 462062816
+mas 'Microsoft Word', id: 462054704
+mas 'WeChat', id: 836500024
+mas 'Wunderlist', id: 410628904
