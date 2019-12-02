@@ -19,10 +19,10 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 echo "Beginning UI/UX updates."
 
 # Set computer name (as done via System Preferences → Sharing)
-sudo scutil --set ComputerName "MacBookIfor"
-sudo scutil --set HostName "MacBookIfor"
-sudo scutil --set LocalHostName "MacBookIfor"
-sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "MacBook-Ifor"
+sudo scutil --set ComputerName "Macbook-Ifor"
+sudo scutil --set HostName "Macbook-Ifor"
+sudo scutil --set LocalHostName "Macbook-Ifor"
+sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "Macbook-Ifor"
 
 # Disable the sound effects on boot
 sudo nvram SystemAudioVolume=" "
