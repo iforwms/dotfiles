@@ -7,6 +7,7 @@ alias hosts="sudo vim /etc/hosts"
 alias ll="ls -lah"
 weather() { curl -4 wttr.in/${1:-yangshuo} }
 alias phpstorm='open -a /Applications/PhpStorm.app "`pwd`"'
+alias subl='open -a "/Applications/Sublime Text.app" "`pwd`"'
 alias c="clear"
 alias zbundle="antibody bundle < $DOTFILES/zsh_plugins.txt > $DOTFILES/zsh_plugins.sh"
 
