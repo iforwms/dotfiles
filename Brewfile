@@ -36,6 +36,7 @@ brew 'redis'
 brew 'yarn'
 
 # Apps
+cask 'android-file-transfer'
 cask 'android-studio'
 cask 'bartender'
 # cask 'caffeine'
