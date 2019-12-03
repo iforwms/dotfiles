@@ -37,7 +37,7 @@ brew 'yarn'
 
 # Apps
 cask 'bartender'
-cask 'caffeine'
+# cask 'caffeine'
 # cask 'docker'
 cask 'firefox'
 cask 'github'
