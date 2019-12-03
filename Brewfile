@@ -36,8 +36,8 @@ brew 'redis'
 brew 'yarn'
 
 # Apps
-# cask 'bartender'
-# cask 'caffeine'
+cask 'bartender'
+cask 'caffeine'
 # cask 'docker'
 cask 'firefox'
 cask 'github'
