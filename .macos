@@ -68,7 +68,7 @@ defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
 echo 'Disable the “Are you sure you want to open this application?” dialog'
 defaults write com.apple.LaunchServices LSQuarantine -bool false
 
-echo "Remove duplicates in the “Open With” menu (also see `lscleanup` alias)"
+echo "Remove duplicates in the “Open With” menu (also see lscleanup alias)"
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user
 
 echo "Display ASCII control characters using caret notation in standard text views"
@@ -171,7 +171,7 @@ defaults write NSGlobalDomain AppleMetricUnits -bool true
 # Show language menu in the top right corner of the boot screen
 # sudo defaults write /Library/Preferences/com.apple.loginwindow showInputMenu -bool true
 
-echo "Set the timezone; see `sudo systemsetup -listtimezones` for other values"
+echo "Set the timezone; see sudo systemsetup -listtimezones for other values"
 sudo systemsetup -settimezone "Asia/Shanghai" > /dev/null
 
 # Stop iTunes from responding to the keyboard media keys
@@ -487,7 +487,7 @@ defaults write com.apple.Safari SuppressSearchSuggestions -bool true
 echo "Show the full URL in the address bar (note: this still hides the scheme)"
 defaults write com.apple.Safari ShowFullURLInSmartSearchField -bool true
 
-echo "Set Safari’s home page to `about:blank` for faster loading"
+echo "Set Safari’s home page to about:blank for faster loading"
 defaults write com.apple.Safari HomePage -string "about:blank"
 
 echo "Prevent Safari from opening ‘safe’ files automatically after downloading"
@@ -571,7 +571,7 @@ echo "Disable send and reply animations in Mail.app"
 defaults write com.apple.mail DisableReplyAnimations -bool true
 defaults write com.apple.mail DisableSendAnimations -bool true
 
-echo "Copy email addresses as `foo@example.com` instead of `Foo Bar <foo@example.com>` in Mail.app"
+echo "Copy email addresses as 'foo@example.com' instead of 'Foo Bar <foo@example.com>' in Mail.app"
 defaults write com.apple.mail AddressesIncludeNameOnPasteboard -bool false
 
 echo "Add the keyboard shortcut ⌘ + Enter to send an email in Mail.app"
@@ -887,11 +887,11 @@ echo "Google Chrome settings updated"
 ###############################################################################
 echo "Beginning Transmission settings update"
 
-echo "Use `~/Documents/Torrents` to store incomplete downloads"
+echo "Use '~/Documents/Torrents' to store incomplete downloads"
 defaults write org.m0k.transmission UseIncompleteDownloadFolder -bool true
 defaults write org.m0k.transmission IncompleteDownloadFolder -string "${HOME}/Documents/Torrents"
 
-echo "Use `~/Downloads` to store completed downloads"
+echo "Use '~/Downloads' to store completed downloads"
 defaults write org.m0k.transmission DownloadLocationConstant -bool true
 
 echo "Don’t prompt for confirmation before downloading"
