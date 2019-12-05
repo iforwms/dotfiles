@@ -31,6 +31,10 @@ echo "Removes .zshrc from $HOME (if it exists) and symlinks the .zshrc file from
 rm -rf $HOME/.zshrc
 ln -s $HOME/.dotfiles/.zshrc $HOME/.zshrc
 
+echo "Download Vim colour scheme"
+mkdir $HOME/.vim/colors
+curl -o $HOME/.vim/colors/Benokai.vim 'https://raw.githubusercontent.com/benjaminwhite/Benokai/master/colors/Benokai.vim'
+
 echo "Removes .vimrc from $HOME (if it exists) and symlinks the .vimrc file from the .dotfiles"
 rm -rf $HOME/.vimrc
 ln -s $HOME/.dotfiles/.vimrc $HOME/.vimrc
