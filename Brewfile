@@ -14,7 +14,6 @@ brew 'git'
 # brew 'gnupg2' # GNU privacy guard.
 brew 'grep'
 brew 'httpie'
-brew 'iterm2'
 # brew 'hub' # Git command line helper.
 brew 'mackup'
 brew 'mas' # Mac App Store manager
@@ -49,6 +48,7 @@ cask 'github'
 cask 'google-chrome'
 cask 'handbrake'
 cask 'insomnia'
+cask 'iterm2'
 cask 'java'
 # cask 'mysqlworkbench'
 cask 'ngrok'
