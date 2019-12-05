@@ -27,6 +27,10 @@ echo "Create a Code directory"
 # This is a default directory for macOS user accounts but doesn't comes pre-installed
 mkdir $HOME/code
 
+echo "Download ZSH plugins"
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions
+
 echo "Removes .zshrc from $HOME (if it exists) and symlinks the .zshrc file from the .dotfiles"
 rm -rf $HOME/.zshrc
 ln -s $HOME/.dotfiles/.zshrc $HOME/.zshrc
