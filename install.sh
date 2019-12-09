@@ -46,6 +46,6 @@ ln -s $HOME/.dotfiles/.vimrc $HOME/.vimrc
 echo "Symlink the Mackup config file to the home directory"
 ln -s $HOME/.dotfiles/.mackup.cfg $HOME/.mackup.cfg
 
-# Set macOS preferences
+echo "Set macOS preferences"
 # We will run this last because this will reload the shell
 source .macos
