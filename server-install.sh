@@ -16,7 +16,6 @@ echo "Installing ZSH"
 sudo apt install zsh
 rm -rf $HOME/.oh-my-zsh
 git clone https://github.com/robbyrussell/oh-my-zsh.git $HOME/.oh-my-zsh
-# sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
 echo "Creating symlink for .zshrc"
 rm -rf $HOME/.zshrc
