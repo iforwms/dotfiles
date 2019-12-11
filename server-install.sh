@@ -17,17 +17,19 @@ sudo apt install zsh
 git clone https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
 # sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
-echo "Setting ZSH as default shell"
-chsh -s $(which zsh)
-
 echo "Creating symlink for .zshrc"
 rm -rf $HOME/.zshrc
 ln -s $HOME/.dotfiles/.zshrc $HOME/.zshrc
 
+echo "Creating ZSH custom plugins directory"
+mkdir -p $HOME/.dotfiles/plugins
+
 echo "Download ZSH plugins"
-mkdir -p ${ZSH_CUSTOM}/plugins
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting
-git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${$HOME/.dotfiles}/plugins/zsh-syntax-highlighting
+git clone https://github.com/zsh-users/zsh-autosuggestions $$HOME/.dotfiles/plugins/zsh-autosuggestions
+
+echo "Setting ZSH as default shell"
+chsh -s $(which zsh)
 
 echo "Download Vim colour scheme"
 mkdir -p $HOME/.vim/colors
