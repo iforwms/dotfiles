@@ -7,7 +7,7 @@ echo "Updating repositories"
 sudo apt update
 
 echo "Upgrading packages"
-sudo apt upgrade
+sudo apt upgrade -y
 
 # TODO
 # Install Yarn, Node, Composer
