@@ -2,6 +2,18 @@
 
 echo "Setting up your Server..."
 
+# echo "Updating repositories"
+# sudo apt update
+
+# echo "Upgrading packages"
+# sudo apt upgrade
+
+echo "Installing ZSH"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+
+echo "Setting ZSH as default shell"
+chsh -s $(which zsh)
+
 echo "Removes .zshrc from $HOME (if it exists) and symlinks the .zshrc file from the .dotfiles"
 rm -rf $HOME/.zshrc
 ln -s $HOME/.dotfiles/.zshrc $HOME/.zshrc
