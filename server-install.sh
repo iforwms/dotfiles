@@ -8,6 +8,9 @@ echo "Setting up your Server..."
 # echo "Upgrading packages"
 # sudo apt upgrade
 
+# TODO
+# Install Yarn, Node, Composer
+
 echo "Installing ZSH"
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
