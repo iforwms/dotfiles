@@ -2,7 +2,8 @@
 
 A fork of Dries's dotfiles.
 
-📖 Read the blog post: https://driesvints.com/blog/getting-started-with-dotfiles 📹 Watch the screencast on Laracasts: https://laracasts.com/series/guest-spotlight/episodes/1
+📖 Read the blog post: https://driesvints.com/blog/getting-started-with-dotfiles
+📹 Watch the screencast on Laracasts: https://laracasts.com/series/guest-spotlight/episodes/1
 
 ## A Fresh macOS Setup
 
