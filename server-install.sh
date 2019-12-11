@@ -26,8 +26,8 @@ echo "Creating ZSH custom plugins directory"
 mkdir -p $HOME/.dotfiles/plugins
 
 echo "Download ZSH plugins"
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${$HOME/.dotfiles}/plugins/zsh-syntax-highlighting
-git clone https://github.com/zsh-users/zsh-autosuggestions ${$HOME/.dotfiles}/plugins/zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.dotfiles/plugins/zsh-syntax-highlighting
+git clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.dotfiles/plugins/zsh-autosuggestions
 
 echo "Setting ZSH as default shell"
 chsh -s $(which zsh)
