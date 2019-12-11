@@ -24,6 +24,7 @@ brew 'zlib' # Needed for Memcached
 
 # Development
 brew 'php'
+brew 'phpunit'
 brew 'php@7.3'
 brew 'php@7.2'
 brew 'composer'
