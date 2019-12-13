@@ -2,7 +2,7 @@
 
 install_type=$1
 
-if [[ $install_type -eq 0 ]] || [[ $install_type > 3 ]]; then
+if [[ $install_type -eq 0 ]] || [[ $install_type -gt 3 ]]; then
     echo "Please choose an installation type:"
     echo "1: server"
     echo "2: imac"
@@ -14,7 +14,7 @@ fi
 
 sudo -v
 
-if [[ $install_type eq 1 ]]; then
+if [[ $install_type -eq 1 ]]; then
     echo "Setting up server..."
 
     echo "Updating repositories"
@@ -83,7 +83,7 @@ echo "Creating symlink for .vimrc"
 rm -rf $HOME/.vimrc
 ln -s $HOME/.dotfiles/.vimrc $HOME/.vimrc
 
-if [[ $install_type -eq 1 ]]; then
+if [[ $install_type -gt 1 ]]; then
     echo "Symlink Mackup config file to the home directory"
     ln -s $HOME/.dotfiles/.mackup.cfg $HOME/.mackup.cfg
 
