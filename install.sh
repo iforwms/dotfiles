@@ -27,19 +27,29 @@ echo "Create a Code directory"
 # This is a default directory for macOS user accounts but doesn't comes pre-installed
 mkdir $HOME/code
 
-echo "Removes .zshrc from $HOME (if it exists) and symlinks the .zshrc file from the .dotfiles"
+echo "Setting up ZSH"
+rm -rf $HOME/.oh-my-zsh
+git clone https://github.com/robbyrussell/oh-my-zsh.git $HOME/.oh-my-zsh
+
+echo "Creating symlink for .zshrc"
 rm -rf $HOME/.zshrc
 ln -s $HOME/.dotfiles/.zshrc $HOME/.zshrc
 
+echo "Creating ZSH custom plugins directory"
+mkdir -p $HOME/.dotfiles/plugins
+
 echo "Download ZSH plugins"
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.dotfiles/plugins/zsh-syntax-highlighting
+git clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.dotfiles/plugins/zsh-autosuggestions
+
+echo "Setting ZSH as default shell"
+sudo sh -c "echo $(which zsh) >> /etc/shells" && chsh -s $(which zsh)
 
 echo "Download Vim colour scheme"
-mkdir $HOME/.vim/colors
+mkdir -p $HOME/.vim/colors
 curl -o $HOME/.vim/colors/Benokai.vim 'https://raw.githubusercontent.com/benjaminwhite/Benokai/master/colors/Benokai.vim'
 
-echo "Removes .vimrc from $HOME (if it exists) and symlinks the .vimrc file from the .dotfiles"
+echo "Creating symlink for .vimrc"
 rm -rf $HOME/.vimrc
 ln -s $HOME/.dotfiles/.vimrc $HOME/.vimrc
 
