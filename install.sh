@@ -36,23 +36,23 @@ else
       /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
     fi
 
-    echo "Update Homebrew recipes"
+    echo "Updating Homebrew recipes"
     brew update
 
-    echo "Install all our dependencies with bundle (See Brewfile)"
+    echo "Installing all brew dependencies (See Brewfile)"
     brew tap homebrew/bundle
     brew bundle
 
-    echo "Install PHP extensions with PECL"
+    echo "Installing PHP extensions with PECL"
     pecl install memcached imagick
 
-    echo "Install global Composer packages"
+    echo "Installing global Composer packages"
     /usr/local/bin/composer global require laravel/installer
 
     # Install Laravel Valet
     # $HOME/.composer/vendor/bin/valet install
 
-    echo "Create a Code directory"
+    echo "Creating a Code directory"
     # This is a default directory for macOS user accounts but doesn't comes pre-installed
     mkdir $HOME/code
 fi
@@ -68,14 +68,14 @@ ln -s $HOME/.dotfiles/.zshrc $HOME/.zshrc
 echo "Creating ZSH custom plugins directory"
 mkdir -p $HOME/.dotfiles/plugins
 
-echo "Download ZSH plugins"
+echo "Downloading ZSH plugins"
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.dotfiles/plugins/zsh-syntax-highlighting
 git clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.dotfiles/plugins/zsh-autosuggestions
 
 echo "Setting ZSH as default shell"
 sudo sh -c "echo $(which zsh) >> /etc/shells" && chsh -s $(which zsh)
 
-echo "Download Vim colour scheme"
+echo "Downloading Vim colour scheme"
 mkdir -p $HOME/.vim/colors
 curl -o $HOME/.vim/colors/Benokai.vim 'https://raw.githubusercontent.com/benjaminwhite/Benokai/master/colors/Benokai.vim'
 
@@ -84,10 +84,10 @@ rm -rf $HOME/.vimrc
 ln -s $HOME/.dotfiles/.vimrc $HOME/.vimrc
 
 if [[ $install_type -eq 1 ]]; then
-    echo "Symlink the Mackup config file to the home directory"
+    echo "Symlink Mackup config file to the home directory"
     ln -s $HOME/.dotfiles/.mackup.cfg $HOME/.mackup.cfg
 
-    echo "Set macOS preferences"
+    echo "Updating macOS preferences"
     # We will run this last because this will reload the shell
     source .macos
 fi
