@@ -27,7 +27,7 @@ if [[ $install_type -eq 1 ]]; then
     # Install Yarn, Node, Composer
 
     echo "Installing ZSH"
-    sudo apt install zsh
+    sudo apt install -y zsh
 else
     echo "Setting up your Mac..."
 
