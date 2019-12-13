@@ -3,6 +3,21 @@
 # Thanks to Mathias Bynens!
 # ~/.macos — https://mths.be/macos
 
+if [[ $1 -eq 0 ]] || [[ $1 -lt 2 ]] || [[ $1 -gt 3 ]]; then
+    echo "Please choose an installation type:"
+    echo "2: iMac"
+    echo "3: MacBook"
+    echo ""
+    echo "Usage: ./source .macos [type]"
+    return
+fi
+
+computer_name="iMac-Ifor"
+
+if [[ $1 -eq 3 ]]; then
+    computer_name="MacBook-Ifor"
+fi
+
 # Close any open System Preferences panes, to prevent them from overriding
 # settings we’re about to change
 osascript -e 'tell application "System Preferences" to quit'
@@ -20,10 +35,10 @@ echo "Beginning UI/UX update"
 
 echo "Setting computer name"
 # Set computer name (as done via System Preferences → Sharing)
-sudo scutil --set ComputerName "Macbook-Ifor"
-sudo scutil --set HostName "Macbook-Ifor"
-sudo scutil --set LocalHostName "Macbook-Ifor"
-sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "Macbook-Ifor"
+sudo scutil --set ComputerName $computer_name
+sudo scutil --set HostName $computer_name
+sudo scutil --set LocalHostName $computer_name
+sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string $computer_name
 
 echo "Disabling sound effects on boot"
 sudo nvram SystemAudioVolume=" "
