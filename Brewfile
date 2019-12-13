@@ -34,6 +34,7 @@ brew 'nginx'
 brew 'node'
 brew 'redis'
 brew 'yarn'
+brew 'zsh'
 
 # Apps
 cask 'android-file-transfer'
