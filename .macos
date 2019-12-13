@@ -68,8 +68,8 @@ defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
 echo 'Disable the “Are you sure you want to open this application?” dialog'
 defaults write com.apple.LaunchServices LSQuarantine -bool false
 
-echo "Remove duplicates in the “Open With” menu (also see lscleanup alias)"
-/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user
+# echo "Remove duplicates in the “Open With” menu (also see lscleanup alias)"
+# /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user
 
 echo "Display ASCII control characters using caret notation in standard text views"
 # Try e.g. `cd /tmp; unidecode "\x{0000}" > cc.txt; open -e cc.txt`
@@ -466,7 +466,7 @@ defaults write com.apple.dock wvous-tl-modifier -int 0
 echo "Top right screen corner → Desktop"
 defaults write com.apple.dock wvous-tr-corner -int 4
 defaults write com.apple.dock wvous-tr-modifier -int 0
-Bottom left screen corner → Start screen saver
+echo "Bottom left screen corner → Start screen saver"
 defaults write com.apple.dock wvous-bl-corner -int 3
 defaults write com.apple.dock wvous-bl-modifier -int 0
 
@@ -594,8 +594,9 @@ echo "Mail updated"
 ###############################################################################
 echo "Beginning Spotlight update"
 
-echo "Hide Spotlight tray-icon (and subsequent helper)"
-sudo chmod 600 /System/Library/CoreServices/Search.bundle/Contents/MacOS/Search
+# Use Bartender instead.
+# echo "Hide Spotlight tray-icon (and subsequent helper)"
+# sudo chmod 600 /System/Library/CoreServices/Search.bundle/Contents/MacOS/Search
 
 echo "Disable Spotlight indexing for any volume that gets mounted and has not yet"
 echo "been indexed before."
