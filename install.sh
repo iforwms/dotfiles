@@ -4,9 +4,9 @@ install_type=$1
 
 if [[ $install_type -eq 0 ]] || [[ $install_type -gt 3 ]]; then
     echo "Please choose an installation type:"
-    echo "1: server"
-    echo "2: imac"
-    echo "3: macbook"
+    echo "1: Server"
+    echo "2: iMac"
+    echo "3: MacBook"
     echo ""
     echo "Usage: ./install.sh [type]"
     exit
@@ -85,6 +85,7 @@ ln -s $HOME/.dotfiles/.vimrc $HOME/.vimrc
 
 if [[ $install_type -gt 1 ]]; then
     echo "Symlink Mackup config file to the home directory"
+    rm -rf $HOME/.mackup.cfg
     ln -s $HOME/.dotfiles/.mackup.cfg $HOME/.mackup.cfg
 
     echo "Updating macOS preferences"
