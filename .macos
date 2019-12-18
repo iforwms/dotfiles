@@ -903,9 +903,9 @@ echo "Google Chrome settings updated"
 ###############################################################################
 echo "Beginning Transmission settings update"
 
-echo "Use '~/Documents/Torrents' to store incomplete downloads"
+echo "Use '~/Downloads/Torrents' to store incomplete downloads"
 defaults write org.m0k.transmission UseIncompleteDownloadFolder -bool true
-defaults write org.m0k.transmission IncompleteDownloadFolder -string "${HOME}/Documents/Torrents"
+defaults write org.m0k.transmission IncompleteDownloadFolder -string "${HOME}/Downloads/Torrents"
 
 echo "Use '~/Downloads' to store completed downloads"
 defaults write org.m0k.transmission DownloadLocationConstant -bool true
