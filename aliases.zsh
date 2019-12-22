@@ -86,3 +86,8 @@ alias gpl='git pull'
 alias ga='git add'
 alias nah='git reset --hard && git clean -df'
 # alias apgi='git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached'
+
+# SSH
+alias sshtun='ssh -D 8080 clients'
+alias pxy='networksetup -setsocksfirewallproxy "Wi-Fi" localhost 8080'
+alias pxn='networksetup -setsocksfirewallproxystate "Wi-Fi" off'
