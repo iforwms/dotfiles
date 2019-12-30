@@ -656,6 +656,7 @@ sudo mdutil -i on / > /dev/null
 # Rebuild the index from scratch
 sudo mdutil -E / > /dev/null
  echo "Spotlight updated"
+
 ###############################################################################
 # Terminal & iTerm 2                                                          #
 ###############################################################################
