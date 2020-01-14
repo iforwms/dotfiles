@@ -89,6 +89,6 @@ alias nah='git reset --hard && git clean -df'
 
 # SSH
 alias sshtun='ssh -D 8080 clients'
-alias pxy='networksetup -setsocksfirewallproxy "Wi-Fi" localhost 8080'
-alias pxn='networksetup -setsocksfirewallproxystate "Wi-Fi" off'
+alias pxy='networksetup -setsocksfirewallproxy "Wi-Fi" localhost 8080 && networksetup -setsocksfirewallproxy "Ethernet" localhost 8080'
+alias pxn='networksetup -setsocksfirewallproxystate "Wi-Fi" off && networksetup -setsocksfirewallproxystate "Ethernet" off'
 alias on='pxy && sshtun'
