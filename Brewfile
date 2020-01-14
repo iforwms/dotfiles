@@ -13,6 +13,7 @@ brew 'coreutils' # Those that come with macOS are outdated
 brew 'git'
 # brew 'gnupg2' # GNU privacy guard.
 brew 'grep'
+brew 'htop'
 brew 'httpie'
 # brew 'hub' # Git command line helper.
 brew 'mackup'
