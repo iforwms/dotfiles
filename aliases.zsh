@@ -41,8 +41,21 @@ alias cfresh="rm -rf vendor/ composer.lock && composer i"
 alias pu="vendor/bin/phpunit"
 alias pf="vendor/bin/phpunit --filter"
 
+# Composer
+alias c="composer"
+alias cu="composer update"
+alias cr="composer require"
+alias ci="composer install"
+alias cda="composer dump-autoload -o"
+alias cchina="composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/"
+alias cintl="composer config -g --unset repos.packagist"
+
 # JS
 alias nfresh="rm -rf node_modules/ package-lock.json && yarn install"
+
+# IP addresses
+alias ip="curl https://diagnostic.opendns.com/myip ; echo"
+# alias localip="ifconfig -a | grep -o 'inet6\? \(addr:\)\?\s\?\(\(\([0-9]\+\.\)\{3\}[0-9]\+\)\|[a-fA-F0-9:]\+\)' | awk '{ sub(/inet6? (addr:)? ?/, \"\"); print }'"
 
 # Vagrant
 function hs() {
