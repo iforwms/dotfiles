@@ -35,6 +35,7 @@ brew 'mysql'
 brew 'nginx'
 brew 'node'
 brew 'redis'
+brew 'tmux'
 brew 'yarn'
 brew 'zsh'
 
