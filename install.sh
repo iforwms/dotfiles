@@ -65,6 +65,10 @@ echo "Creating symlink for .zshrc"
 rm -rf $HOME/.zshrc
 ln -s $HOME/.dotfiles/.zshrc $HOME/.zshrc
 
+echo "Creating symlink for .tmux.conf"
+rm -rf $HOME/.tmux.conf
+ln -s $HOME/.dotfiles/.tmux.conf $HOME/.tmux.conf
+
 echo "Creating ZSH custom plugins directory"
 mkdir -p $HOME/.dotfiles/plugins
 
