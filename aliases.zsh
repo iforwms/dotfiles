@@ -24,6 +24,9 @@ weather() { curl -4 wttr.in/${1:-yangshuo} }
 alias phpstorm='open -a /Applications/PhpStorm.app "`pwd`"'
 alias subl='open -a "/Applications/Sublime Text.app" "`pwd`"'
 alias c="clear"
+alias ping='ping -c 5'  # Pings with 5 packets, not unlimited
+alias df='df -h'        # Disk free, in gigabytes, not bytes
+alias du='du -h -c'     # Calculate total disk usage for a folder
 # alias zbundle="antibody bundle < $DOTFILES/zsh_plugins.txt > $DOTFILES/zsh_plugins.sh"
 
 # Directories
@@ -108,3 +111,56 @@ alias lpxoff='networksetup -setsocksfirewallproxystate "Wi-Fi" off'
 alias dpxoff='networksetup -setsocksfirewallproxystate "Wi-Fi" off && networksetup -setsocksfirewallproxystate "Ethernet" off'
 alias lon='lproxy && sshtun'
 alias don='dproxy && sshtun'
+
+# Termux
+alias tml="tmux list-sessions"
+alias tmk="tmux kill-session -t"
+
+# Given a tmux session name, add suffixes until it is unique
+function _tmux_get_unique_id() {
+    local _id=$(tmux list-sessions|grep "^$1"|wc -l)
+    local _unique=0
+    while [[ $_unique != 1 ]]; do
+        _id=$(($_id + 1))
+        local clientid=$1-$_id
+        tmux list-sessions | grep -q "^$clientid"
+        _unique=$?
+    done
+    echo $clientid
+}
+
+# Attach to an existing tmux session.
+#     A second argument can be given to select a particular window in the session.
+#     eg    tma mysession 2  -> attach to window 2 in mysession
+function tma() {
+    local clientid=$(_tmux_get_unique_id $1)
+    if [[ $# -eq 2 ]]; then
+        tmux new-session -d -t $1 -s $clientid \; \
+            set destroy-unattached on \; attach-session -t $clientid \; \
+            select-window -t $2 \; refresh-client -t $clientid \;
+    else
+        tmux new-session -d -t $1 -s $clientid \; \
+            set destroy-unattached on \; attach-session -t $clientid \; \
+            refresh-client -t $clientid \;
+    fi
+}
+
+# Create a new tmux session if needed, then attach to it.
+function tm() {
+    (tmux list-sessions|grep "^${1}" &>/dev/null) || \
+        tmux new-session -d -s $1
+    tma $1 $2
+}
+
+# Create a new window in the given tmux session and then attach to it.
+function tmc() {
+    local name=""
+    if [[ $# -eq 2 ]]; then
+        name="-n ${2}"
+    fi
+    local clientid=$(_tmux_get_unique_id $1)
+    tmux new-session -d -t $1 -s $clientid \; \
+        set destroy-unattached on \; new-window $name \; \
+        attach-session -t $clientid \; \
+        refresh-client -t $clientid \;
+}
