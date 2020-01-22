@@ -109,8 +109,8 @@ alias lproxy='networksetup -setsocksfirewallproxy "Wi-Fi" localhost 8080'
 alias dproxy='networksetup -setsocksfirewallproxy "Wi-Fi" localhost 8080 && networksetup -setsocksfirewallproxy "Ethernet" localhost 8080'
 alias lpxoff='networksetup -setsocksfirewallproxystate "Wi-Fi" off'
 alias dpxoff='networksetup -setsocksfirewallproxystate "Wi-Fi" off && networksetup -setsocksfirewallproxystate "Ethernet" off'
-alias lon='lproxy && sshtun'
-alias don='dproxy && sshtun'
+alias lon='lproxy && ssht'
+alias don='dproxy && ssht'
 
 # Termux
 alias tml="tmux list-sessions"
