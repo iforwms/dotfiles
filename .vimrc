@@ -7,8 +7,8 @@ set nocompatible                                    "Disable checks for staying 
 set noswapfile                                      "Disable swapfile creation.
 set hidden                                          "Allow switching buffers without writing to disk.
 set autowriteall                                    "Enable save on buffer change.
-"set spell                                           "Enable spell-checking.
-"set relativenumber                                  "Show line numbers relative to cursor position.
+"set spell                                          "Enable spell-checking.
+"set relativenumber                                 "Show line numbers relative to cursor position.
 
 
 "--------Spaces and Tabs--------"
