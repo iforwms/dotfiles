@@ -18,6 +18,9 @@ if ! tmux has-session -t domino; then
     # Watch CSS file for changes.
     tmux send-keys -t domino:1.2 'yr css' Enter
 
+    # Start Homestead server.
+    tmux send-keys -t domino:1.3 'hs up' Enter
+
     # Create a new window called DominoAdmin
     tmux new-window -t domino:2 -n DominoAdmin -c ~/code/domino/domino-admin
 
