@@ -10,6 +10,7 @@ brew 'awscli'
 brew 'bash' # Latest Bash version
 # brew 'bat' # "cat" on steroids
 brew 'coreutils' # Those that come with macOS are outdated
+brew 'dos2unix'
 brew 'git'
 # brew 'gnupg2' # GNU privacy guard.
 brew 'grep'
@@ -22,6 +23,7 @@ brew 'pkg-config' # https://github.com/driesvints/dotfiles/issues/20
 brew 'tldr' # Simpified man pages
 brew 'trash' # Manage the Trash bin
 brew 'tree' # List directories in a tree structure
+brew 'wget'
 brew 'zlib' # Needed for Memcached
 
 # Development
@@ -47,7 +49,7 @@ cask 'bartender'
 # cask 'caffeine'
 cask 'coda'
 cask 'db-browser-for-sqlite'
-# cask 'docker'
+cask 'docker'
 cask 'expressvpn'
 cask 'firefox'
 cask 'github'
@@ -61,9 +63,9 @@ cask 'ngrok'
 cask 'phpstorm'
 cask 'postman'
 cask 'pycharm'
-cask 'sequel-pro-nightly'
+# cask 'sequel-pro-nightly'
 cask 'sublime-text'
-# cask 'tableplus'
+cask 'tableplus'
 cask 'the-unarchiver'
 cask 'transmission'
 cask 'vagrant'
