@@ -37,8 +37,8 @@ if ! tmux has-session -t domino; then
     tmux send-keys -t domino:2.2 'yr css' Enter
 
     # Set active pane to main API pane on both wincows.
-    tmux select-pane -t domino:2.3
     tmux select-pane -t domino:1.3
+    tmux select-pane -t domino:2.3
 
     # Select DominoFrontend as main window.
     tmux select-window -t domino:1
