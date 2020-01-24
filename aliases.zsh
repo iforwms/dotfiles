@@ -112,9 +112,14 @@ alias dpxoff='networksetup -setsocksfirewallproxystate "Wi-Fi" off && networkset
 alias lon='lproxy && ssht'
 alias don='dproxy && ssht'
 
-# Termux
-alias tml="tmux list-sessions"
-alias tmk="tmux kill-session -t"
+# Tmux
+alias t="tmux"
+alias tls="tmux list-sessions"
+alias tkl="tmux kill-session -t"
+
+# Tmux session scripts
+alias domino="$HOME/.dotfiles/tmux/domino.sh"
+alias indier="$HOME/.dotfiles/tmux/indier.sh"
 
 # Given a tmux session name, add suffixes until it is unique
 function _tmux_get_unique_id() {
