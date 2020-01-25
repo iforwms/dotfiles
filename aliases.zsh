@@ -120,6 +120,7 @@ alias tkl="tmux kill-session -t"
 # Tmux session scripts
 alias domino="$HOME/.dotfiles/tmux/domino.sh"
 alias indier="$HOME/.dotfiles/tmux/indier.sh"
+alias ide="$HOME/.dotfiles/tmux/ide.sh"
 
 # Given a tmux session name, add suffixes until it is unique
 function _tmux_get_unique_id() {
