@@ -10,7 +10,8 @@ set autowriteall                                    "Enable save on buffer chang
 "set spell                                          "Enable spell-checking.
 "set relativenumber                                 "Show line numbers relative to cursor position.
 let g:tmux_navigator_disable_when_zoomed = 1        "Disable tmux navigator when zooming the Vim pane
-
+"Clear terminal on exit.
+au VimLeave * !clear
 
 "--------Spaces and Tabs--------"
 set shiftwidth=4                                    "Set indenting to 4 spaces not 8.
