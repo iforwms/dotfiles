@@ -114,6 +114,7 @@ alias don='dproxy && ssht'
 
 # Tmux
 alias t="tmux"
+alias ta="tmux a"
 alias tls="tmux list-sessions"
 alias tkl="tmux kill-session -t"
 
