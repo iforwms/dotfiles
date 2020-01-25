@@ -49,7 +49,21 @@ set complete=.,w,b,u,t
 nnoremap <Leader><space> :nohlsearch<CR>
 
 
-"--------Visuals--------"
+"--------Shortcuts--------"
+"Create horizontal split.
+nmap ss :split<Return>
+
+"Create vertical split.
+nmap sv :vsplit<Return>
+
+"Create new tab
+nmap te :tabedit<Return>
+
+"Switch between tabs
+nmap <Tab> :tabnext<Return>
+nmap <S-Tab> :tabprev<Return>
+
+"--------Visuals--------ete horizontal split.
 if !has("gui_running")                              "Enable 256 colors and turn on theme.
     set term=pcansi
     set t_CO=256
