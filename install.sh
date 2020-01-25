@@ -79,9 +79,9 @@ git clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.dotfiles/plugi
 echo "Setting ZSH as default shell"
 sudo sh -c "echo $(which zsh) >> /etc/shells" && chsh -s $(which zsh)
 
-echo "Downloading Vim colour scheme"
-mkdir -p $HOME/.vim/colors
-curl -o $HOME/.vim/colors/Benokai.vim 'https://raw.githubusercontent.com/benjaminwhite/Benokai/master/colors/Benokai.vim'
+echo "Setting up Vim"
+rm -rf $HOME/.vim
+ln -s $HOME/.dotfiles/.vim $HOME/.vim
 
 echo "Creating symlink for .vimrc"
 rm -rf $HOME/.vimrc

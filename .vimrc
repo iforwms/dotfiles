@@ -9,6 +9,7 @@ set hidden                                          "Allow switching buffers wit
 set autowriteall                                    "Enable save on buffer change.
 "set spell                                          "Enable spell-checking.
 "set relativenumber                                 "Show line numbers relative to cursor position.
+let g:tmux_navigator_disable_when_zoomed = 1        " Disable tmux navigator when zooming the Vim pane
 
 
 "--------Spaces and Tabs--------"
@@ -91,10 +92,10 @@ set splitbelow                                      "Open new splits below.
 set splitright                                      "Open new splits to the right.
 
 "Map ctrl+direction to move between windows.
-nnoremap <C-h> <C-w><C-h>
-nnoremap <C-j> <C-w><C-j>
-nnoremap <C-k> <C-w><C-k>
-nnoremap <C-l> <C-w><C-l>
+"nnoremap <C-h> <C-w><C-h>
+"nnoremap <C-j> <C-w><C-j>
+"nnoremap <C-k> <C-w><C-k>
+"nnoremap <C-l> <C-w><C-l>
 
 
 "--------Directory browser settings--------"
