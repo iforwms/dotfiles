@@ -34,6 +34,10 @@ augroup CursorLine                                  "Only highlight cursor line 
 augroup END
 
 
+"--------Lilypond--------"
+" \v for version
+inoremap <Leader>\v \version "2.18.2"
+
 "--------Search--------"
 set path+=**                                        "Turn on recursive search.
 set hlsearch                                        "Highlight all search results.
@@ -133,7 +137,7 @@ nnoremap <Leader>html :-1read $HOME/.vim/.skeleton.html<CR>4jf>a
 "inoremap <SPACE><SPACE> <ESC>/<++><Enter>"_c4l
 nnoremap <Leader>ev :tabe $MYVIMRC<CR>
 inoremap <Leader>i Ifor Waldo Williams
-inoremap <Leader>w ifor@designedbywaldo.com
+inoremap <Leader>em ifor@cors.tech
 inoremap <Leader>n iforwms
 
 
