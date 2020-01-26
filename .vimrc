@@ -151,7 +151,7 @@ function! ActiveStatus()
 
     let statusline=""
     let statusline.="%1*\ %{BufferNumber()}\ "      "Show current buffer number.
-    let statusline.="%0*\ %{GitBranch()}\ | "         "Show current GIT branch.
+    let statusline.="%0*\ %{StatuslineGit()}\ "         "Show current GIT branch.
     let statusline.="%0*\%-.30f\  "                 "Show filename.
     let statusline.="%0*%="                         "Add divider.
     let statusline.="%0*\ %{FileSize()}\ [%l:%v] |"             "Show filesize.
@@ -181,13 +181,15 @@ augroup END
 "Get current GIT branch - WIP
 function! GitBranch()
     "return "WIP"
-    let l:string = system("git rev-parse --abbrev-ref HEAD")
-    if (l:string =~ '/^fatal/')
-        return 'N/A'
-    endif
+    let l:string = system("git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n'")
 
     return l:string
 endfun
+
+function! StatuslineGit()
+  let l:branchname = GitBranch()
+  return strlen(l:branchname) > 0?'  '.l:branchname.' ':''
+endfunction
 
 "Get current buffer number
 function! BufferNumber()
