@@ -55,6 +55,9 @@ else
     echo "Creating a Code directory"
     # This is a default directory for macOS user accounts but doesn't comes pre-installed
     mkdir $HOME/code
+
+    echo "Installing tmux cmus plugin"
+    git clone https://github.com/Mpdreamz/tmux-cmus $HOME/.dotfiles/tmux/tmux-cmus
 fi
 
 echo "Setting up ZSH"
