@@ -56,6 +56,10 @@ else
     # This is a default directory for macOS user accounts but doesn't comes pre-installed
     mkdir $HOME/code
 
+    echo "Setting up lilypond"
+    ln -s $HOME/.dotfiles/lilypond/lilypond-link /usr/local/bin/lilypond-link
+    chmod +x /usr/local/bin/lilypond-link
+
     echo "Installing tmux cmus plugin"
     git clone https://github.com/Mpdreamz/tmux-cmus $HOME/.dotfiles/tmux/tmux-cmus
 fi
