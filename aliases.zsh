@@ -61,7 +61,11 @@ alias ip="curl https://diagnostic.opendns.com/myip ; echo"
 # alias localip="ifconfig -a | grep -o 'inet6\? \(addr:\)\?\s\?\(\(\([0-9]\+\.\)\{3\}[0-9]\+\)\|[a-fA-F0-9:]\+\)' | awk '{ sub(/inet6? (addr:)? ?/, \"\"); print }'"
 
 # Lilypond
+alias scores="cd ~/Documents/scores"
 alias lily="docker run --rm -v $(pwd):/app -w /app gpit2286/lilypond lilypond"
+function lilyw() {
+    find . -name "${1}.ly" | entr sh -c 'docker run --rm -v $(pwd):/app -w /app gpit2286/lilypond lilypond '"${1}.ly"' && open '"${1}.pdf";
+}
 
 # Vagrant
 function hs() {
