@@ -64,7 +64,7 @@ alias ip="curl https://diagnostic.opendns.com/myip ; echo"
 alias scores="cd ~/Documents/scores"
 alias lily="docker run --rm -v $(pwd):/app -w /app gpit2286/lilypond lilypond"
 function lilyw() {
-    find . -name "${1}.ly" | entr sh -c 'docker run --rm -v $(pwd):/app -w /app gpit2286/lilypond lilypond '"${1}.ly"' && open '"${1}.pdf";
+    find . -name "*.ly" | entr sh -c 'docker run --rm -v $(pwd):/app -w /app gpit2286/lilypond lilypond '"${1}.ly"' && open '"${1}.pdf";
 }
 
 # Vagrant
