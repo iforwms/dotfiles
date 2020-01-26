@@ -37,6 +37,7 @@ augroup END
 "--------Lilypond--------"
 " \v for version
 inoremap <Leader>\v \version "2.18.2"
+inoremap <Leader>44 \numericTimeSignature \time 4/4
 
 "--------Search--------"
 set path+=**                                        "Turn on recursive search.
