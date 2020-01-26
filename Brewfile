@@ -13,6 +13,7 @@ brew 'cash-cli' # currency rates
 brew 'cmus' # terminal player
 brew 'coreutils' # Those that come with macOS are outdated
 brew 'dos2unix'
+brew 'entr'
 brew 'git'
 # brew 'gnupg2' # GNU privacy guard.
 brew 'grep'
