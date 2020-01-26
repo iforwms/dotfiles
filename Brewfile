@@ -9,6 +9,8 @@ tap 'homebrew/bundle'
 brew 'awscli'
 brew 'bash' # Latest Bash version
 # brew 'bat' # "cat" on steroids
+brew 'cash-cli' # currency rates
+brew 'cmus' # terminal player
 brew 'coreutils' # Those that come with macOS are outdated
 brew 'dos2unix'
 brew 'git'
