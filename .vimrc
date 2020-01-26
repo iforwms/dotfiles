@@ -151,12 +151,12 @@ function! ActiveStatus()
 
     let statusline=""
     let statusline.="%1*\ %{BufferNumber()}\ "      "Show current buffer number.
-    let statusline.="%3*\ %{GitBranch()}\ "         "Show current GIT branch.
-    let statusline.="%2*\ %-.30f\ "                 "Show filename.
-    let statusline.="%3*%="                         "Add divider.
-    let statusline.="%1*\ %{FileSize()}\ [%l:%v]"             "Show filesize.
-    let statusline.="%1* %y\ %{(&fenc!=''?&fenc:&enc)}\[%{&ff}]\ "   "Show file encoding.
-    let statusline.="%4*\ %{strftime('%c')}\ "      "Show current time.
+    let statusline.="%0*\ %{GitBranch()}\ | "         "Show current GIT branch.
+    let statusline.="%0*\%-.30f\  "                 "Show filename.
+    let statusline.="%0*%="                         "Add divider.
+    let statusline.="%0*\ %{FileSize()}\ [%l:%v] |"             "Show filesize.
+    let statusline.="%0* %y\ %{(&fenc!=''?&fenc:&enc)}\[%{&ff}]\ "   "Show file encoding.
+    let statusline.="%0*\| %{strftime('%a %d %h %R')}\ "      "Show current time.
     return statusline
 endfunction
 
@@ -180,7 +180,7 @@ augroup END
 "--------Helper Functions--------"
 "Get current GIT branch - WIP
 function! GitBranch()
-    return "WIP"
+    "return "WIP"
     let l:string = system("git rev-parse --abbrev-ref HEAD")
     if (l:string =~ '/^fatal/')
         return 'N/A'
