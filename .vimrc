@@ -1,8 +1,11 @@
 "--------General Preferences--------"
+filetype off
+set runtimepath+=$HOME/.dotfiles/lilypond/vim/
+filetype plugin on                                  "Enable filetype plugin.
+filetype on
 set encoding=utf-8                                  "Set encoding to utf-8.
 set fileencoding=utf-8                              "Set file encoding to utf-8.
 syntax enable                                       "Enable syntax and plugins (for netrw).
-filetype plugin on                                  "Enable filetype plugin.
 set nocompatible                                    "Disable checks for staying compatible with VI.
 set noswapfile                                      "Disable swapfile creation.
 set hidden                                          "Allow switching buffers without writing to disk.
@@ -74,12 +77,32 @@ nmap <Tab> :tabnext<Return>
 nmap <S-Tab> :tabprev<Return>
 
 "--------Visuals--------ete horizontal split.
+if !has('gui')
+    " ^[ is a single character: Ctrl+V,<ESC>
+    let &t_8f = "[38;2;%lu;%lu;%lum"
+    let &t_8b = "[48;2;%lu;%lu;%lum"
+
+    set termguicolors
+
+    if !has('mac')
+        set t_ut=
+    endif
+endif
+
 if !has("gui_running")                              "Enable 256 colors and turn on theme.
     set term=pcansi
     set t_CO=256
+
+    "Add italic support
+    let &t_ZH="\e[3m"
+    let &t_ZR="\e[23m"
+    highlight Comment cterm=italic
+
     let &t_AB="\e[48;5;%dm"
     let &t_AF="\e[38;5;%dm"
-    colorscheme Benokai
+    let g:onedark_terminal_italics=1
+    let g:onedark_termcolors=256
+    colorscheme onedark
 endif
 
 set fillchars=""                                    "Characters used in split window divider.
@@ -230,6 +253,16 @@ function! FileSize()
     endif
 endfunction
 
+function! PhpSyntaxOverride()
+  " Put snippet overrides in this function.
+  hi! link phpDocTags phpDefine
+  hi! link phpDocParam phpType
+endfunction
+
+augroup phpSyntaxOverride
+  autocmd!
+  autocmd FileType php call PhpSyntaxOverride()
+augroup END
 
 "--------Reference Guide--------"
 " [count] [operator] [text object / motion]
