@@ -118,6 +118,8 @@ function ggs() {
 
 
 # SSH
+# Make sure our custom terminal with italics is not used no remote machines.
+alias ssh="TERM=xterm-256color ssh"
 alias ssht='ssh -D 8080 clients'
 alias lproxy='networksetup -setsocksfirewallproxy "Wi-Fi" localhost 8080'
 alias dproxy='networksetup -setsocksfirewallproxy "Wi-Fi" localhost 8080 && networksetup -setsocksfirewallproxy "Ethernet" localhost 8080'
