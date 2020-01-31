@@ -2,7 +2,7 @@
 
 # Bash script for displaying currently playing cmus song.
 # To set up, run the following command inside cmus:
-# :set status_display_program=<path-to-this-shell-script>
+# :set status_display_program=~/.dotfiles/scripts/cmus-notify.sh
 
 convertsecs() {
     # h=$(bc <<< "${1}/3600")

@@ -99,7 +99,6 @@ alias p="python"
 alias sv="source venv/bin/activate"
 
 # Git
-alias ggs='find ~/code -mindepth 1 -maxdepth 4 -type d -name .git -execdir git status -s \;'
 alias gl='git log --oneline --all --graph --decorate --pretty=format:"%Cgreen%h %Cred%d %Creset%s  %Cblue(%ar) <%an>" $*'
 alias gs='git status'
 alias gc='git commit -m'
@@ -111,6 +110,12 @@ alias gpl='git pull'
 alias ga='git add'
 alias nah='git reset --hard && git clean -df'
 # alias apgi='git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached'
+# find ~/code -mindepth 1 -maxdepth 4 -type d -name .git -execdir git status -s \;
+function ggs() {
+    find $HOME/code -mindepth 1 -maxdepth 3 -type d -name .git -prune -execdir $HOME/.dotfiles/scripts/globalGitStatus.sh \;
+}
+
+
 
 # SSH
 alias ssht='ssh -D 8080 clients'
@@ -128,9 +133,9 @@ alias tls="tmux list-sessions"
 alias tkl="tmux kill-session -t"
 
 # Tmux session scripts
-alias domino="$HOME/.dotfiles/tmux/domino.sh"
-alias indier="$HOME/.dotfiles/tmux/indier.sh"
-alias ide="$HOME/.dotfiles/tmux/ide.sh"
+alias domino="$HOME/.dotfiles/scripts/tmux-domino.sh"
+alias indier="$HOME/.dotfiles/scripts/tmux-indier.sh"
+alias ide="$HOME/.dotfiles/scripts/tmux-ide.sh"
 
 # Given a tmux session name, add suffixes until it is unique
 function _tmux_get_unique_id() {
