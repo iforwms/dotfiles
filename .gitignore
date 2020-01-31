@@ -3,3 +3,7 @@ plugins
 .idea/
 tmux/tmux-cmus
 lilypond/vim
+.vim/autoload/*.vim
+.vim/colors/*.vim
+.vim/syntax/*.vim
+.vim/plugin/*.vim
