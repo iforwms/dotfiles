@@ -14,6 +14,10 @@ fi
 
 sudo -v
 
+echo "Creating a Code directory"
+# This is a default directory for macOS user accounts but doesn't comes pre-installed
+mkdir $HOME/code
+
 if [[ $install_type -eq 1 ]]; then
     echo "Setting up server..."
 
@@ -24,7 +28,7 @@ if [[ $install_type -eq 1 ]]; then
     sudo apt upgrade -y
 
     # TODO
-    # Install Yarn, Node, Composer
+    # Install Yarn, Node, Composer, tmux
 
     echo "Installing ZSH"
     sudo apt install -y zsh
@@ -51,17 +55,6 @@ else
 
     # Install Laravel Valet
     # $HOME/.composer/vendor/bin/valet install
-
-    echo "Creating a Code directory"
-    # This is a default directory for macOS user accounts but doesn't comes pre-installed
-    mkdir $HOME/code
-
-    echo "Setting up lilypond"
-    ln -s $HOME/.dotfiles/lilypond/lilypond-link /usr/local/bin/lilypond-link
-    chmod +x /usr/local/bin/lilypond-link
-
-    echo "Installing tmux cmus plugin"
-    git clone https://github.com/Mpdreamz/tmux-cmus $HOME/.dotfiles/tmux/tmux-cmus
 fi
 
 echo "Setting up ZSH"
@@ -71,10 +64,6 @@ git clone https://github.com/robbyrussell/oh-my-zsh.git $HOME/.oh-my-zsh
 echo "Creating symlink for .zshrc"
 rm -rf $HOME/.zshrc
 ln -s $HOME/.dotfiles/.zshrc $HOME/.zshrc
-
-echo "Creating symlink for .tmux.conf"
-rm -rf $HOME/.tmux.conf
-ln -s $HOME/.dotfiles/.tmux.conf $HOME/.tmux.conf
 
 echo "Creating ZSH custom plugins directory"
 mkdir -p $HOME/.dotfiles/plugins
@@ -90,14 +79,47 @@ echo "Setting up Vim"
 rm -rf $HOME/.vim
 ln -s $HOME/.dotfiles/.vim $HOME/.vim
 
+echo "Installing php vim syntax highlighting"
+curl -fsSL -o $HOME/.dotfiles/.vim/syntax/php.vim https://raw.githubusercontent.com/StanAngeloff/php.vim/master/syntax/php.vim
+
+echo "Installing vim color scheme"
+curl -fsSL -o $HOME/.dotfiles/.vim/colors/onedark.vim https://raw.githubusercontent.com/joshdick/onedark.vim/master/colors/onedark.vim
+curl -fsSL -o $HOME/.dotfiles/.vim/autoload/onedark.vim https://raw.githubusercontent.com/joshdick/onedark.vim/master/autoload/onedark.vim
+
 echo "Creating symlink for .vimrc"
 rm -rf $HOME/.vimrc
 ln -s $HOME/.dotfiles/.vimrc $HOME/.vimrc
+
+echo "Install tmux navigator vim plugin"
+curl -fsSL -o $HOME/.dotfiles/.vim/plugin/tmux_navigator.vim https://raw.githubusercontent.com/christoomey/vim-tmux-navigator/master/plugin/tmux_navigator.vim
+
+echo "Creating symlink for .tmux.conf"
+rm -rf $HOME/.tmux.conf
+ln -s $HOME/.dotfiles/.tmux.conf $HOME/.tmux.conf
 
 if [[ $install_type -gt 1 ]]; then
     echo "Symlink Mackup config file to the home directory"
     rm -rf $HOME/.mackup.cfg
     ln -s $HOME/.dotfiles/.mackup.cfg $HOME/.mackup.cfg
+
+    echo "Symlink .gitconfig file to the home directory"
+    rm -rf $HOME/.gitconfig
+    ln -s $HOME/.dotfiles/.gitconfig $HOME/.gitconfig
+
+    echo "Setting up lilypond"
+    ln -s $HOME/.dotfiles/lilypond/lilypond-link /usr/local/bin/lilypond-link
+    chmod +x /usr/local/bin/lilypond-link
+
+    echo "Cloning lilypond vim syntax highlighting"
+    git clone git@github.com:matze/vim-lilypond.git $HOME/.dotfiles/lilypond/vim
+
+    echo "Installing tmux cmus plugin"
+    git clone https://github.com/Mpdreamz/tmux-cmus $HOME/.dotfiles/tmux/tmux-cmus
+
+    echo "Seting up terminfo config"
+    echo "## remember to update iterm (Preferences > Profiles > Terminal > Report Terminal Type: > xterm-256color-italic)"
+    tic $HOME/.dotfiles/tmux/256-italic-terminfo
+    tic -x $HOME/.dotfiles/tmux/tmux-terminfo
 
     echo "Updating macOS preferences"
     # We will run this last because this will reload the shell
