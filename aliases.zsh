@@ -99,6 +99,7 @@ alias p="python"
 alias sv="source venv/bin/activate"
 
 # Git
+alias ggs='find ~/code -mindepth 1 -maxdepth 4 -type d -name .git -execdir git status -s \;'
 alias gl='git log --oneline --all --graph --decorate --pretty=format:"%Cgreen%h %Cred%d %Creset%s  %Cblue(%ar) <%an>" $*'
 alias gs='git status'
 alias gc='git commit -m'
