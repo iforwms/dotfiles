@@ -1,3 +1,4 @@
 plugins
 .idea/
 tmux/tmux-cmus
+lilypond/vim
