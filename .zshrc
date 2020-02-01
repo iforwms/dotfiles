@@ -85,6 +85,9 @@ source $ZSH/oh-my-zsh.sh
 # Reduce key timeout (switching from insert to normal mode in vim)
 KEYTIMEOUT=1
 
+# Set terminal input type to vi
+set -o vi
+
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
