@@ -31,7 +31,7 @@ alias du='du -h -c'     # Calculate total disk usage for a folder
 # alias zbundle="antibody bundle < $DOTFILES/zsh_plugins.txt > $DOTFILES/zsh_plugins.sh"
 
 # Directories
-alias dotfiles="cd $DOTFILES"
+alias dot="cd $DOTFILES"
 alias library="cd $HOME/Library"
 alias code="cd $HOME/code"
 
