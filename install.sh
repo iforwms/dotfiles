@@ -116,10 +116,20 @@ if [[ $install_type -gt 1 ]]; then
     echo "Installing tmux cmus plugin"
     git clone https://github.com/Mpdreamz/tmux-cmus $HOME/.dotfiles/tmux/tmux-cmus
 
+    # TODO: Install cmus playlists
+
     echo "Seting up terminfo config"
     echo "## remember to update iterm (Preferences > Profiles > Terminal > Report Terminal Type: > xterm-256color-italic)"
     tic $HOME/.dotfiles/tmux/256-italic-terminfo
     tic -x $HOME/.dotfiles/tmux/tmux-terminfo
+
+    # Install python?
+    # echo "Installing beets"
+    # pip3 install beets
+    # echo "Setting up beets"
+    # mkdir -p $HOME/.config/beets
+    # rm -rf $HOME/.config/beets/config.yaml
+    # ln -s $HOME/.dotfiles/beets/config.yaml $HOME/.config/beets/config.yaml
 
     echo "Updating macOS preferences"
     # We will run this last because this will reload the shell
