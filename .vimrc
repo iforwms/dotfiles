@@ -5,13 +5,14 @@ filetype plugin on                                  "Enable filetype plugin.
 filetype on
 set encoding=utf-8                                  "Set encoding to utf-8.
 set fileencoding=utf-8                              "Set file encoding to utf-8.
+set termencoding=utf-8
+setglobal fileencoding=utf-8
 syntax enable                                       "Enable syntax and plugins (for netrw).
 set nocompatible                                    "Disable checks for staying compatible with VI.
 set noswapfile                                      "Disable swapfile creation.
 set hidden                                          "Allow switching buffers without writing to disk.
 set autowriteall                                    "Enable save on buffer change.
 "set spell                                          "Enable spell-checking.
-set relativenumber                                 "Show line numbers relative to cursor position.
 let g:tmux_navigator_disable_when_zoomed = 1        "Disable tmux navigator when zooming the Vim pane
 "Clear terminal on exit.
 au VimLeave * !clear
@@ -25,8 +26,11 @@ set expandtab                                       "Use spaces instead of tabs.
 
 "--------UI Config--------"
 let mapleader=','                                   "Overwrite default leader (\) to comma.
+set timeoutlen=1000                                 "Disable delay in switching from insert to normal mode
+set ttimeoutlen=0                                  "Disable delay in switching from insert to normal mode
 set backspace=indent,eol,start                      "Fix backspace actions.
 set number                                          "Add line numbering.
+set relativenumber                                  "Show line numbers relative to cursor position.
 set showcmd                                         "Show (partial) command in status line.
 set showmatch                                       "Highlight matching [{()}]
 set matchpairs+=<:>                                 "Highlight matching pairs of brackets. Use the '%' character to jump between them.
@@ -34,6 +38,13 @@ augroup CursorLine                                  "Only highlight cursor line 
         au!
         au VimEnter,WinEnter,BufWinEnter * setlocal cursorline
         au WinLeave * setlocal nocursorline
+augroup END
+
+"Show absolute line numbering when in insert mode.
+augroup numbertoggle
+  autocmd!
+  autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
+  autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
 augroup END
 
 
@@ -122,8 +133,8 @@ hi CursorLineNr ctermbg=red ctermfg=white           "Current line number formatt
 hi NonText ctermbg=235 ctermfg=red cterm=none       "EOL etc text formatting.
 hi LineNr ctermbg=bg                                "Set line number formatting.
 hi VertSplit ctermbg=blue                           "Set vertical split separator color.
-hi TabLineFill ctermfg=red ctermbg=DarkBlue         "Set main tab bg (right).
-hi TabLine ctermfg=White ctermbg=DarkBlue           "Set unselected tabs formatting.
+hi TabLineFill ctermfg=red ctermbg=236         "Set main tab bg (right).
+hi TabLine ctermfg=White ctermbg=242           "Set unselected tabs formatting.
 hi TabLineSel ctermfg=White ctermbg=red             "Set active tab formatting.
 hi Title ctermfg=White                              "Set window count per tab formatting.
 
@@ -179,22 +190,49 @@ augroup END
 
 "--------Statusline--------"
 function! ActiveStatus()
-    "1: grey, 2: red, 3: blue, 4: green"
+    "1: grey, 2: red, 3: blue, 4: green
 
     let statusline=""
-    let statusline.="%1*\ %{BufferNumber()}\ "      "Show current buffer number.
-    let statusline.="%0*\ %{StatuslineGit()}\ "         "Show current GIT branch.
-    let statusline.="%0*\%-.30f\  "                 "Show filename.
-    let statusline.="%0*%="                         "Add divider.
-    let statusline.="%0*\ %{FileSize()}\ [%l:%v] |"             "Show filesize.
-    let statusline.="%0* %y\ %{(&fenc!=''?&fenc:&enc)}\[%{&ff}]\ "   "Show file encoding.
-    let statusline.="%0*\| %{strftime('%a %d %h %R')}\ "      "Show current time.
+
+    "Show input mode
+    let statusline.=" %{toupper(g:currentmode[mode()])} "
+
+    "Show current GIT branch.
+    let statusline.="%0*\ %{StatuslineGit()}\ "
+
+    "Show filename.
+    let statusline.="%0*\%-.30f\  "
+
+    "Add divider.
+    let statusline.="%0*%="
+
+    "Show current buffer number
+    let statusline.="%0*\ %{BufferNumber()}\ "
+
+    "Show filesize and current line/col
+    let statusline.="%0*\ %{FileSize()}\ [%l:%v] [%b][0x%B] |"
+
+    "Show file type, encoding and format.
+    let statusline.="%0* %y\ %{(&fenc!=''?&fenc:&enc)}\[%{&ff}]\ "
+
+    "help file flag
+    let statusline.="%0*\ %h \ "
+
+    "modified flag
+    let statusline.="%0*\ [%{getbufvar(bufnr('%'),'&mod')?'modified':'saved'}] \ "
+
+    "read-only flag
+    let statusline.="%0*\ %r \ "
+
+    "Show current time.
+    "let statusline.="%0*\| %{strftime('%a %d %h %R')}\ "
+
     return statusline
 endfunction
 
 function! InactiveStatus()
     let statusline=""
-    let statusline.="%1*\ %{BufferNumber()}\ "      "Show current buffer number.
+    let statusline.="%0*\ %{BufferNumber()}\ "      "Show current buffer number.
     let statusline.="\ %-.30f\ "                    "Show filename.
     return statusline
 endfunction
@@ -208,8 +246,37 @@ augroup status
   autocmd WinLeave * setlocal statusline=%!InactiveStatus()
 augroup END
 
+set noshowmode    "to get rid of thing like --INSERT--
+set noshowcmd     "to get rid of display of last command
+set shortmess+=F  "to get rid of the file name displayed in the command line bar
 
 "--------Helper Functions--------"
+" Define all the different modes
+let g:currentmode={
+    \ 'n'  : 'Normal',
+    \ 'no' : 'N·Operator Pending',
+    \ 'v'  : 'Visual',
+    \ 'V'  : 'V·Line',
+    \ '' : 'V·Block',
+    \ 's'  : 'Select',
+    \ 'S'  : 'S·Line',
+    \ '' : 'S·Block',
+    \ 'i'  : 'Insert',
+    \ 'R'  : 'Replace',
+    \ 'Rv' : 'V·Replace',
+    \ 'c'  : 'Command',
+    \ 'cv' : 'Vim Ex',
+    \ 'ce' : 'Ex',
+    \ 'r'  : 'Prompt',
+    \ 'rm' : 'More',
+    \ 'r?' : 'Confirm',
+    \ '!'  : 'Shell',
+    \}
+
+function! ShowCurrentMode(mode)
+    return a:mode
+endfunction
+
 "Get current GIT branch - WIP
 function! GitBranch()
     "return "WIP"
