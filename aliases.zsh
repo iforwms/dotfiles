@@ -115,7 +115,13 @@ function ggs() {
     find $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -execdir $HOME/.dotfiles/scripts/globalGitStatus.sh \;
 }
 
-
+# beets
+alias beetimport="docker exec -u abc -it beets /bin/bash -c 'beet import /downloads'"
+alias beatupdate="docker exec -it beets /bin/bash -c 'beet update'"
+# If you make any configuration changes that would alter the
+# physical file structure of your collection, you will need to
+# run a fresh import on the clean music folder:
+# docker exec -it beets /bin/bash -c 'beet import /music'
 
 # SSH
 # Make sure our custom terminal with italics is not used no remote machines.

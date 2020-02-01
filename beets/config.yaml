@@ -1,0 +1,20 @@
+plugins: fetchart embedart convert scrub replaygain lastgenre chroma web
+directory: /music
+library: /config/musiclibrary.db
+threaded: yes
+
+paths:
+    default: $albumartist/$album%aunique{}/$track - $title
+    singleton: Non-Album/$artist - $title
+    comp: Compilations/$album%aunique{}/$track - $title
+    albumtype_soundtrack: Soundtracks/$album/$track $title
+
+import:
+    write: yes
+    copy: no
+    move: yes
+    resume: ask
+    incremental: yes
+    quiet_fallback: skip
+    timid: no
+    log: ~/beet.log
