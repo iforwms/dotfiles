@@ -93,6 +93,12 @@ ln -s $HOME/.dotfiles/.vimrc $HOME/.vimrc
 echo "Install tmux navigator vim plugin"
 curl -fsSL -o $HOME/.dotfiles/.vim/plugin/tmux_navigator.vim https://raw.githubusercontent.com/christoomey/vim-tmux-navigator/master/plugin/tmux_navigator.vim
 
+echo "Install vim surround plugin"
+curl -fsSL -o $HOME/.dotfiles/.vim/plugin/surround.vim https://raw.githubusercontent.com/tpope/vim-surround/master/plugin/surround.vim
+
+echo "Install vim commentary plugin"
+curl -fsSL -o $HOME/.dotfiles/.vim/plugin/commentary.vim https://raw.githubusercontent.com/tpope/vim-commentary/master/plugin/commentary.vim
+
 echo "Creating symlink for .tmux.conf"
 rm -rf $HOME/.tmux.conf
 ln -s $HOME/.dotfiles/.tmux.conf $HOME/.tmux.conf
