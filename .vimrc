@@ -31,7 +31,6 @@ set ttimeoutlen=0                                  "Disable delay in switching f
 set backspace=indent,eol,start                      "Fix backspace actions.
 set number                                          "Add line numbering.
 set relativenumber                                  "Show line numbers relative to cursor position.
-set showcmd                                         "Show (partial) command in status line.
 set showmatch                                       "Highlight matching [{()}]
 set matchpairs+=<:>                                 "Highlight matching pairs of brackets. Use the '%' character to jump between them.
 augroup CursorLine                                  "Only highlight cursor line for active buffer.
@@ -127,15 +126,15 @@ set listchars+=nbsp:.                               "Set character for non-break
 
 
 "--------Color Scheme Overrides--------"
-hi CursorLine ctermbg=0                             "Set color of current line.
+hi CursorLine ctermbg=234                             "Set color of current line.
 hi CursorColumn ctermbg=0                           "Set color of current column.
-hi CursorLineNr ctermbg=red ctermfg=white           "Current line number formatting.
+hi CursorLineNr ctermbg=235 ctermfg=39           "Current line number formatting.
 hi NonText ctermbg=235 ctermfg=red cterm=none       "EOL etc text formatting.
-hi LineNr ctermbg=bg                                "Set line number formatting.
-hi VertSplit ctermbg=blue                           "Set vertical split separator color.
+hi LineNr ctermbg=234                                "Set line number formatting.
+hi VertSplit ctermbg=238                           "Set vertical split separator color.
 hi TabLineFill ctermfg=red ctermbg=236         "Set main tab bg (right).
-hi TabLine ctermfg=White ctermbg=242           "Set unselected tabs formatting.
-hi TabLineSel ctermfg=White ctermbg=red             "Set active tab formatting.
+hi TabLine ctermfg=244 ctermbg=236           "Set unselected tabs formatting.
+hi TabLineSel ctermfg=120 ctermbg=236             "Set active tab formatting.
 hi Title ctermfg=White                              "Set window count per tab formatting.
 
 hi User1 ctermbg=grey ctermfg=0                     "Set user-defined scheme 1.

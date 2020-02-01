@@ -1,39 +1,44 @@
-
 "--------Statusline--------"
-function! ActiveStatus()
-    "1: grey, 2: red, 3: blue, 4: green
+set showcmd                                         "Show (partial) command in status line.
+hi StatusLineNC ctermbg=237
+hi vertsplit ctermfg=fg ctermbg=bg
 
+function! ActiveStatus()
     let statusline=""
 
     "Show input mode
-    let statusline.=" %{toupper(g:currentmode[mode()])} "
+    let statusline.="%#Function#\ %{toupper(g:currentmode[mode()][0])} "
 
     "Show current GIT branch.
-    let statusline.="%0*\ %{StatuslineGit()}\ "
+    let statusline.="%0*\%{StatuslineGit()}\ "
 
     "Show filename.
-    let statusline.="%0*\%-.30f\  "
+    let statusline.="%#String#\ %-.30f%{getbufvar(bufnr('%'),'&mod')?'*':''}\ "
+
+    "help file flag
+    let statusline.="%h"
+
+    "read-only flag
+    let statusline.="%r"
 
     "Add divider.
     let statusline.="%0*%="
 
+    "Show current line ancd column"
+    let statusline.="%0*\ %l:%v\ "
+
     "Show current buffer number
-    let statusline.="%0*\ %{BufferNumber()}\ "
+    let statusline.="%#Function#\ %{BufferNumber()}\ "
 
     "Show filesize and current line/col
-    let statusline.="%0*\ %{FileSize()}\ [%l:%v] [%b][0x%B] |"
+    "let statusline.="%0*\ "
+    "let statusline.="%{FileSize()}"
+    "let statusline.="\ "
+    "let statusline.="%l:%v "
+    "let statusline.="[%b][0x%B]"
 
     "Show file type, encoding and format.
-    let statusline.="%0* %y\ %{(&fenc!=''?&fenc:&enc)}\[%{&ff}]\ "
-
-    "help file flag
-    let statusline.="%0*\ %h \ "
-
-    "modified flag
-    let statusline.="%0*\ [%{getbufvar(bufnr('%'),'&mod')?'modified':'saved'}] \ "
-
-    "read-only flag
-    let statusline.="%0*\ %r \ "
+    "let statusline.="%0* %y\ %{(&fenc!=''?&fenc:&enc)}\[%{&ff}]\ "
 
     "Show current time.
     "let statusline.="%0*\| %{strftime('%a %d %h %R')}\ "
@@ -43,8 +48,28 @@ endfunction
 
 function! InactiveStatus()
     let statusline=""
-    let statusline.="%0*\ %{BufferNumber()}\ "      "Show current buffer number.
-    let statusline.="\ %-.30f\ "                    "Show filename.
+
+    "Show current GIT branch.
+    let statusline.="%0*\%{StatuslineGit()}\ "
+
+    "Show filename.
+    let statusline.="%-.30f%{getbufvar(bufnr('%'),'&mod')?'*':''} "
+
+    "help file flag
+    let statusline.="%h"
+
+    "read-only flag
+    let statusline.="%r"
+
+    "Add divider.
+    let statusline.="%0*%="
+
+    "Show current line ancd column"
+    let statusline.="%l:%v "
+
+    "Show current buffer number
+    let statusline.="%{BufferNumber()}\ "
+
     return statusline
 endfunction
 
@@ -63,29 +88,25 @@ set shortmess+=F  "to get rid of the file name displayed in the command line bar
 
 " Define all the different modes
 let g:currentmode={
-    \ 'n'  : 'Normal',
-    \ 'no' : 'N·Operator Pending',
-    \ 'v'  : 'Visual',
-    \ 'V'  : 'V·Line',
-    \ '' : 'V·Block',
-    \ 's'  : 'Select',
-    \ 'S'  : 'S·Line',
-    \ '' : 'S·Block',
-    \ 'i'  : 'Insert',
-    \ 'R'  : 'Replace',
-    \ 'Rv' : 'V·Replace',
-    \ 'c'  : 'Command',
-    \ 'cv' : 'Vim Ex',
-    \ 'ce' : 'Ex',
-    \ 'r'  : 'Prompt',
-    \ 'rm' : 'More',
-    \ 'r?' : 'Confirm',
-    \ '!'  : 'Shell',
+    \ 'n'  : ['Normal', 1],
+    \ 'no' : ['N·Operator Pending', 0],
+    \ 'v'  : ['Visual', 0],
+    \ 'V'  : ['V·Line', 0],
+    \ '' : ['V·Block', 0],
+    \ 's'  : ['Select', 0],
+    \ 'S'  : ['S·Line', 0],
+    \ '' : ['S·Block', 0],
+    \ 'i'  : ['Insert', 0],
+    \ 'R'  : ['Replace', 0],
+    \ 'Rv' : ['V·Replace', 0],
+    \ 'c'  : ['Command', 0],
+    \ 'cv' : ['Vim Ex', 0],
+    \ 'ce' : ['Ex', 0],
+    \ 'r'  : ['Prompt', 0],
+    \ 'rm' : ['More', 0],
+    \ 'r?' : ['Confirm', 0],
+    \ '!'  : ['Shell', 0],
     \}
-
-function! ShowCurrentMode(mode)
-    return a:mode
-endfunction
 
 "Get current GIT branch - WIP
 function! GitBranch()
@@ -102,7 +123,7 @@ endfunction
 
 "Get current buffer number
 function! BufferNumber()
-    return 'help'!=&filetype?'b:'.bufnr('%'):''
+    return 'help'!=&filetype?bufnr('%'):''
 endfun
 
 "Get current buffer's size
