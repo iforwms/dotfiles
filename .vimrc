@@ -71,7 +71,6 @@ set complete=.,w,b,u,t
 "Shortcut to turn off search highlighting.
 nnoremap <Leader><space> :nohlsearch<CR>
 
-
 "--------Shortcuts--------"
 "Create horizontal split.
 nmap ss :split<Return>
