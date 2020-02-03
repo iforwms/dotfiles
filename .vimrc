@@ -50,12 +50,6 @@ augroup END
 "--------Fix common typos--------"
 iabbrev teh the
 
-"--------Lilypond--------"
-" \v for version
-iabbrev \v \version "2.18.2"
-inoremap <Leader>44 \numericTimeSignature \time 4/4
-iabbrev \h \header {<CR>  title=""<CR>  composer=""<CR>}
-
 "--------Search--------"
 set path+=**                                        "Turn on recursive search.
 set hlsearch                                        "Highlight all search results.
