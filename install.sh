@@ -1,24 +1,28 @@
-#!/bin/sh
+#!/bin/bash
 
 install_type=$1
 
-if [[ $install_type -eq 0 ]] || [[ $install_type -gt 3 ]]; then
+if [ -z $install_type ] || (( $install_type < 1 )) || (( $install_type > 4 ))
+then
     echo "Please choose an installation type:"
     echo "1: Server"
     echo "2: iMac"
     echo "3: MacBook"
+    echo "4: Termux"
     echo ""
     echo "Usage: ./install.sh [type]"
     exit
 fi
 
-sudo -v
 
 echo "Creating a Code directory"
 # This is a default directory for macOS user accounts but doesn't comes pre-installed
-mkdir $HOME/code
+mkdir $HOME/code 2> /dev/null
 
-if [[ $install_type -eq 1 ]]; then
+if (( $install_type == 1 ))
+then
+    sudo -v
+
     echo "Setting up server..."
 
     echo "Updating repositories"
@@ -32,7 +36,12 @@ if [[ $install_type -eq 1 ]]; then
 
     echo "Installing ZSH"
     sudo apt install -y zsh
-else
+
+    # add zsh at default shell
+elif (( $install_type < 4 ))
+then
+    sudo -v
+
     echo "Setting up your Mac..."
 
     # Check for Homebrew and install if we don't have it
@@ -55,6 +64,14 @@ else
 
     # Install Laravel Valet
     # $HOME/.composer/vendor/bin/valet install
+else
+    echo "Updating packages"
+    pkg upgrade
+    echo "installing, tree, tmux, zsh, openssh, php, python, git, vim, node"
+    pkg install tree tmux openssh zsh php python vim git
+
+    echo "Setting zsh as default shell"
+    chsh -s zsh
 fi
 
 echo "Setting up ZSH"
@@ -69,11 +86,10 @@ echo "Creating ZSH custom plugins directory"
 mkdir -p $HOME/.dotfiles/plugins
 
 echo "Downloading ZSH plugins"
+rm -rf $HOME/.dotfiles/plugins/zsh-syntax-highlighting
+rm -rf $HOME/.dotfiles/plugins/zsh-autosuggestions
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.dotfiles/plugins/zsh-syntax-highlighting
 git clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.dotfiles/plugins/zsh-autosuggestions
-
-echo "Setting ZSH as default shell"
-sudo sh -c "echo $(which zsh) >> /etc/shells" && chsh -s $(which zsh)
 
 echo "Setting up Vim"
 rm -rf $HOME/.vim
@@ -103,7 +119,10 @@ echo "Creating symlink for .tmux.conf"
 rm -rf $HOME/.tmux.conf
 ln -s $HOME/.dotfiles/.tmux.conf $HOME/.tmux.conf
 
-if [[ $install_type -gt 1 ]]; then
+if (( $install_type > 1 && $install_type < 4 )); then
+echo "Setting ZSH as default shell"
+sudo sh -c "echo $(which zsh) >> /etc/shells" && chsh -s $(which zsh)
+
     echo "Symlink Mackup config file to the home directory"
     rm -rf $HOME/.mackup.cfg
     ln -s $HOME/.dotfiles/.mackup.cfg $HOME/.mackup.cfg
