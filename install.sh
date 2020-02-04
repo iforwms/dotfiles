@@ -1,8 +1,6 @@
 #!/bin/bash
 
-install_type=$1
-
-if [ -z $install_type ] || (( $install_type < 1 )) || (( $install_type > 4 ))
+if [ -z $1 ] || (( $1 < 1 )) || (( $1 > 4 ))
 then
     echo "Please choose an installation type:"
     echo "1: Server"
@@ -19,7 +17,7 @@ echo "Creating a Code directory"
 # This is a default directory for macOS user accounts but doesn't comes pre-installed
 mkdir $HOME/code 2> /dev/null
 
-if (( $install_type == 1 ))
+if (( $1 == 1 ))
 then
     sudo -v
 
@@ -38,7 +36,7 @@ then
     sudo apt install -y zsh
 
     # add zsh at default shell
-elif (( $install_type < 4 ))
+elif (( $1 < 4 ))
 then
     sudo -v
 
@@ -119,7 +117,7 @@ echo "Creating symlink for .tmux.conf"
 rm -rf $HOME/.tmux.conf
 ln -s $HOME/.dotfiles/.tmux.conf $HOME/.tmux.conf
 
-if (( $install_type > 1 && $install_type < 4 )); then
+if (( $1 > 1 && $install_type < 4 )); then
 echo "Setting ZSH as default shell"
 sudo sh -c "echo $(which zsh) >> /etc/shells" && chsh -s $(which zsh)
 
