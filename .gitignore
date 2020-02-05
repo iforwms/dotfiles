@@ -13,3 +13,4 @@ beets/.cache
 beets/beets.sh
 beets/*.pickle
 .ash_history
+.netrwhist
