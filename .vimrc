@@ -76,8 +76,8 @@ nmap sv :vsplit<Return>
 nmap te :tabedit<Return>
 
 "Switch between tabs
-nmap <Tab> :tabnext<Return>
-nmap <S-Tab> :tabprev<Return>
+"nmap <Tab> :tabnext<Return>
+"nmap <S-Tab> :tabprev<Return>
 
 "--------Visuals--------ete horizontal split.
 if !has('gui')
