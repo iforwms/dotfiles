@@ -167,7 +167,5 @@
 --exclude=\*.tar.\*
 --exclude=bower_components
 --exclude=dist
---exclude=test
---exclude=tests
 --exclude=.tmp
 --exclude=*bundle.*
