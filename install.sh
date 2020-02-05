@@ -17,6 +17,7 @@ echo "Creating a Code directory"
 # This is a default directory for macOS user accounts but doesn't comes pre-installed
 mkdir $HOME/code 2> /dev/null
 
+# Server only setup
 if (( $1 == 1 ))
 then
     sudo -v
@@ -35,9 +36,10 @@ then
     echo "Installing ZSH"
     sudo apt install -y zsh
 
-    # add zsh at default shell
+    sudo sh -c "echo $(which zsh) >> /etc/shells" && chsh -s $(which zsh)
 elif (( $1 < 4 ))
 then
+    # Macbook/iMac only setup
     sudo -v
 
     echo "Setting up your Mac..."
@@ -59,17 +61,20 @@ then
 
     echo "Installing global Composer packages"
     /usr/local/bin/composer global require laravel/installer
-
-    # Install Laravel Valet
-    # $HOME/.composer/vendor/bin/valet install
 else
+    # Termux setup
     echo "Updating packages"
     pkg upgrade
-    echo "installing, tree, tmux, zsh, openssh, php, python, git, vim, node"
-    pkg install tree tmux openssh zsh php python vim git
+
+    echo "installing, tree, tmux, zsh, openssh, php, python, git, vim, yarn"
+    pkg install tree tmux openssh zsh php python vim git yarn
 
     echo "Setting zsh as default shell"
     chsh -s zsh
+
+    echo "Symlink .gitconfig file to the home directory"
+    rm -rf $HOME/.gitconfig
+    ln -s $HOME/.dotfiles/.gitconfig $HOME/.gitconfig
 fi
 
 echo "Setting up ZSH"
@@ -79,9 +84,6 @@ git clone https://github.com/robbyrussell/oh-my-zsh.git $HOME/.oh-my-zsh
 echo "Creating symlink for .zshrc"
 rm -rf $HOME/.zshrc
 ln -s $HOME/.dotfiles/.zshrc $HOME/.zshrc
-
-echo "Creating ZSH custom plugins directory"
-mkdir -p $HOME/.dotfiles/plugins
 
 echo "Downloading ZSH plugins"
 rm -rf $HOME/.dotfiles/plugins/zsh-syntax-highlighting
@@ -117,9 +119,10 @@ echo "Creating symlink for .tmux.conf"
 rm -rf $HOME/.tmux.conf
 ln -s $HOME/.dotfiles/.tmux.conf $HOME/.tmux.conf
 
+# Macbook/iMac only scripts
 if (( $1 > 1 && $install_type < 4 )); then
-echo "Setting ZSH as default shell"
-sudo sh -c "echo $(which zsh) >> /etc/shells" && chsh -s $(which zsh)
+    echo "Setting ZSH as default shell"
+    sudo sh -c "echo $(which zsh) >> /etc/shells" && chsh -s $(which zsh)
 
     echo "Symlink Mackup config file to the home directory"
     rm -rf $HOME/.mackup.cfg
