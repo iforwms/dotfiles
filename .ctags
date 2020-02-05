@@ -4,7 +4,6 @@
 --tag-relative=yes
 
 --langmap=php:+.inc
---php-kinds=cfd
 --regex-PHP=/abstract\s+class\s+([^ ]+)/\1/c/
 --regex-PHP=/interface\s+([^ ]+)/\1/c/
 --regex-PHP=/(public\s+|static\s+|protected\s+|private\s+)\$([^     =]+)/\2/p/
@@ -12,6 +11,7 @@
 --regex-PHP=/final\s+(public\s+|static\s+|abstract\s+|protected\s+|private\s+)function\s+\&?\s*([^ (]+)/\2/f/
 --regex-php=/get([a-z|A-Z|0-9]+)Attribute/\1/
 --regex-php=/scope([a-z|A-Z|0-9]+)/\1/
+--php-kinds=cfpd
 
 --regex-html=/id="([A-Za-z0-9_-]+)"/\1/i,id,ids/
 --regex-html=/class="([A-Za-z0-9_-]+)"/\1/c,class,classes/
