@@ -82,7 +82,7 @@ augroup status
   autocmd WinLeave * setlocal statusline=%!InactiveStatus()
 augroup END
 
-set noshowmode    "to get rid of thing like --INSERT--
+"set noshowmode    "to get rid of thing like --INSERT--
 "set noshowcmd     "to get rid of display of last command
 set shortmess+=F  "to get rid of the file name displayed in the command line bar
 
