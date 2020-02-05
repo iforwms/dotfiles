@@ -119,6 +119,10 @@ echo "Creating symlink for .tmux.conf"
 rm -rf $HOME/.tmux.conf
 ln -s $HOME/.dotfiles/.tmux.conf $HOME/.tmux.conf
 
+echo "Creating symlink for .ctags"
+rm -rf $HOME/.ctags
+ln -s $HOME/.dotfiles/.ctags $HOME/.ctags
+
 # Macbook/iMac only scripts
 if (( $1 > 1 && $install_type < 4 )); then
     echo "Setting ZSH as default shell"
