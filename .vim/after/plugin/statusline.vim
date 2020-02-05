@@ -25,7 +25,7 @@ function! ActiveStatus()
     let statusline.="%0*%="
 
     "Show current line ancd column"
-    let statusline.="%0*\ %l:%v\ "
+    let statusline.="%0*\ %l/%L:%v\ "
 
     "Show current buffer number
     let statusline.="%#Function#\ %{BufferNumber()}\ "
@@ -64,8 +64,8 @@ function! InactiveStatus()
     "Add divider.
     let statusline.="%0*%="
 
-    "Show current line ancd column"
-    let statusline.="%l:%v "
+    "Show current line and column"
+    let statusline.="%l/%L:%v "
 
     "Show current buffer number
     let statusline.="%{BufferNumber()}\ "
