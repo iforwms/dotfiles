@@ -14,7 +14,6 @@ alias 7='cd -7'
 alias 8='cd -8'
 alias 9='cd -9'
 alias _='sudo '
-alias copyssh="pbcopy < $HOME/.ssh/id_rsa.pub"
 alias reloadcli="source $HOME/.zshrc"
 alias hosts="sudo vim /etc/hosts"
 alias bi="brew install"
@@ -46,7 +45,6 @@ alias pu="vendor/bin/phpunit"
 alias pf="vendor/bin/phpunit --filter"
 
 # Composer
-alias c="composer"
 alias cu="composer update"
 alias cr="composer require"
 alias ci="composer install"
@@ -124,6 +122,8 @@ alias beatupdate="docker exec -it beets /bin/bash -c 'beet update'"
 # docker exec -it beets /bin/bash -c 'beet import /music'
 
 # SSH
+alias copyssh="pbcopy < $HOME/.ssh/id_rsa.pub"
+# alias addssh='ssh $1 "echo \"`cat ~/.ssh/id_rsa.pub`\" >> ~/.ssh/authorized_keys"'
 # Make sure our custom terminal with italics is not used no remote machines.
 alias ssh="TERM=xterm-256color ssh"
 alias ssht='ssh -D 8080 clients'
