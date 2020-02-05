@@ -88,6 +88,7 @@ set shortmess+=F  "to get rid of the file name displayed in the command line bar
 
 " Define all the different modes
 let g:currentmode={
+    \ 't'  : ['Terminal', 1],
     \ 'n'  : ['Normal', 1],
     \ 'no' : ['N·Operator Pending', 0],
     \ 'v'  : ['Visual', 0],
