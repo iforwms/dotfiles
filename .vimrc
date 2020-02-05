@@ -80,6 +80,9 @@ nmap te :tabedit<Return>
 "nmap <Tab> :tabnext<Return>
 "nmap <S-Tab> :tabprev<Return>
 
+"Search tags
+nmap <Leader>s :tag<space>
+
 "--------Visuals--------ete horizontal split.
 if !has('gui')
     " ^[ is a single character: Ctrl+V,<ESC>
