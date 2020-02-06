@@ -3,10 +3,12 @@ filetype off
 set runtimepath+=$HOME/.dotfiles/lilypond/vim/
 filetype plugin on                                  "Enable filetype plugin.
 filetype on
+
 set encoding=utf-8                                  "Set encoding to utf-8.
 set fileencoding=utf-8                              "Set file encoding to utf-8.
 set termencoding=utf-8
 setglobal fileencoding=utf-8
+
 syntax enable                                       "Enable syntax and plugins (for netrw).
 set nocompatible                                    "Disable checks for staying compatible with VI.
 set noswapfile                                      "Disable swapfile creation.
@@ -14,8 +16,7 @@ set hidden                                          "Allow switching buffers wit
 set autowriteall                                    "Enable save on buffer change.
 "set spell                                          "Enable spell-checking.
 let g:tmux_navigator_disable_when_zoomed = 1        "Disable tmux navigator when zooming the Vim pane
-"Clear terminal on exit.
-au VimLeave * !clear
+
 
 "--------Spaces and Tabs--------"
 set shiftwidth=4                                    "Set indenting to 4 spaces not 8.
@@ -50,6 +51,7 @@ augroup END
 "--------Fix common typos--------"
 iabbrev teh the
 
+
 "--------Search--------"
 set path+=**                                        "Turn on recursive search.
 set hlsearch                                        "Highlight all search results.
@@ -65,6 +67,7 @@ set complete=.,w,b,u,t,i,kspell
 
 "Shortcut to turn off search highlighting.
 nnoremap <Leader><space> :nohlsearch<CR>
+
 
 "--------Shortcuts--------"
 "Create horizontal split.
@@ -82,6 +85,7 @@ nmap te :tabedit<Return>
 
 "Search tags
 nmap <Leader>s :tag<space>
+
 
 "--------Visuals--------ete horizontal split.
 if !has('gui')
@@ -183,6 +187,8 @@ augroup autosourcing                                "Auto-source the vimrc file 
         autocmd BufWritePost .vimrc source %
 augroup END
 
+"Clear terminal on exit.
+au VimLeave * !clear
 
 "--------Helper Functions--------"
 function! PhpSyntaxOverride()
