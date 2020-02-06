@@ -164,12 +164,13 @@ let g:netrw_liststyle=3                             "Set display mode to be Tree
 let g:netrw_list_hide=netrw_gitignore#Hide()        "Hide files hidden by .gitignore.
 let g:netrw_list_hide.=',\(^\|\s\s)\zs\.\S+'        "Hide additional files.
 "autocmd FileType netrw setl bufhidden=Delete        "By default, netrw leaves unmodified buffers open. This autocommand deletes netrw's buffer once it's hidden.
-autocmd BufRead * call s:set_hidden()
-function s:set_hidden()
-    if empty(&buftype) "most explorer plugins have buftype=nofile
-        setlocal bufhidden=delete
-    endif
-endfunction
+"autocmd BufRead * call s:set_hidden()
+"function s:set_hidden()
+"    if empty(&buftype) "most explorer plugins have buftype=nofile
+"        setlocal bufhidden=delete
+""    endif
+"endfunction
+
 
 "--------Snippets--------"
 nnoremap <Leader>html :-1read $HOME/.vim/.skeleton.html<CR>4jf>a
