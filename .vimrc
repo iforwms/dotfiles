@@ -28,6 +28,7 @@ set expandtab                                       "Use spaces instead of tabs.
 "--------UI Config--------"
 let mapleader=','                                   "Overwrite default leader (\) to comma.
 set timeoutlen=1000                                 "Disable delay in switching from insert to normal mode
+set colorcolumn="80,".join(range(120,999),",")      "Set visual markers at cols 80 and 120
 set ttimeoutlen=0                                  "Disable delay in switching from insert to normal mode
 set backspace=indent,eol,start                      "Fix backspace actions.
 set number                                          "Add line numbering.
