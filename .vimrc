@@ -67,6 +67,14 @@ set complete=.,w,b,u,t,i,kspell
 
 "Shortcut to turn off search highlighting.
 nnoremap <Leader><space> :nohlsearch<CR>
+"
+"Prettify current file
+function! Prettify()
+    let curPos = getcurpos()
+    exe "%!prettier --stdin --stdin-filepath %"
+    call setpos('.', curPos)
+endfunction
+nnoremap <Leader>p :call Prettify()<cr>
 
 
 "--------Shortcuts--------"
