@@ -35,6 +35,7 @@ set backspace=indent,eol,start                      "Fix backspace actions.
 set number                                          "Add line numbering.
 set relativenumber                                  "Show line numbers relative to cursor position.
 set showmatch                                       "Highlight matching [{()}]
+set nrformats=                                      "Always treat numbers as decimal
 set matchpairs+=<:>                                 "Highlight matching pairs of brackets. Use the '%' character to jump between them.
 augroup CursorLine                                  "Only highlight cursor line for active buffer.
         au!
@@ -62,6 +63,7 @@ set ignorecase                                      "Enable case-insensitive sea
 set smartcase                                       "Enable case-sensitive searching if mixed-case.
 set tags=./tags;,tags,                              "Set ctags index location.
 set wildmenu                                        "Display all matching files when tab complete.
+set wildmode=full                                   "Make wildcard matching match ZSH behaviour
 set wildignore+=**/node_modules/**                  "Ignore node_modules in autocomplete.
 set wildignore+=*.pyc,*.pyo,__pycache__             "Ignore compiled pythong files in autocomplete.
 "file, window, buffer, inactive buffers, tags, includes, spell check (when enabled)"
