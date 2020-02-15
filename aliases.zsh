@@ -116,7 +116,7 @@ function ggs() {
 
 # beets
 alias beetimport="docker exec -u abc -it beets /bin/bash -c 'beet import /downloads'"
-alias beatupdate="docker exec -it beets /bin/bash -c 'beet update'"
+alias beetupdate="docker exec -it beets /bin/bash -c 'beet update'"
 # If you make any configuration changes that would alter the
 # physical file structure of your collection, you will need to
 # run a fresh import on the clean music folder:
