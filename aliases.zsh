@@ -30,6 +30,14 @@ alias du='du -h -c'     # Calculate total disk usage for a folder
 # alias zbundle="antibody bundle < $DOTFILES/zsh_plugins.txt > $DOTFILES/zsh_plugins.sh"
 alias vimgolf='docker run --rm -it -e "key=4ff4186b1f258b4dd2755c104835abeb" kramos/vimgolf'
 
+# Docker
+alias doc="docker-compose"
+alias dstop="docker stop $(docker ps -a -q)"
+alias dpurgec="dstop && docker rm $(docker ps -a -q)"
+alias dpurgei="docker rmi $(docker images -q)"
+# dbuild() { docker build -t=$1 .; }
+# dbash() { docker exec -it $(docker ps -aqf "name=$1") bash; }
+
 # Directories
 alias dot="cd $DOTFILES"
 alias library="cd $HOME/Library"
@@ -78,14 +86,6 @@ function hs() {
 # alias vreload="vagrant reload"
 # alias vrebuild="vagrant destroy --force && vagrant up"
 
-# Docker
-# alias docker-composer="docker-compose"
-# alias dstop="docker stop $(docker ps -a -q)"
-# alias dpurgecontainers="dstop && docker rm $(docker ps -a -q)"
-# alias dpurgeimages="docker rmi $(docker images -q)"
-# dbuild() { docker build -t=$1 .; }
-# dbash() { docker exec -it $(docker ps -aqf "name=$1") bash; }
-
 # Yarn
 alias yr='yarn'
 alias yra='yarn add'
@@ -127,13 +127,14 @@ alias copyssh="pbcopy < $HOME/.ssh/id_rsa.pub"
 # alias addssh='ssh $1 "echo \"`cat ~/.ssh/id_rsa.pub`\" >> ~/.ssh/authorized_keys"'
 # Make sure our custom terminal with italics is not used no remote machines.
 alias ssh="TERM=xterm-256color ssh"
-alias ssht='ssh -D 8080 clients'
-alias lproxy='networksetup -setsocksfirewallproxy "Wi-Fi" localhost 8080'
-alias dproxy='networksetup -setsocksfirewallproxy "Wi-Fi" localhost 8080 && networksetup -setsocksfirewallproxy "Ethernet" localhost 8080'
-alias lpxoff='networksetup -setsocksfirewallproxystate "Wi-Fi" off'
-alias dpxoff='networksetup -setsocksfirewallproxystate "Wi-Fi" off && networksetup -setsocksfirewallproxystate "Ethernet" off'
+alias ssht='ssh -D 2080 clients'
+alias lproxy='networksetup -setsocksfirewallproxy "Wi-Fi" localhost 2080'
+alias dproxy='networksetup -setsocksfirewallproxy "Wi-Fi" localhost 2080 && networksetup -setsocksfirewallproxy "Ethernet" localhost 2080'
+alias loff='networksetup -setsocksfirewallproxystate "Wi-Fi" off'
+alias doff='networksetup -setsocksfirewallproxystate "Wi-Fi" off && networksetup -setsocksfirewallproxystate "Ethernet" off'
 alias lon='lproxy && ssht'
 alias don='dproxy && ssht'
+alias pc='proxychains4'
 
 # Tmux
 alias t="tmux"
