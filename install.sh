@@ -27,6 +27,6 @@ fi
 
 source install/generic.sh
 
-if (( $1 > 1 && $install_type < 4 )); then
+if (( $1 > 1 && $1 < 4 )); then
     source install/mac-2.sh
 fi
