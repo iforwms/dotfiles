@@ -32,9 +32,9 @@ alias vimgolf='docker run --rm -it -e "key=4ff4186b1f258b4dd2755c104835abeb" kra
 
 # Docker
 alias doc="docker-compose"
-alias dstop="docker stop $(docker ps -a -q)"
-alias dpurgec="dstop && docker rm $(docker ps -a -q)"
-alias dpurgei="docker rmi $(docker images -q)"
+# alias dstop="docker stop $(docker ps -a -q)"
+# alias dpurgec="dstop && docker rm $(docker ps -a -q)"
+# alias dpurgei="docker rmi $(docker images -q)"
 # dbuild() { docker build -t=$1 .; }
 # dbash() { docker exec -it $(docker ps -aqf "name=$1") bash; }
 
