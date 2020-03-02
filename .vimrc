@@ -16,7 +16,7 @@ set hidden                                          "Allow switching buffers wit
 set autowriteall                                    "Enable save on buffer change.
 "set spell                                          "Enable spell-checking.
 let g:tmux_navigator_disable_when_zoomed = 1        "Disable tmux navigator when zooming the Vim pane
-
+set clipboard+=unnamedplus                          "By default, yank to system clipboard
 
 "--------Spaces and Tabs--------"
 set shiftwidth=4                                    "Set indenting to 4 spaces not 8.
