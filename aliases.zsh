@@ -107,6 +107,7 @@ alias gcam='git commit --amend'
 alias gps='git push'
 alias gpl='git pull'
 alias ga='git add'
+alias gaa='git add .'
 alias nah='git reset --hard && git clean -df'
 # alias apgi='git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached'
 # find ~/code -mindepth 1 -maxdepth 4 -type d -name .git -execdir git status -s \;
