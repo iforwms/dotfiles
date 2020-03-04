@@ -17,16 +17,16 @@ mkdir $HOME/code 2> /dev/null
 
 if (( $1 == 1 ))
 then
-    source install/server.sh
+    source $HOME/.dotfiles/install/server.sh
 elif (( $1 < 4 ))
 then
-    source install/mac-1.sh
+    source $HOME/.dotfiles/install/mac-1.sh
 else
-    source install/termux.sh
+    source $HOME/.dotfiles/install/termux.sh
 fi
 
-source install/generic.sh
+source $HOME/.dotfiles/install/generic.sh
 
 if (( $1 > 1 && $1 < 4 )); then
-    source install/mac-2.sh
+    source $HOME/.dotfiles/install/mac-2.sh
 fi
