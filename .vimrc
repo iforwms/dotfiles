@@ -82,6 +82,9 @@ nnoremap <Leader>p :call Prettify()<cr>
 
 
 "--------Shortcuts--------"
+"Force saving file as sudo
+cmap w!! w !sudo tee > /dev/null %
+
 "Create horizontal split.
 nmap ss :split<Return>
 
