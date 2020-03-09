@@ -1,3 +1,7 @@
+"--------Userful tips --------------"
+"Replace all px with rem
+" :%s#\(\d\+\)px#\=printf("%f", (submatch(1) / 16.0))."rem"#g
+
 "--------General Preferences--------"
 filetype off
 set runtimepath+=$HOME/.dotfiles/lilypond/vim/
