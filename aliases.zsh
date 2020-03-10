@@ -19,7 +19,7 @@ alias hosts="sudo vim /etc/hosts"
 alias bi="brew install"
 # alias reloaddns="dscacheutil -flushcache && sudo killall -HUP mDNSResponder"
 # alias ll="/usr/local/opt/coreutils/libexec/gnubin/ls -ahlF --color --group-directories-first"
-alias ll="ls -lah"
+alias ll="LC_COLLATE=C ls -lah"
 weather() { curl -4 wttr.in/${1:-yangshuo} }
 alias phpstorm='open -a /Applications/PhpStorm.app "`pwd`"'
 alias subl='open -a "/Applications/Sublime Text.app" "`pwd`"'
