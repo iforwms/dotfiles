@@ -1,0 +1,13 @@
+"[ASSOC PROCESS]" wlan.fc.type_subtype eq 0 or wlan.fc.type_subtype eq 1 or wlan.fc.type_subtype eq 10
+"[BEACONS]" wlan.fc.type_subtype eq 8
+"[DATA]" wlan.fc.type eq 2
+"[DEAUTHS]" wlan.fc.type_subtype eq 12
+"[PROBES]" wlan.fc.type_subtype == 4 or wlan.fc.type_subtype == 5
+"[PWR MGMT]" wlan.fc.type_subtype == 0x0024
+"[QOS]" wlan.qos.priority eq 
+"[RTS/CTS]" wlan.fc.type_subtype eq 27 or wlan.fc.type_subtype eq 28 
+"[RETRIES]" wlan.fc.retry eq 1
+"------------------------------------" ------------------------------------
+"DEVICE > VERA" wlan.addr == 08:E6:89:B2:95:C9
+"DEVICE > JAYNE" wlan.addr == 3C:15:C2:E5:4E:E8
+"DEVICE > FIREFLY" wlan.addr == 38:53:9C:A6:86:2A
