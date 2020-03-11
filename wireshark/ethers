@@ -1,0 +1,10 @@
+# Use the ethers files to name devices.
+# This will replace the MAC address with the name you specify here.
+# An example of adding a device MAC address and name.
+
+######## EXAMPLE DEVICE ENTRY ############
+
+# 1A:2B:3C:4D:5E:6F DEVICE-NAME
+
+######## ENTER YOU DEVICES BELOW! ########
+70.BB.E9.D3.01.F7 IFOR-MI-MAX
