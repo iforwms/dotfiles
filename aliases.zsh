@@ -116,6 +116,23 @@ alias nah='git reset --hard && git clean -df'
 function ggs() {
     find $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -execdir $HOME/.dotfiles/scripts/globalGitStatus.sh \;
 }
+function gitPurge() {
+  git filter-branch --force --index-filter \
+  "git rm --cached --ignore-unmatch $1" \
+  --prune-empty --tag-name-filter cat -- --all
+  # echo $1 >> .gitignore
+  # git add .gitignore
+  # git commit -m "Add sensitive file to .gitignore"
+  # git push origin --force --all
+  #
+  # If tags have been published
+  # git push origin --force --tags
+  #
+  # If git filter-branch had no unintended side effects
+  # git for-each-ref --format="delete %(refname)" refs/original | git update-ref --stdin
+  # git reflog expire --expire=now --all
+  # git gc --prune=now
+}
 
 # beets
 alias beetimport="docker exec -u abc -it beets /bin/bash -c 'beet import /downloads'"
