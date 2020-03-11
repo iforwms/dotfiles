@@ -225,25 +225,17 @@ gui.column.hidden:
 # Each pair of strings consists of a column title and its format
 gui.column.format: 
 	"No.", "%m",
-	"StrmIndx", "%Cus:tcp.stream:0:R",
 	"Time", "%t",
-	"Time Delta", "%Gt",
-	"TCP Delta", "%Cus:tcp.time_delta:0:R",
+	"Time Delta", "%Cus:frame.time_delta_displayed:0:R",
 	"Source", "%s",
+	"SRC-Port", "%Cus:udp.srcport:0:R",
 	"Destination", "%d",
+	"DST-Port", "%Cus:udp.dstport:0:R",
+	"PROT", "%p",
 	"Length", "%L",
-	"TCP-LEN", "%Cus:tcp.len:0:R",
-	"D Port", "%Cus:tcp.dstport:0:R",
-	"SEQ#", "%Cus:tcp.seq:0:R",
-	"NextSEQ", "%Cus:tcp.nxtseq:0:R",
-	"ACK#", "%Cus:tcp.ack:0:R",
-	"ACKfor", "%Cus:tcp.analysis.acks_frame:0:R",
-	"WIN Size", "%Cus:tcp.window_size_value:0:R",
-	"CumBytes", "%B",
-	"Bytes in flight", "%Cus:tcp.analysis.bytes_in_flight:0:R",
-	"Bytes since PSH", "%Cus:tcp.analysis.push_bytes_sent:0:R",
-	"Protocol", "%p",
-	"IP ID", "%Cus:ip.id:0:R",
+	"QUERY-NAME", "%Cus:dns.qry.name:0:R",
+	"RESP-NAME", "%Cus:dns.resp.name:0:R",
+	"RESP-ADDR", "%Cus:dns.a:0:R",
 	"Info", "%i"
 
 ####### User Interface: Font ########
