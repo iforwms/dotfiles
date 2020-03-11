@@ -220,40 +220,26 @@ gui.column.hidden:
 
 # Packet list column format
 # Each pair of strings consists of a column title and its format
-gui.column.format: 
-	"No.", "%m",
-	"StrmIndx", "%Cus:tcp.stream:0:R",
-	"Time", "%t",
-	"Time Delta", "%Gt",
-	"TCP Delta", "%Cus:tcp.time_delta:0:R",
-	"Source", "%s",
-	"Destination", "%d",
-	"Length", "%L",
-	"TCP-LEN", "%Cus:tcp.len:0:R",
-	"D Port", "%Cus:tcp.dstport:0:R",
-	"SEQ#", "%Cus:tcp.seq:0:R",
-	"NextSEQ", "%Cus:tcp.nxtseq:0:R",
-	"ACK#", "%Cus:tcp.ack:0:R",
-	"ACKfor", "%Cus:tcp.analysis.acks_frame:0:R",
-	"WIN Size", "%Cus:tcp.window_size_value:0:R",
-	"CumBytes", "%B",
-	"Bytes in flight", "%Cus:tcp.analysis.bytes_in_flight:0:R",
-	"Bytes since PSH", "%Cus:tcp.analysis.push_bytes_sent:0:R",
-	"Protocol", "%p",
-	"IP ID", "%Cus:ip.id:0:R",
-	"Info", "%i"
+#gui.column.format: 
+#	"No.", "%m",
+#	"Time", "%t",
+#	"Source", "%s",
+#	"Destination", "%d",
+#	"Protocol", "%p",
+#	"Length", "%L",
+#	"Info", "%i"
 
 ####### User Interface: Font ########
 
 # Font name for packet list, protocol tree, and hex dump panes. (Qt)
 # A string
-gui.qt.font_name: Menlo,12,-1,5,50,0,0,0,0,0,Regular
+gui.qt.font_name: Menlo,13,-1,5,50,0,0,0,0,0
 
 ####### User Interface: Layout ########
 
 # Layout type (1-6)
 # A decimal number
-#gui.layout_type: 1
+gui.layout_type: 2
 
 # Layout content of the pane 1
 # One of: NONE, PLIST, PDETAILS, PBYTES
