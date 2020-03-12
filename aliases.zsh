@@ -29,7 +29,7 @@ alias df='df -h'        # Disk free, in gigabytes, not bytes
 alias du='du -h -c'     # Calculate total disk usage for a folder
 # alias zbundle="antibody bundle < $DOTFILES/zsh_plugins.txt > $DOTFILES/zsh_plugins.sh"
 alias vimgolf='docker run --rm -it -e "key=4ff4186b1f258b4dd2755c104835abeb" kramos/vimgolf'
-
+alias deploy='sudo -u www-data ./deploy.sh'
 # Docker
 alias doc="docker-compose"
 # alias dstop="docker stop $(docker ps -a -q)"
