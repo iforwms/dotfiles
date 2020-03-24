@@ -17,6 +17,7 @@ alias _='sudo '
 alias reloadcli="source $HOME/.zshrc"
 alias hosts="sudo vim /etc/hosts"
 alias bi="brew install"
+alias killPhotoA="launchctl disable user/$(id -u)/com.apple.photoanalysisd"
 # alias reloaddns="dscacheutil -flushcache && sudo killall -HUP mDNSResponder"
 # alias ll="/usr/local/opt/coreutils/libexec/gnubin/ls -ahlF --color --group-directories-first"
 alias ll="LC_COLLATE=C ls -lah"
