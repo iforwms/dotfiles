@@ -3,9 +3,11 @@
 echo "Setting ZSH as default shell"
 sudo sh -c "echo $(which zsh) >> /etc/shells" && chsh -s $(which zsh)
 
-echo "Symlink Mackup config file to the home directory"
+echo "Symlink Mackup config file and folder to the home directory"
 rm -rf $HOME/.mackup.cfg
 ln -s $HOME/.dotfiles/.mackup.cfg $HOME/.mackup.cfg
+rm -rf $HOME/.mackup
+ln -s $HOME/.dotfiles/mackup $HOME/.mackup
 
 echo "Setting up lilypond"
 ln -s $HOME/.dotfiles/lilypond/lilypond-link /usr/local/bin/lilypond-link
