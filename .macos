@@ -411,7 +411,7 @@ echo "Enable spring loading for all Dock items"
 defaults write com.apple.dock enable-spring-load-actions-on-all-items -bool true
 
 echo "Show indicator lights for open applications in the Dock"
-defaults write com.apple.dock show-process-indicators -bool true
+defaults write com.apple.dock show-process-indicators -bool false
 
 # Wipe all (default) app icons from the Dock
 # This is only really useful when setting up a new Mac, or if you don’t use
@@ -419,7 +419,7 @@ defaults write com.apple.dock show-process-indicators -bool true
 # defaults write com.apple.dock persistent-apps -array
 
 # Show only open applications in the Dock
-# defaults write com.apple.dock static-only -bool true
+defaults write com.apple.dock static-only -bool true
 
 echo "Don’t animate opening applications from the Dock"
 defaults write com.apple.dock launchanim -bool false
@@ -446,7 +446,7 @@ echo "Remove the animation when hiding/showing the Dock"
 defaults write com.apple.dock autohide-time-modifier -float 0
 
 # Automatically hide and show the Dock
-# defaults write com.apple.dock autohide -bool true
+defaults write com.apple.dock autohide -bool true
 
 echo "Make Dock icons of hidden applications translucent"
 defaults write com.apple.dock showhidden -bool true
