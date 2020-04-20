@@ -5,9 +5,9 @@ export DOTFILES=$HOME/.dotfiles
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Export China Homebrew Repos
-# export HOMEBREW_BREW_GIT_REMOTE=https://mirrors.ustc.edu.cn/brew.git
+#export HOMEBREW_BREW_GIT_REMOTE=https://mirrors.ustc.edu.cn/brew.git
 export HOMEBREW_BREW_GIT_REMOTE=https://github.com/Homebrew/brew.git
-# export HOMEBREW_CORE_GIT_REMOTE=https://mirrors.ustc.edu.cn/homebrew-core.git
+#export HOMEBREW_CORE_GIT_REMOTE=https://mirrors.ustc.edu.cn/homebrew-core.git
 export HOMEBREW_CORE_GIT_REMOTE=https://github.com/Homebrew/homebrew-core.git
 
 # Path to your oh-my-zsh installation.
