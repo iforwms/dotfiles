@@ -1,13 +1,26 @@
 #!/bin/bash
+HOMEBREW_INSTALL_URL="123"
 
 # Macbook/iMac only setup
 sudo -v
 
 echo "Setting up your Mac..."
 
+echo "Installing CLI tools for Xcode"
+xcode-select --install 2>/dev/null
+
 # Check for Homebrew and install if we don't have it
 if test ! $(which brew); then
-  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  grep 199.232.28.133 /etc/hosts -c || sudo -- sh -c "echo 199.232.28.133 raw.githubusercontent.com >> /etc/hosts"
+
+  echo "Homebrew not found, downloading installer"
+#  bash -c '/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"'
+  /bin/bash -c "$(curl -fsSL https://iforwms.com/music/brew_install.sh)"
+fi
+
+if test ! $(which brew); then
+  echo "Brew install failed. Exiting..."
+  exit
 fi
 
 echo "Updating Homebrew recipes"
