@@ -12,6 +12,7 @@ brew 'bash' # Latest Bash version
 brew 'cash-cli' # currency rates
 brew 'cmus' # terminal player
 brew 'coreutils' # Those that come with macOS are outdated
+brew 'dfu-programmer' # Flashing Arduino bootloaders
 brew 'dos2unix'
 brew 'entr'
 brew 'git'
@@ -74,6 +75,7 @@ cask 'java'
 cask 'kicad'
 cask 'lilypond'
 # cask 'mysqlworkbench'
+cask 'midi-monitor'
 cask 'moom'
 cask 'ngrok'
 cask 'phpstorm'
