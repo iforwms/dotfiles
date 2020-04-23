@@ -37,7 +37,7 @@ autocmd FileType markdown let &colorcolumn=""       "Disable column colouring in
 set ttimeoutlen=0                                  "Disable delay in switching from insert to normal mode
 set backspace=indent,eol,start                      "Fix backspace actions.
 set number                                          "Add line numbering.
-set relativenumber                                  "Show line numbers relative to cursor position.
+"set relativenumber                                  "Show line numbers relative to cursor position.
 set showmatch                                       "Highlight matching [{()}]
 set nrformats=                                      "Always treat numbers as decimal
 set matchpairs+=<:>                                 "Highlight matching pairs of brackets. Use the '%' character to jump between them.
@@ -48,11 +48,11 @@ augroup CursorLine                                  "Only highlight cursor line 
 augroup END
 
 "Show absolute line numbering when in insert mode.
-augroup numbertoggle
-  autocmd!
-  autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
-  autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
-augroup END
+"augroup numbertoggle
+  "autocmd!
+  "autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
+  "autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
+"augroup END
 
 
 "--------Fix common typos--------"
