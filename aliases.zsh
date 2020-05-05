@@ -62,6 +62,9 @@ alias cda="composer dump-autoload -o"
 alias cchina="composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/"
 alias cintl="composer config -g --unset repos.packagist"
 
+# Android
+alias apk="./gradlew assembleDebug && scp ./app/build/outputs/apk/debug/app-debug.apk clients:~/code/iforwms/public/music"
+
 # JS
 alias nfresh="rm -rf node_modules/ package-lock.json && yarn install"
 
