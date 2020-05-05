@@ -109,8 +109,8 @@ nmap <Leader>s :tag<space>
 "--------Visuals--------ete horizontal split.
 if !has('gui')
     " ^[ is a single character: Ctrl+V,<ESC>
-    "let &t_8f = "[38;2;%lu;%lu;%lum"
-    "let &t_8b = "[48;2;%lu;%lu;%lum"
+    let &t_8f = "[38;2;%lu;%lu;%lum"
+    let &t_8b = "[48;2;%lu;%lu;%lum"
 
     set termguicolors
 
