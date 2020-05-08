@@ -139,6 +139,9 @@ function gitPurge() {
 }
 
 # beets
+function beet() {
+    docker exec -t beets /bin/bash -c "beet $1"
+}
 alias beetimport="docker exec -u abc -it beets /bin/bash -c 'beet import /downloads'"
 alias beetupdate="docker exec -it beets /bin/bash -c 'beet update'"
 # If you make any configuration changes that would alter the
