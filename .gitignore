@@ -14,3 +14,4 @@ beets/beets.sh
 beets/*.pickle
 .ash_history
 .netrwhist
+*.log
