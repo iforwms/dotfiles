@@ -4,10 +4,10 @@ library: /config/musiclibrary.db
 threaded: yes
 
 paths:
-    default: $albumartist/$album [$original_year]/$track - $title
+    default: $albumartist/[$original_year] $album/$track - $title
     singleton: Non-Album/$artist - $title
-    comp: Compilations/$album [$original_year]/$track - $title
-    albumtype_soundtrack: Soundtracks/$album [$original_year]/$track $title
+    comp: Compilations/[$original_year] $album/$track - $title
+    albumtype_soundtrack: Soundtracks/[$original_year] $album/$track $title
 
 import:
     write: yes
