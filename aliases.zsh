@@ -55,6 +55,7 @@ alias code="cd $HOME/code"
 
 # Laravel
 alias a="php artisan"
+alias aw="sudo -u www-data php artisan"
 alias ams="php artisan migrate:fresh --seed"
 alias amm="php artisan make:model"
 
