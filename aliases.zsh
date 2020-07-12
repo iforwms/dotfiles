@@ -181,7 +181,7 @@ alias tls="tmux list-sessions"
 alias tkl="tmux kill-session -t"
 
 # Tmux session scripts
-alias domino="$HOME/.dotfiles/scripts/tmux-domino.sh"
+alias dev="$HOME/.dotfiles/scripts/tmux-dev.sh"
 alias indier="$HOME/.dotfiles/scripts/tmux-indier.sh"
 alias ide="$HOME/.dotfiles/scripts/tmux-ide.sh"
 
