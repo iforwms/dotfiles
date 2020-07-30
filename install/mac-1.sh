@@ -35,3 +35,9 @@ pecl install memcached imagick
 
 echo "Installing global Composer packages"
 /usr/local/bin/composer global require laravel/installer
+
+echo "Installing jtc"
+curl -fsSL -o $HOME/jtc https://github.com/ldn-softdev/jtc/releases/download/LatestBuild/jtc-macos-64.latest
+chmod 754 $HOME/jtc
+xattr -dr com.apple.quarantine $HOME/jtc
+mv $HOME/jtc /usr/local/bin/
