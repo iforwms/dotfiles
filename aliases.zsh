@@ -52,6 +52,7 @@ alias doc="docker-compose"
 alias dot="cd $DOTFILES"
 alias library="cd $HOME/Library"
 alias code="cd $HOME/code"
+alias shutdown="$DOTFILES/scripts/shutdown.sh"
 
 # Laravel
 alias a="php artisan"
