@@ -14,7 +14,7 @@ if [[ ! -z "$status" ]]; then
     echo
     git status -s
 else
-    echo "No local changes."
+    echo " No local changes."
 fi
 
 echo
