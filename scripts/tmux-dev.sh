@@ -18,7 +18,7 @@ if ! tmux has-session -t alpha; then
     tmux send-keys -t alpha:2.2 'hs up' Enter
 
     # Run Git status.
-    tmux send-keys -t alpha:2.1 'ggs' Enter
+    tmux send-keys -t alpha:2.1 'ggp && ggs' Enter
 
     # Create a new window for frontend
     tmux new-window -t alpha:3 -n Frontend -c ~/code/domino/domino-frontend
