@@ -47,7 +47,7 @@ if ((unpushedLength > 0)); then
     done
 fi
 
-if [[ ! -z "$dirty" ]]; then
+if [[ ! "$dirty" = true ]]; then
     echo "Nothing to push, shutting down..."
     sudo shutdown -h now
 fi
