@@ -5,8 +5,7 @@
 # sudo apt-get updateo
 # sudo apt -y install php7.4
 # sudo apt-get install -y php7.4-{bcmath,curl,bz2,intl,xml,gd,mbstring,mysql,zip}
-#
-#
+
 # Shortcuts
 alias -- -='cd -'
 alias ...=../..
@@ -130,10 +129,10 @@ alias nah='git reset --hard && git clean -df'
 # alias apgi='git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached'
 # find ~/code -mindepth 1 -maxdepth 4 -type d -name .git -execdir git status -s \;
 function ggs() {
-    find $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -execdir $HOME/.dotfiles/scripts/globalGitStatus.sh \;
+    find -L $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -execdir $HOME/.dotfiles/scripts/globalGitStatus.sh \;
 }
 function ggp() {
-    find $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -execdir $HOME/.dotfiles/scripts/globalGitPull.sh \;
+    find -L $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -execdir $HOME/.dotfiles/scripts/globalGitPull.sh \;
      # | sed s/.git// | xargs -I % git -C % pull
 }
 function gitPurge() {

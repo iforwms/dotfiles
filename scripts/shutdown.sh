@@ -19,7 +19,7 @@ while read line; do
         unpushedArray+=( "$repoPath" )
     fi
 
-done < <(find $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune)
+done < <(find -L $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune)
 
 modifiedLength="${#modifiedArray[@]}"
 if ((modifiedLength > 0)); then
