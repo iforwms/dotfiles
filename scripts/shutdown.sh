@@ -8,8 +8,6 @@ unpushed=()
 while read line; do
     repoPath=`echo $line | sed "s/\/.git//"`
 
-    # echo -e "\033[1;35m" Processing repo: $repoPath"\033[0;37m"
-
     modified=`git -C $repoPath status -s`
     if [[ ! -z "$modified" ]]; then
         modifiedArray+=( "$repoPath" )
@@ -29,3 +27,14 @@ if ((modifiedLength > 0)); then
     done
 fi
 
+unpushedLength="${#unpushedArray[@]}"
+if ((unpushedLength > 0)); then
+    echo
+    echo -e "\033[1;35m" Found $unpushedLength unpushed repos:"\033[0;37m"
+    echo
+
+    for i in "${unpushedArray[@]}"
+    do
+        echo " " $i
+    done
+fi
