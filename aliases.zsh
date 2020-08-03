@@ -132,7 +132,8 @@ function ggs() {
     find $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -execdir $HOME/.dotfiles/scripts/globalGitStatus.sh \;
 }
 function ggp() {
-    find $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune | sed s/.git// | xargs -I % git -C % pull
+    find $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -execdir $HOME/.dotfiles/scripts/globalGitPull.sh \;
+     # | sed s/.git// | xargs -I % git -C % pull
 }
 function gitPurge() {
   git filter-branch --force --index-filter \
