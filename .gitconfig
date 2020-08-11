@@ -7,3 +7,5 @@
     name = Ifor Waldo Williams
     email = ifor@cors.tech
 
+[pull]
+	rebase = false
