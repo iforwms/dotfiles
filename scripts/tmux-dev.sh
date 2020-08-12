@@ -67,9 +67,20 @@ if ! tmux has-session -t alpha; then
     # Get current git status.
     tmux send-keys -t alpha:5.1 'ssh dc' Enter
 
+    # Create a new window for UI Library
+    tmux new-window -t alpha:6 -n UILib -c ~/code/personal/react-components
+
+    # Create split pane for UI Library
+    tmux split-window -t alpha:6 -h -p 30 -c ~/code/personal/react-components
+
+    # Start build process
+    tmux send-keys -t alpha:6.2 'yr build-watch' Enter
+
     # Set active pane to main API pane on both windows.
     tmux select-pane -t alpha:2.1
     tmux select-pane -t alpha:3.1
+    tmux select-pane -t alpha:4.1
+    tmux select-pane -t alpha:6.1
 
     # Select API as main window.
     tmux select-window -t alpha:2
