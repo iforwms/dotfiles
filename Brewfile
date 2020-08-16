@@ -16,6 +16,7 @@ brew 'dfu-programmer' # Flashing Arduino bootloaders
 brew 'dos2unix'
 brew 'entr'
 brew 'git'
+brew 'gnu-sed'
 # brew 'gnupg2' # GNU privacy guard.
 brew 'grep'
 brew 'htop'
