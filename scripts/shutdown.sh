@@ -49,5 +49,17 @@ fi
 
 if [[ ! "$dirty" = true ]]; then
     echo "Nothing to push, shutting down..."
+
+    read -p "Nothing to push, are you sure you want to shutdown? " -n 1 -r
+
+    echo
+
+    if [[ ! $REPLY =~ ^[Yy]$ ]]
+    then
+        echo "Aborting shutdown..."
+        exit 1
+    fi
+
+    echo "Shutting down..."
     sudo shutdown -h now
 fi
