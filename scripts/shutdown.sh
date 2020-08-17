@@ -48,9 +48,7 @@ if ((unpushedLength > 0)); then
 fi
 
 if [[ ! "$dirty" = true ]]; then
-    echo "Nothing to push, shutting down..."
-
-    read -p "Nothing to push, are you sure you want to shutdown? " -n 1 -r
+    read -p "Nothing to push, are you sure you want to shutdown? (y/n) " -n 1 -r
 
     echo
 
