@@ -34,6 +34,9 @@ ln -s $HOME/.dotfiles/.vimrc $HOME/.vimrc
 echo "Install tmux navigator vim plugin"
 curl -fsSL -o $HOME/.dotfiles/.vim/plugin/tmux_navigator.vim $RAW_GIT/christoomey/vim-tmux-navigator/master/plugin/tmux_navigator.vim
 
+echo "Install vim abolish plugin"
+curl -fsSL -o $HOME/.dotfiles/.vim/plugin/abolish.vim $RAW_GIT/tpope/vim-abolish/master/plugin/abolish.vim
+
 echo "Install vim surround plugin"
 curl -fsSL -o $HOME/.dotfiles/.vim/plugin/surround.vim $RAW_GIT/tpope/vim-surround/master/plugin/surround.vim
 
