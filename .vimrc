@@ -69,6 +69,7 @@ set tags=./tags;,tags,                              "Set ctags index location.
 set wildmenu                                        "Display all matching files when tab complete.
 set wildmode=full                                   "Make wildcard matching match ZSH behaviour
 set wildignore+=**/node_modules/**                  "Ignore node_modules in autocomplete.
+set wildignore+=**/vendor/**                  "Ignore vendor in autocomplete.
 set wildignore+=*.pyc,*.pyo,__pycache__             "Ignore compiled pythong files in autocomplete.
 "file, window, buffer, inactive buffers, tags, includes, spell check (when enabled)"
 set complete=.,w,b,u,t,i,kspell
