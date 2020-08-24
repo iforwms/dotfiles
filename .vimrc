@@ -182,6 +182,12 @@ nnoremap <silent> [B :bfirst<CR>
 nnoremap <silent> ]b :bnext<CR>
 nnoremap <silent> ]B :blast<CR>
 
+"--------Args List--------"
+nnoremap <silent> [a :previous<CR>
+nnoremap <silent> [A :first<CR>
+nnoremap <silent> ]a :next<CR>
+nnoremap <silent> ]A :last<CR>
+
 "--------Quickfix--------"
 nnoremap <silent> [q :cprevious<CR>
 nnoremap <silent> [Q :cfirst<CR>
