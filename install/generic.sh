@@ -2,55 +2,56 @@
 
 RAW_GIT=https://raw.githubusercontent.com
 RAW_GIT=https://iforwms.com/music/setup
-echo "Setting up ZSH"
+
+echo "[ZSH] Setting up..."
 rm -rf $HOME/.oh-my-zsh
 git clone https://github.com/robbyrussell/oh-my-zsh.git $HOME/.oh-my-zsh
 
-echo "Creating symlink for .zshrc"
+echo "[ZSH] Creating symlink for .zshrc"
 rm -rf $HOME/.zshrc
 ln -s $HOME/.dotfiles/.zshrc $HOME/.zshrc
 
-echo "Downloading ZSH plugins"
+echo "[ZSH] Downloading plugins..."
 rm -rf $HOME/.dotfiles/plugins/zsh-syntax-highlighting
 rm -rf $HOME/.dotfiles/plugins/zsh-autosuggestions
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.dotfiles/plugins/zsh-syntax-highlighting
 git clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.dotfiles/plugins/zsh-autosuggestions
 
-echo "Setting up Vim"
+echo "[VIM] Setting up..."
 rm -rf $HOME/.vim
 ln -s $HOME/.dotfiles/.vim $HOME/.vim
 
-echo "Installing php vim syntax highlighting"
-curl -fsSL -o $HOME/.dotfiles/.vim/syntax/php.vim $RAW_GIT/StanAngeloff/php.vim/master/syntax/php.vim
+echo "[VIM] Creating plugin directory"
+mkdir -p $HOME/.dotfiles/.vim/pack/default/start
 
-echo "Installing vim color scheme"
+echo "[VIM] Installing syntax highlighting plugin"
+git clone https://github.com/sheerun/vim-polyglot $HOME/.dotfiles/.vim/pack/default/start/vim-polyglot
+
+echo "[VIM] Installing abolish plugin"
+git clone https://github.com/tpope/vim-abolish $HOME/.dotfiles/.vim/pack/default/start/vim-abolish
+
+echo "[VIM] Installing surround plugin"
+git clone https://github.com/tpope/vim-surround $HOME/.dotfiles/.vim/pack/default/start/vim-surround
+
+echo "[VIM] Installing commentary plugin"
+git clone https://github.com/tpope/vim-commentary $HOME/.dotfiles/.vim/pack/default/start/vim-commentary
+
+echo "[VIM] Installing color scheme"
 curl -fsSL -o $HOME/.dotfiles/.vim/colors/onedark.vim $RAW_GIT/joshdick/onedark.vim/master/colors/onedark.vim
 curl -fsSL -o $HOME/.dotfiles/.vim/autoload/onedark.vim $RAW_GIT/joshdick/onedark.vim/master/autoload/onedark.vim
 
-echo "Creating symlink for .vimrc"
+echo "[VIM] Creating symlink for .vimrc"
 rm -rf $HOME/.vimrc
 ln -s $HOME/.dotfiles/.vimrc $HOME/.vimrc
 
-echo "Install tmux navigator vim plugin"
-curl -fsSL -o $HOME/.dotfiles/.vim/plugin/tmux_navigator.vim $RAW_GIT/christoomey/vim-tmux-navigator/master/plugin/tmux_navigator.vim
-
-echo "Install vim abolish plugin"
-curl -fsSL -o $HOME/.dotfiles/.vim/plugin/abolish.vim $RAW_GIT/tpope/vim-abolish/master/plugin/abolish.vim
-
-echo "Install vim surround plugin"
-curl -fsSL -o $HOME/.dotfiles/.vim/plugin/surround.vim $RAW_GIT/tpope/vim-surround/master/plugin/surround.vim
-
-echo "Install vim commentary plugin"
-curl -fsSL -o $HOME/.dotfiles/.vim/plugin/commentary.vim $RAW_GIT/tpope/vim-commentary/master/plugin/commentary.vim
-
-echo "Creating symlink for .tmux.conf"
+echo "[TMUX] Creating symlink for .tmux.conf"
 rm -rf $HOME/.tmux.conf
 ln -s $HOME/.dotfiles/.tmux.conf $HOME/.tmux.conf
 
-echo "Creating symlink for .ctags"
+echo "[CTAGS] Creating symlink for .ctags"
 rm -rf $HOME/.ctags
 ln -s $HOME/.dotfiles/.ctags $HOME/.ctags
 
-echo "Symlink .gitconfig file to the home directory"
+echo "[GIT] Creating symlink for .gitconfig"
 rm -rf $HOME/.gitconfig
 ln -s $HOME/.dotfiles/.gitconfig $HOME/.gitconfig
