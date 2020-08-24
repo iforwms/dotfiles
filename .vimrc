@@ -175,6 +175,22 @@ set splitright                                      "Open new splits to the righ
 "nnoremap <C-l> <C-w><C-l>
 
 
+"--------Buffers--------"
+nnoremap <silent> [b :bprevious<CR>
+nnoremap <silent> [B :bfirst<CR>
+nnoremap <silent> ]b :bnext<CR>
+nnoremap <silent> ]B :blast<CR>
+
+"--------Quickfix--------"
+nnoremap <silent> [q :cprevious<CR>
+nnoremap <silent> [Q :cfirst<CR>
+nnoremap <silent> ]q :cnext<CR>
+nnoremap <silent> ]Q :clast<CR>
+
+" Add similar to above but for [l - location
+" and [t for tag lists
+
+
 "--------Directory browser settings--------"
 let g:netrw_banner=0                                "Remove header from directory browser.
 let g:netrw_browse_split=4                          "Open files in a new vertical split. (1: hsplit, 2: vsplit, 3: tab, 4: prev window)
@@ -195,9 +211,9 @@ let g:netrw_list_hide.=',\(^\|\s\s)\zs\.\S+'        "Hide additional files.
 nnoremap <Leader>html :-1read $HOME/.vim/.skeleton.html<CR>4jf>a
 "inoremap <SPACE><SPACE> <ESC>/<++><Enter>"_c4l
 nnoremap <Leader>ev :tabe $MYVIMRC<CR>
-inoremap <Leader>i Ifor Waldo Williams
+inoremap <Leader>iww Ifor Waldo Williams
 inoremap <Leader>em ifor@cors.tech
-inoremap <Leader>n iforwms
+inoremap <Leader>nn iforwms
 
 
 "--------AutoCommands--------"
