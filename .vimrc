@@ -65,7 +65,7 @@ set hlsearch                                        "Highlight all search result
 set incsearch                                       "Enable incremental searching.
 set ignorecase                                      "Enable case-insensitive searching.
 set smartcase                                       "Enable case-sensitive searching if mixed-case.
-set tags=./tags;,tags,                              "Set ctags index location.
+set tags=./tags,tags;$HOME                          "Set ctags index location.
 set wildmenu                                        "Display all matching files when tab complete.
 set wildmode=full                                   "Make wildcard matching match ZSH behaviour
 set wildignore+=**/node_modules/**                  "Ignore node_modules in autocomplete.
