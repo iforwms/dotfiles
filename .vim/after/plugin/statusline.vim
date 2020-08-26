@@ -24,7 +24,9 @@ function! ActiveStatus()
     "Add divider.
     let statusline.="%0*%="
 
-    "Show current line ancd column"
+    let statusline.="%{coc#status()}%{get(b:,'coc_current_function','')}"
+
+    "Show current line and column"
     let statusline.="%0*\ %l/%L:%v\ "
 
     "Show current buffer number
