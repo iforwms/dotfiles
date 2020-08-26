@@ -40,6 +40,10 @@ echo "[VIM] Installing commentary plugin"
 git clone https://github.com/tpope/vim-commentary $HOME/.dotfiles/.vim/pack/default/start/vim-commentary
 # vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-commentary/doc" -c q
 
+echo "[VIM] Installing FZF plugin"
+git clone https://github.com/junegunn/fzf.vim $HOME/.dotfiles/.vim/pack/default/start/fzf.vim
+# vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/fzf.vim/doc" -c q
+
 echo "[VIM] Installing PHP import namespace plugin"
 git clone https://github.com/arnaud-lb/vim-php-namespace $HOME/.dotfiles/.vim/pack/default/start/vim-php-namespace
 

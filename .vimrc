@@ -5,6 +5,7 @@
 "--------General Preferences--------"
 filetype off
 set runtimepath+=$HOME/.dotfiles/lilypond/vim/
+set runtimepath+=/usr/local/opt/fzf
 filetype plugin on                                  "Enable filetype plugin.
 filetype on
 
@@ -85,6 +86,18 @@ function! Prettify()
     call setpos('.', curPos)
 endfunction
 nnoremap <Leader>p :call Prettify()<cr>
+
+"Invoke FZF for current directory
+nnoremap <silent> <leader>f :Files<cr>
+
+"Invoke FZF respecting .gitignore
+nnoremap <silent> <leader>g :GFiles<cr>
+
+"Invoke FZF tag search
+nnoremap <silent> <leader>c :Tags<cr>
+
+"Invoke FZF for home directory
+nnoremap <silent> <leader>F :Files ~<cr>
 
 "Order lines by length
 vmap <Leader>su !awk '{ print length(), $0 \| "sort -n \| cut -d\\  -f2-" }'<CR>
