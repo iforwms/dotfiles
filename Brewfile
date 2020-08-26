@@ -15,6 +15,7 @@ brew 'coreutils' # Those that come with macOS are outdated
 brew 'dfu-programmer' # Flashing Arduino bootloaders
 brew 'dos2unix'
 brew 'entr'
+brew 'fzf' # Fuzzy file finder
 brew 'git'
 brew 'gnu-sed'
 # brew 'gnupg2' # GNU privacy guard.
