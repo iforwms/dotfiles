@@ -26,19 +26,19 @@ mkdir -p $HOME/.dotfiles/.vim/pack/default/start
 
 echo "[VIM] Installing syntax highlighting plugin"
 git clone https://github.com/sheerun/vim-polyglot $HOME/.dotfiles/.vim/pack/default/start/vim-polyglot
-vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-polyglot/doc" -c q
+# vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-polyglot/doc" -c q
 
 echo "[VIM] Installing abolish plugin"
 git clone https://github.com/tpope/vim-abolish $HOME/.dotfiles/.vim/pack/default/start/vim-abolish
-vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-abolish/doc" -c q
+# vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-abolish/doc" -c q
 
 echo "[VIM] Installing surround plugin"
 git clone https://github.com/tpope/vim-surround $HOME/.dotfiles/.vim/pack/default/start/vim-surround
-vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-surround/doc" -c q
+# vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-surround/doc" -c q
 
 echo "[VIM] Installing commentary plugin"
 git clone https://github.com/tpope/vim-commentary $HOME/.dotfiles/.vim/pack/default/start/vim-commentary
-vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-commentary/doc" -c q
+# vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-commentary/doc" -c q
 
 echo "[VIM] Installing color scheme"
 curl -fsSL -o $HOME/.dotfiles/.vim/colors/onedark.vim $RAW_GIT/joshdick/onedark.vim/master/colors/onedark.vim
