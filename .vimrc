@@ -234,6 +234,14 @@ augroup END
 "Clear terminal on exit.
 au VimLeave * !clear
 
+"--------Function for PHP namespace import -------"
+function! IPhpInsertUse()
+    call PhpInsertUse()
+    call feedkeys('a',  'n')
+endfunction
+autocmd FileType php inoremap <Leader>n <Esc>:call IPhpInsertUse()<CR>
+autocmd FileType php noremap <Leader>n :call PhpInsertUse()<CR>
+
 "--------Helper Functions--------"
 function! PhpSyntaxOverride()
   " Put snippet overrides in this function.
