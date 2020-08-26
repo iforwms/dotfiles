@@ -16,3 +16,4 @@ beets/*.pickle
 .ash_history
 .netrwhist
 *.log
+.vim/view
