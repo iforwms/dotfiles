@@ -21,6 +21,7 @@ set autowriteall                                    "Enable save on buffer chang
 "set spell                                          "Enable spell-checking.
 let g:tmux_navigator_disable_when_zoomed = 1        "Disable tmux navigator when zooming the Vim pane
 "set clipboard+=unnamedplus                          "By default, yank to system clipboard
+set foldcolumn=2                                    "Display folds beside line numbers.
 
 "--------Spaces and Tabs--------"
 set shiftwidth=4                                    "Set indenting to  space.
