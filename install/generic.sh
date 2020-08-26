@@ -47,7 +47,7 @@ git clone https://github.com/junegunn/fzf.vim $HOME/.dotfiles/.vim/pack/default/
 echo "[VIM] Installing PHP import namespace plugin"
 git clone https://github.com/arnaud-lb/vim-php-namespace $HOME/.dotfiles/.vim/pack/default/start/vim-php-namespace
 
-echo "[VIM] Installing color scheme"
+echo "[VIM] Installing onedark color scheme"
 curl -fsSL -o $HOME/.dotfiles/.vim/colors/onedark.vim $RAW_GIT/joshdick/onedark.vim/master/colors/onedark.vim
 curl -fsSL -o $HOME/.dotfiles/.vim/autoload/onedark.vim $RAW_GIT/joshdick/onedark.vim/master/autoload/onedark.vim
 
