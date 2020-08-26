@@ -86,6 +86,9 @@ function! Prettify()
 endfunction
 nnoremap <Leader>p :call Prettify()<cr>
 
+"Order lines by length
+vmap <Leader>su !awk '{ print length(), $0 \| "sort -n \| cut -d\\  -f2-" }'<CR>
+
 
 "--------Shortcuts--------"
 "Force saving file as sudo
