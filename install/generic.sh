@@ -1,7 +1,7 @@
 #!/bin/bash
 
 RAW_GIT=https://raw.githubusercontent.com
-RAW_GIT=https://iforwms.com/music/setup
+# RAW_GIT=https://iforwms.com/music/setup
 
 echo "[ZSH] Setting up..."
 rm -rf $HOME/.oh-my-zsh
