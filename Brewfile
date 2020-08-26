@@ -1,14 +1,13 @@
 # Taps
+tap 'homebrew/bundle'
 tap 'homebrew/cask'
 tap 'homebrew/cask-eid'
 tap 'homebrew/cask-fonts'
 tap 'homebrew/cask-versions'
-tap 'homebrew/bundle'
 
 # Binaries
 brew 'awscli'
 brew 'bash' # Latest Bash version
-# brew 'bat' # "cat" on steroids
 brew 'cash-cli' # currency rates
 brew 'cmus' # terminal player
 brew 'coreutils' # Those that come with macOS are outdated
@@ -18,15 +17,14 @@ brew 'entr'
 brew 'fzf' # Fuzzy file finder
 brew 'git'
 brew 'gnu-sed'
-# brew 'gnupg2' # GNU privacy guard.
 brew 'grep'
 brew 'htop'
 brew 'httpie'
-# brew 'hub' # Git command line helper.
 brew 'mackup'
 brew 'mas' # Mac App Store manager
 brew 'pkg-config' # https://github.com/driesvints/dotfiles/issues/20
 brew 'reattach-to-user-namespace' # Required for tmux copy paste
+brew 'ripgrep'
 brew 'tldr' # Simpified man pages
 brew 'trash' # Manage the Trash bin
 brew 'tree' # List directories in a tree structure

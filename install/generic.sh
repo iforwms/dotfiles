@@ -47,6 +47,13 @@ git clone https://github.com/junegunn/fzf.vim $HOME/.dotfiles/.vim/pack/default/
 echo "[VIM] Installing PHP import namespace plugin"
 git clone https://github.com/arnaud-lb/vim-php-namespace $HOME/.dotfiles/.vim/pack/default/start/vim-php-namespace
 
+echo "[VIM] Installing coc"
+COC_INSTALL=$HOME/.dotfiles/.vim/pack/coc/start
+mkdir -p $COC_INSTALL
+curl -fsSL -o $COC_INSTALL/release.tar.gz https://github.com/neoclide/coc.nvim/archive/release.tar.gz
+tar -xzf $COC_INSTALL/release.tar.gz
+# rm $COC_INSTALL/release.tar.gz
+
 echo "[VIM] Installing onedark color scheme"
 curl -fsSL -o $HOME/.dotfiles/.vim/colors/onedark.vim $RAW_GIT/joshdick/onedark.vim/master/colors/onedark.vim
 curl -fsSL -o $HOME/.dotfiles/.vim/autoload/onedark.vim $RAW_GIT/joshdick/onedark.vim/master/autoload/onedark.vim

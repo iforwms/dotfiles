@@ -19,6 +19,38 @@ set nocompatible                                    "Disable checks for staying 
 set noswapfile                                      "Disable swapfile creation.
 set hidden                                          "Allow switching buffers without writing to disk.
 set autowriteall                                    "Enable save on buffer change.
+
+"---------COC Config-------"
+" Some servers have issues with backup files, see #649.
+set nobackup
+set nowritebackup
+
+" Give more space for displaying messages.
+set cmdheight=2
+
+" Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
+" delays and poor user experience.
+set updatetime=300
+" Don't pass messages to |ins-completion-menu|.
+set shortmess+=c
+
+" GoTo code navigation.
+function! JumpToDefinition()
+   let s =  execute("normal \<Plug>(coc-definition)")
+   if strtrans(s)=="^@[coc.nvim]Definition provider not found for current document^@[coc.nvim]Definition provider not found for current document"
+    execute "AnyJump"
+   endif
+endfunction
+nmap <silent>gd :call JumpToDefinition()<CR>
+
+"Rename variable
+nmap <Leader>rr <Plug>(coc-rename)
+
+"Project rename word
+nnoremap <Leader>prw :CocSearch <C-R>=expand("<cword>")<CR><CR>
+
+"-------End COC Config--------
+
 "set spell                                          "Enable spell-checking.
 let g:tmux_navigator_disable_when_zoomed = 1        "Disable tmux navigator when zooming the Vim pane
 "set clipboard+=unnamedplus                          "By default, yank to system clipboard
