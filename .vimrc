@@ -23,9 +23,9 @@ let g:tmux_navigator_disable_when_zoomed = 1        "Disable tmux navigator when
 "set clipboard+=unnamedplus                          "By default, yank to system clipboard
 
 "--------Spaces and Tabs--------"
-set shiftwidth=4                                    "Set indenting to 4 spaces not 8.
-set tabstop=8                                       "Set tab width to 8.
-set softtabstop=4                                   "Number of spaces for a tab.
+set shiftwidth=4                                    "Set indenting to  space.
+set tabstop=4                                       "Set tab width to 4.
+set softtabstop=0                                   "Number of spaces for a tab - force using spaces.
 set expandtab                                       "Use spaces instead of tabs.
 
 
