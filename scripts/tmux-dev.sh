@@ -18,7 +18,7 @@ if ! tmux has-session -t alpha; then
     tmux send-keys -t alpha:2.2 'hs up' Enter
 
     # Run Git status.
-    tmux send-keys -t alpha:2.1 'ggp && ggs' Enter
+    tmux send-keys -t alpha:2.1 'ggp && ggs && ctags -R' Enter
 
     # Create a new window for frontend
     tmux new-window -t alpha:3 -n Frontend -c ~/code/domino/domino-frontend
@@ -33,7 +33,7 @@ if ! tmux has-session -t alpha; then
     # tmux split-window -t alpha:2.3 -h -p 50 -c ~/code/domino/domino-frontend
 
     # Install any missing packages and start a server on port 3000.
-    tmux send-keys -t alpha:3.2 'yr && PORT=3000 yrs' Enter
+    tmux send-keys -t alpha:3.2 'ctags -R && yr && PORT=3000 yrs' Enter
 
     # Watch CSS file for changes.
     # tmux send-keys -t alpha:2.4 'yr css' Enter
@@ -53,7 +53,7 @@ if ! tmux has-session -t alpha; then
     # tmux split-window -t alpha:3.3 -h -p 50 -c ~/code/domino/domino-admin
 
     # Install any missing packages and start a server on port 3001.
-    tmux send-keys -t alpha:4.2 'yr && PORT=3001 yrs' Enter
+    tmux send-keys -t alpha:4.2 'ctags -R && yr && PORT=3001 yrs' Enter
 
     # Watch CSS file for changes.
     # tmux send-keys -t alpha:3.4 'yr css' Enter
@@ -74,7 +74,7 @@ if ! tmux has-session -t alpha; then
     tmux split-window -t alpha:6 -h -p 30 -c ~/code/personal/react-components
 
     # Start build process
-    tmux send-keys -t alpha:6.2 'yr build-watch' Enter
+    tmux send-keys -t alpha:6.2 'ctags -R && yr build-watch' Enter
 
     # Set active pane to main API pane on both windows.
     tmux select-pane -t alpha:2.1
