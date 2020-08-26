@@ -221,7 +221,7 @@ nnoremap <Leader>html :-1read $HOME/.vim/.skeleton.html<CR>4jf>a
 nnoremap <Leader>ev :tabe $MYVIMRC<CR>
 inoremap <Leader>iww Ifor Waldo Williams
 inoremap <Leader>em ifor@cors.tech
-inoremap <Leader>nn iforwms
+" inoremap <Leader>nn iforwms
 
 
 "--------AutoCommands--------"
