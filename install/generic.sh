@@ -44,6 +44,12 @@ echo "[VIM] Installing FZF plugin"
 git clone https://github.com/junegunn/fzf.vim $HOME/.dotfiles/.vim/pack/default/start/fzf.vim
 # vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/fzf.vim/doc" -c q
 
+echo "[VIM] Installing Vim Fugitive checkout plugin"
+git clone https://github.com/tpope/vim-fugitive $HOME/.dotfiles/.vim/pack/default/start/vim-fugitive
+
+echo "[VIM] Installing FZF checkout plugin"
+git clone https://github.com/stsewd/fzf-checkout.vim $HOME/.dotfiles/.vim/pack/default/start/fzf-checkout.vim
+
 echo "[VIM] Installing PHP import namespace plugin"
 git clone https://github.com/arnaud-lb/vim-php-namespace $HOME/.dotfiles/.vim/pack/default/start/vim-php-namespace
 
