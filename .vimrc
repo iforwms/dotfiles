@@ -19,6 +19,8 @@ set nocompatible                                    "Disable checks for staying 
 set noswapfile                                      "Disable swapfile creation.
 set hidden                                          "Allow switching buffers without writing to disk.
 set autowriteall                                    "Enable save on buffer change.
+set viewoptions=folds,cursor
+set sessionoptions=folds
 
 "---------COC Config-------"
 " Some servers have issues with backup files, see #649.
