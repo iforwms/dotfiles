@@ -183,6 +183,19 @@ nnoremap <Leader>prw :CocSearch <C-R>=expand("<cword>")<CR><CR>
 
 "-------End COC Config--------
 
+"-------Vim Fugitive------
+"Shortcut for checking out branches
+nnoremap <Leader>gc :GCheckout<CR>
+
+"Git status
+nmap <Leader>gs :G<CR>
+
+"Merge from left pane (merge conflict)
+nmap <Leader>gj :diffget //3<CR>
+
+"Merge from right pane (merge conflict)
+nmap <Leader>gf :diffget //2<CR>
+
 "set spell                                          "Enable spell-checking.
 let g:tmux_navigator_disable_when_zoomed = 1        "Disable tmux navigator when zooming the Vim pane
 "set clipboard+=unnamedplus                          "By default, yank to system clipboard
@@ -255,13 +268,17 @@ nnoremap <Leader>p :call Prettify()<cr>
 nnoremap <silent> <leader>f :Files<cr>
 
 "Invoke FZF respecting .gitignore
-nnoremap <silent> <leader>g :GFiles<cr>
+nnoremap <silent> <leader>gf :GFiles<cr>
 
 "Invoke FZF tag search
 nnoremap <silent> <leader>c :Tags<cr>
 
 "Invoke FZF for home directory
 nnoremap <silent> <leader>F :Files ~<cr>
+
+"Set fzf window to center
+let g:fzf_layout = { 'window': { 'width': 0.8, 'height': 0.8 } }
+let $FZF_DEFAULT_OPTS='--reverse'
 
 "Order lines by length
 vmap <Leader>su !awk '{ print length(), $0 \| "sort -n \| cut -d\\  -f2-" }'<CR>
