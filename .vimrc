@@ -19,6 +19,8 @@ set nocompatible                                    "Disable checks for staying 
 set noswapfile                                      "Disable swapfile creation.
 set hidden                                          "Allow switching buffers without writing to disk.
 set autowriteall                                    "Enable save on buffer change.
+set dictionary+=/usr/share/dict/words               "Add dictionary.
+
 set viewoptions=folds,cursor
 set sessionoptions=folds
 
@@ -236,7 +238,7 @@ set wildignore+=**/node_modules/**                  "Ignore node_modules in auto
 set wildignore+=**/vendor/**                  "Ignore vendor in autocomplete.
 set wildignore+=*.pyc,*.pyo,__pycache__             "Ignore compiled pythong files in autocomplete.
 "file, window, buffer, inactive buffers, tags, includes, spell check (when enabled)"
-set complete=.,w,b,u,t,i,kspell
+set complete=.,w,b,u,t,i
 
 "Shortcut to turn off search highlighting.
 nnoremap <Leader><space> :nohlsearch<CR>
