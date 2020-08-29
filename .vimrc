@@ -277,8 +277,9 @@ nnoremap <silent> <leader>c :Tags<cr>
 nnoremap <silent> <leader>F :Files ~<cr>
 
 "Set fzf window to center
-" TODO : Check vim version!
-let g:fzf_layout = { 'window': { 'width': 0.8, 'height': 0.8 } }
+if v:version > 82190
+    let g:fzf_layout = { 'window': { 'width': 0.8, 'height': 0.8 } }
+endif
 let $FZF_DEFAULT_OPTS='--reverse'
 
 "Order lines by length
