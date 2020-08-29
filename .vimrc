@@ -179,22 +179,22 @@ nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
 nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
 
 "Project rename word
-nnoremap <Leader>prw :CocSearch <C-R>=expand("<cword>")<CR><CR>
+nnoremap <leader>prw :CocSearch <C-R>=expand("<cword>")<CR><CR>
 
 "-------End COC Config--------
 
 "-------Vim Fugitive------
 "Shortcut for checking out branches
-nnoremap <Leader>gc :GCheckout<CR>
+nnoremap <leader>gc :GCheckout<CR>
 
 "Git status
-nmap <Leader>gs :G<CR>
+nmap <leader>gs :G<CR>
 
 "Merge from left pane (merge conflict)
-nmap <Leader>gj :diffget //3<CR>
+nmap <leader>gj :diffget //3<CR>
 
 "Merge from right pane (merge conflict)
-nmap <Leader>gf :diffget //2<CR>
+nmap <leader>ga :diffget //2<CR>
 
 "set spell                                          "Enable spell-checking.
 let g:tmux_navigator_disable_when_zoomed = 1        "Disable tmux navigator when zooming the Vim pane
@@ -254,7 +254,7 @@ set wildignore+=*.pyc,*.pyo,__pycache__             "Ignore compiled pythong fil
 set complete=.,w,b,u,t,i
 
 "Shortcut to turn off search highlighting.
-nnoremap <Leader><space> :nohlsearch<CR>
+nnoremap <leader><space> :nohlsearch<CR>
 "
 "Prettify current file
 function! Prettify()
@@ -262,7 +262,7 @@ function! Prettify()
     exe "%!prettier --stdin-filepath %"
     call setpos('.', curPos)
 endfunction
-nnoremap <Leader>p :call Prettify()<cr>
+nnoremap <leader>p :call Prettify()<cr>
 
 "Invoke FZF for current directory
 nnoremap <silent> <leader>f :Files<cr>
@@ -284,7 +284,7 @@ endif
 let $FZF_DEFAULT_OPTS='--reverse'
 
 "Order lines by length
-vmap <Leader>su !awk '{ print length(), $0 \| "sort -n \| cut -d\\  -f2-" }'<CR>
+vmap <leader>su !awk '{ print length(), $0 \| "sort -n \| cut -d\\  -f2-" }'<CR>
 
 
 "--------Shortcuts--------"
@@ -305,7 +305,7 @@ nmap te :tabedit<Return>
 "nmap <S-Tab> :tabprev<Return>
 
 "Search tags
-nmap <Leader>s :tag<space>
+nmap <leader>s :tag<space>
 
 
 "--------Visuals--------ete horizontal split.
@@ -416,12 +416,12 @@ let g:netrw_list_hide.=',\(^\|\s\s)\zs\.\S+'        "Hide additional files.
 
 
 "--------Snippets--------"
-nnoremap <Leader>html :-1read $HOME/.vim/.skeleton.html<CR>4jf>a
+nnoremap <leader>html :-1read $HOME/.vim/.skeleton.html<CR>4jf>a
 "inoremap <SPACE><SPACE> <ESC>/<++><Enter>"_c4l
-nnoremap <Leader>ev :tabe $MYVIMRC<CR>
-inoremap <Leader>iww Ifor Waldo Williams
-inoremap <Leader>em ifor@cors.tech
-" inoremap <Leader>nn iforwms
+nnoremap <leader>ev :tabe $MYVIMRC<CR>
+inoremap <leader>iww Ifor Waldo Williams
+inoremap <leader>em ifor@cors.tech
+" inoremap <leader>nn iforwms
 
 
 "--------AutoCommands--------"
@@ -449,8 +449,8 @@ function! IPhpInsertUse()
     call PhpInsertUse()
     call feedkeys('a',  'n')
 endfunction
-autocmd FileType php inoremap <Leader>n <Esc>:call IPhpInsertUse()<CR>
-autocmd FileType php noremap <Leader>n :call PhpInsertUse()<CR>
+autocmd FileType php inoremap <leader>n <Esc>:call IPhpInsertUse()<CR>
+autocmd FileType php noremap <leader>n :call PhpInsertUse()<CR>
 
 "--------Helper Functions--------"
 function! PhpSyntaxOverride()
