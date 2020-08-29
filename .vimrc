@@ -277,7 +277,8 @@ nnoremap <silent> <leader>c :Tags<cr>
 nnoremap <silent> <leader>F :Files ~<cr>
 
 "Set fzf window to center
-if v:version > 819
+" if v:version > 819
+if has("patch-8.2.191")
     let g:fzf_layout = { 'window': { 'width': 0.8, 'height': 0.8 } }
 endif
 let $FZF_DEFAULT_OPTS='--reverse'
