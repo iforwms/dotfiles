@@ -277,7 +277,7 @@ nnoremap <silent> <leader>c :Tags<cr>
 nnoremap <silent> <leader>F :Files ~<cr>
 
 "Set fzf window to center
-if v:version > 82190
+if v:version > 819
     let g:fzf_layout = { 'window': { 'width': 0.8, 'height': 0.8 } }
 endif
 let $FZF_DEFAULT_OPTS='--reverse'
@@ -321,7 +321,7 @@ if !has('gui')
 endif
 
 if !has("gui_running")                              "Enable 256 colors and turn on theme.
-    set term=pcansi
+    " set term=pcansi
     set t_CO=256
 
     "Add italic support
