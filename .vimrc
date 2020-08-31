@@ -267,10 +267,10 @@ endfunction
 nnoremap <leader>p :call Prettify()<cr>
 
 "Invoke FZF for current directory
-nnoremap <silent> <leader>f :Files<cr>
+nnoremap <silent> <leader>f :GFiles<cr>
 
 "Invoke FZF respecting .gitignore
-nnoremap <silent> <leader>gf :GFiles<cr>
+nnoremap <silent> <leader>gf :Files<cr>
 
 "Invoke FZF tag search
 nnoremap <silent> <leader>c :Tags<cr>
