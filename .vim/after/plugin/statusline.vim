@@ -24,7 +24,9 @@ function! ActiveStatus()
     "Add divider.
     let statusline.="%0*%="
 
-    let statusline.="%{coc#status()}%{get(b:,'coc_current_function','')}"
+    if (exists('coc#status'))
+        let statusline.="%{coc#status()}%{get(b:,'coc_current_function','')}"
+    endif
 
     "Show current line and column"
     let statusline.="%0*\ %l/%L:%v\ "
