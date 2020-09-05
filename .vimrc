@@ -19,6 +19,7 @@ syntax enable                                       "Enable syntax and plugins (
 set nocompatible                                    "Disable checks for staying compatible with VI.
 set noswapfile                                      "Disable swapfile creation.
 set hidden                                          "Allow switching buffers without writing to disk.
+set history=200 "Increase command line history
 set autowriteall                                    "Enable save on buffer change.
 set dictionary+=/usr/share/dict/words               "Add dictionary.
 
@@ -68,6 +69,12 @@ if has('nvim')
 else
   inoremap <silent><expr> <c-@> coc#refresh()
 endif
+
+" Add buffer shortcuts
+nnoremap <silent> [b : bprevious <CR>
+nnoremap <silent> ]b : bnext <CR>
+nnoremap <silent> [B :b first <CR>
+nnoremap <silent> ]B :b last <CR>
 
 " Use <cr> to confirm completion, `<C-g>u` means break undo chain at current
 " position. Coc only does snippet and additional edit on confirm.
