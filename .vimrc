@@ -7,6 +7,7 @@ filetype off
 set runtimepath+=$HOME/.dotfiles/lilypond/vim/
 set runtimepath+=/usr/local/opt/fzf
 filetype plugin on                                  "Enable filetype plugin.
+filetype indent on                                  "Enable indent plugin.
 filetype on
 
 set encoding=utf-8                                  "Set encoding to utf-8.
