@@ -26,6 +26,8 @@ set dictionary+=/usr/share/dict/words               "Add dictionary.
 set viewoptions=folds,cursor
 set sessionoptions=folds
 
+runtime macros/matchit.vim " improve brac matching
+
 "---------COC Config-------"
 " Some servers have issues with backup files, see #649.
 set nobackup
