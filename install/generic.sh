@@ -36,6 +36,10 @@ echo "[VIM] Installing surround plugin"
 git clone https://github.com/tpope/vim-surround $HOME/.dotfiles/.vim/pack/default/start/vim-surround
 # vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-surround/doc" -c q
 
+echo "[VIM] Installing wakatime plugin"
+git clone https://github.com/wakatime/vim-wakatime $HOME/.dotfiles/.vim/pack/default/start/vim-wakatime
+# vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-wakatime/doc" -c q
+
 echo "[VIM] Installing commentary plugin"
 git clone https://github.com/tpope/vim-commentary $HOME/.dotfiles/.vim/pack/default/start/vim-commentary
 # vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-commentary/doc" -c q
