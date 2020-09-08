@@ -22,6 +22,7 @@ set hidden                                          "Allow switching buffers wit
 set history=200 "Increase command line history
 set autowriteall                                    "Enable save on buffer change.
 set dictionary+=/usr/share/dict/words               "Add dictionary.
+set cmdheight=2
 
 set viewoptions=folds,cursor
 set sessionoptions=folds
