@@ -76,6 +76,15 @@ if ! tmux has-session -t alpha; then
     # Start build process
     tmux send-keys -t alpha:6.2 'ctags -R && yr build-watch' Enter
 
+    # Create a new window for Chordy
+    tmux new-window -t alpha:7 -n chordy -c ~/code/personal/chordie
+
+    # Create a new window for VPN
+    tmux new-window -t alpha:8 -n vpn -c ~
+
+    # Connect to VPN
+    tmux send-keys -t alpha:8.1 'lon' Enter
+
     # Set active pane to main API pane on both windows.
     tmux select-pane -t alpha:2.1
     tmux select-pane -t alpha:3.1
