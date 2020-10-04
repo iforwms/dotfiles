@@ -94,6 +94,10 @@ endif
 nmap <silent> [g <Plug>(coc-diagnostic-prev)
 nmap <silent> ]g <Plug>(coc-diagnostic-next)
 
+" Fix & (repeat last substitution) by preserving options
+nnoremap & :&&<CR>
+xnoremap & :&&<CR>
+
 " GoTo code navigation.
 function! JumpToDefinition()
    let s =  execute("normal \<Plug>(coc-definition)")
