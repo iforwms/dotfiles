@@ -133,6 +133,9 @@ nmap <leader>rn <Plug>(coc-rename)
 " xmap <leader>f  <Plug>(coc-format-selected)
 " nmap <leader>f  <Plug>(coc-format-selected)
 
+" Update ctags on save
+autocmd BufWritePost * call system("ctags-R")
+
 augroup mygroup
   autocmd!
   " Setup formatexpr specified filetype(s).
