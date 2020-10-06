@@ -40,6 +40,10 @@ echo "[VIM] Installing wakatime plugin"
 git clone https://github.com/wakatime/vim-wakatime $HOME/.dotfiles/.vim/pack/default/start/vim-wakatime
 # vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-wakatime/doc" -c q
 
+echo "[VIM] Installing documentation plugin"
+git clone --depth 1 https://github.com/kkoomen/vim-doge $HOME/.dotfiles/.vim/pack/default/start/vim-doge
+# vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-doge/doc" -c q
+
 echo "[VIM] Installing commentary plugin"
 git clone https://github.com/tpope/vim-commentary $HOME/.dotfiles/.vim/pack/default/start/vim-commentary
 # vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-commentary/doc" -c q
