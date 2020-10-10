@@ -273,6 +273,9 @@ set wildignore+=*.pyc,*.pyo,__pycache__             "Ignore compiled pythong fil
 "file, window, buffer, inactive buffers, tags, includes, spell check (when enabled)"
 set complete=.,w,b,u,t,i
 
+" Turn on spellcheck
+set spell
+
 "Shortcut to turn off search highlighting.
 nnoremap <leader><space> :nohlsearch<CR>
 "
