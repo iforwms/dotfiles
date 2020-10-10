@@ -16,3 +16,8 @@ termux-setup-storage
 echo "Symlink .gitconfig file to the home directory"
 rm -rf $HOME/.gitconfig
 ln -s $HOME/.dotfiles/.gitconfig $HOME/.gitconfig
+
+echo "Symlinking termux config files"
+mkdir -p $HOME/.termux
+ln -s $HOME/.dotfiles/termux/colors.properties $HOME/.termux/colors.properties
+ln -s $HOME/.dotfiles/termux/termux.properties $HOME/.termux/termux.properties
