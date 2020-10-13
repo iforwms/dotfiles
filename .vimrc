@@ -1,4 +1,4 @@
-"--------Userful tips --------------"
+"--------Useful tips --------------"
 "Replace all px with rem
 " :%s#\(\d\+\)px#\=printf("%f", (submatch(1) / 16.0))."rem"#g
 
@@ -27,7 +27,7 @@ set cmdheight=2
 set viewoptions=folds,cursor
 set sessionoptions=folds
 
-runtime macros/matchit.vim " improve brac matching
+runtime macros/matchit.vim " improve brace matching
 
 "---------COC Config-------"
 " Some servers have issues with backup files, see #649.
@@ -43,10 +43,10 @@ set updatetime=300
 " Don't pass messages to |ins-completion-menu|.
 set shortmess+=c
 
-" Always show the signcolumn, otherwise it would shift the text each time
+" Always show the sign column, otherwise it would shift the text each time
 " diagnostics appear/become resolved.
 if has("patch-8.1.1564")
-    " Recently vim can merge signcolumn and number column into one
+    " Recently vim can merge sign column and number column into one
     set signcolumn=number
 else
     set signcolumn=yes
@@ -236,7 +236,7 @@ autocmd FileType markdown let &colorcolumn=""       "Disable column colouring in
 set ttimeoutlen=0                                  "Disable delay in switching from insert to normal mode
 set backspace=indent,eol,start                      "Fix backspace actions.
 set number                                          "Add line numbering.
-"set relativenumber                                  "Show line numbers relative to cursor position.
+"set relative number                                  "Show line numbers relative to cursor position.
 set showmatch                                       "Highlight matching [{()}]
 set nrformats=                                      "Always treat numbers as decimal
 set matchpairs+=<:>                                 "Highlight matching pairs of brackets. Use the '%' character to jump between them.
