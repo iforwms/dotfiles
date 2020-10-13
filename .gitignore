@@ -17,3 +17,4 @@ beets/*.pickle
 .netrwhist
 *.log
 .vim/view
+.vim/spell/*.spl
