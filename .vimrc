@@ -246,6 +246,20 @@ augroup CursorLine                                  "Only highlight cursor line 
         au WinLeave * setlocal nocursorline
 augroup END
 
+function GenerateSpellcheckFiles()
+    for d in glob('~/.vim/spell/*.add', 1, 1)
+        if filereadable(d) && (!filereadable(d . '.spl') || getftime(d) > getftime(d . '.spl'))
+            exec 'mkspell! ' . fnameescape(d)
+        endif
+    endfor
+endfunction
+
+augroup Startup
+    au!
+    au VimEnter * :call GenerateSpellcheckFiles()
+augroup END
+
+
 "Show absolute line numbering when in insert mode.
 "augroup numbertoggle
   "autocmd!
@@ -277,8 +291,11 @@ set complete=.,w,b,u,t,i
 set spell
 
 "Shortcut to turn off search highlighting.
+nnoremap <leader>t :!ctags -R .<CR>
+
+"Shortcut to turn off search highlighting.
 nnoremap <leader><space> :nohlsearch<CR>
-"
+
 "Prettify current file
 function! Prettify()
     let curPos = getcurpos()
