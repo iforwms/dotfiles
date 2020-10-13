@@ -291,8 +291,11 @@ set complete=.,w,b,u,t,i
 set spell
 
 "Shortcut to turn off search highlighting.
+nnoremap <leader>t :!ctags -R .<CR>
+
+"Shortcut to turn off search highlighting.
 nnoremap <leader><space> :nohlsearch<CR>
-"
+
 "Prettify current file
 function! Prettify()
     let curPos = getcurpos()
