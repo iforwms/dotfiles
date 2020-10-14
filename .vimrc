@@ -293,6 +293,9 @@ set spell
 "Shortcut to turn off search highlighting.
 nnoremap <leader>t :!ctags -R .<CR>
 
+"Alias :W to :w
+cnoreabbrev <expr> W ((getcmdtype() is# ':' && getcmdline() is# 'W')?('w'):('W'))
+
 "Shortcut to turn off search highlighting.
 nnoremap <leader><space> :nohlsearch<CR>
 
