@@ -27,6 +27,9 @@ set cmdheight=2
 set viewoptions=folds,cursor
 set sessionoptions=folds
 
+"Enable auto format on rust files on save
+let g:rustfmt_autosave = 1
+
 runtime macros/matchit.vim " improve brace matching
 
 "---------COC Config-------"
