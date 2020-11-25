@@ -41,3 +41,8 @@ curl -fsSL -o $HOME/jtc https://github.com/ldn-softdev/jtc/releases/download/Lat
 chmod 754 $HOME/jtc
 xattr -dr com.apple.quarantine $HOME/jtc
 mv $HOME/jtc /usr/local/bin/
+
+echo "Setting up chessx config"
+rm -rf $HOME/.config/chessx
+mkdir $HOME/.config
+ln -s $HOME/.dotfiles/chessx $HOME/.config/chessx
