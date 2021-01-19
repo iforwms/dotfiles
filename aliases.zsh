@@ -171,6 +171,21 @@ alias beetupdate="docker exec -it beets /bin/bash -c 'beet update'"
 # run a fresh import on the clean music folder:
 # docker exec -it beets /bin/bash -c 'beet import /music'
 
+# rsync
+# -r Recursive
+# -h Human readable sizes
+# -L Copy symlinks as files
+# -p Preserve permissions
+# -t Preserve timestamps
+# -g Preserve groups
+# -o Preserve owners
+# -v Verbose
+# -D Handle block file systems
+# -u Only Copy over newer modified files (or same create and larger file size)
+# --progress Show progress
+alias lsync="rsync -rhLvuD --size-only --progress /Users/ifor/Music/Logic /Volumes/IFOR2T"
+alias msync="rsync -rhLvuD --size-only --progress /Users/ifor/Music/local /Volumes/IFOR2T/music"
+
 # SSH
 alias copyssh="pbcopy < $HOME/.ssh/id_rsa.pub"
 # alias addssh='ssh $1 "echo \"`cat ~/.ssh/id_rsa.pub`\" >> ~/.ssh/authorized_keys"'
