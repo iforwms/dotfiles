@@ -184,9 +184,9 @@ alias beetupdate="docker exec -it beets /bin/bash -c 'beet update'"
 # -u Only Copy over newer modified files (or same create and larger file size)
 # --progress Show progress
 alias l2h="rsync -rhlvuD --size-only --progress /Users/ifor/Music/Logic /Volumes/IFOR2T"
-alias h2l="rsync -rhlvuD --size-only --progress /Volumes/IFOR2T/Logic /Users/ifor"
+alias h2l="rsync -rhlvuD --size-only --progress /Volumes/IFOR2T/Logic /Users/ifor/Music"
 alias l2hd="rsync -rhlvuD --delete --size-only --progress /Users/ifor/Music/Logic /Volumes/IFOR2T"
-alias h2ld="rsync -rhlvuD --delete --size-only --progress /Volumes/IFOR2T/Logic /Users/ifor"
+alias h2ld="rsync -rhlvuD --delete --size-only --progress /Volumes/IFOR2T/Logic /Users/ifor/Music"
 # alias msync="rsync -rhlvuD --size-only --progress /Users/ifor/Music/local /Volumes/IFOR2T/music"
 
 # SSH
