@@ -188,6 +188,8 @@ alias l2h="rsync -rhlvuD --size-only --progress /Users/ifor/Music/Logic /Volumes
 alias h2l="rsync -rhlvuD --size-only --progress /Volumes/IFOR2T/Logic /Users/ifor/Music"
 alias l2hd="rsync -rhlvuD --delete --size-only --progress /Users/ifor/Music/Logic /Volumes/IFOR2T"
 alias h2ld="rsync -rhlvuD --delete --size-only --progress /Volumes/IFOR2T/Logic /Users/ifor/Music"
+alias dl2hd="rsync -rhlvuDn --delete --size-only --progress /Users/ifor/Music/Logic /Volumes/IFOR2T"
+alias dh2ld="rsync -rhlvuDn --delete --size-only --progress /Volumes/IFOR2T/Logic /Users/ifor/Music"
 # alias msync="rsync -rhlvuD --size-only --progress /Users/ifor/Music/local /Volumes/IFOR2T/music"
 
 # SSH
