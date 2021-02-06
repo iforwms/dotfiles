@@ -6,7 +6,7 @@ DEFAULT_DELETE="N"
 
 LOCAL_PATH="/Users/ifor/Logic/"
 HDD_PATH="/Volumes/IFOR2T/Logic/"
-ARGS="-rhlvut --progress"
+ARGS="-rhlvut --progress --exclude=.DS_Store"
 
 echo "Logic Sync Utility"
 echo
