@@ -173,24 +173,7 @@ alias beetupdate="docker exec -it beets /bin/bash -c 'beet update'"
 # docker exec -it beets /bin/bash -c 'beet import /music'
 
 # rsync
-# -r Recursive
-# -h Human readable sizes
-# -L Copy symlinks as files
-# -p Preserve permissions
-# -t Preserve timestamps
-# -g Preserve groups
-# -o Preserve owners
-# -v Verbose
-# -D Handle block file systems
-# -u Only Copy over newer modified files (or same create and larger file size)
-# --progress Show progress
-alias l2h="rsync -rhlvuD --size-only --progress /Users/ifor/Music/Logic /Volumes/IFOR2T"
-alias h2l="rsync -rhlvuD --size-only --progress /Volumes/IFOR2T/Logic /Users/ifor/Music"
-alias l2hd="rsync -rhlvuD --delete --size-only --progress /Users/ifor/Music/Logic /Volumes/IFOR2T"
-alias h2ld="rsync -rhlvuD --delete --size-only --progress /Volumes/IFOR2T/Logic /Users/ifor/Music"
-alias dl2hd="rsync -rhlvuDn --delete --size-only --progress /Users/ifor/Music/Logic /Volumes/IFOR2T"
-alias dh2ld="rsync -rhlvuDn --delete --size-only --progress /Volumes/IFOR2T/Logic /Users/ifor/Music"
-# alias msync="rsync -rhlvuD --size-only --progress /Users/ifor/Music/local /Volumes/IFOR2T/music"
+alias sl="./scripts/sync-logic.sh"
 
 # SSH
 alias copyssh="pbcopy < $HOME/.ssh/id_rsa.pub"
