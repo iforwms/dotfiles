@@ -1,0 +1,99 @@
+#!/bin/bash
+
+DEFAULT_DIRECTION=0
+DEFAULT_DRY="Y"
+DEFAULT_DELETE="N"
+
+LOCAL_PATH="/Users/ifor/Logic/"
+HDD_PATH="/Volumes/IFOR2T/Logic/"
+ARGS="-rhlvut --progress"
+
+echo "Logic Sync Utility"
+echo
+
+read -p "Local to HDD (0) or HDD to Local (1)? [0] " DIRECTION
+DIRECTION="${DIRECTION:-${DEFAULT_DIRECTION}}"
+if [[ ! "$DIRECTION" =~ ^[0-1]+$ ]]; then
+    echo "$DIRECTION is not a valid option!" >&2 && exit 1;
+fi
+
+read -p "Dry run? (y/n) [y] " DRY
+DRY="${DRY:-${DEFAULT_DRY}}"
+if [[ $DRY =~ ^[Yy]$ ]]
+then
+    DRY=true
+else
+    DRY=false
+fi
+
+read -p "Delete missing files? (y/n) [n] " DEL
+DEL="${DEL:-${DEFAULT_DEL}}"
+if [[ $DEL =~ ^[Yy]$ ]]
+then
+    DEL=true
+else
+    DEL=false
+fi
+
+if ($DRY)
+then
+    ARGS="${ARGS} --dry-run"
+fi
+
+if ($DEL)
+then
+    ARGS="${ARGS} --delete"
+fi
+
+if [[ $DIRECTION -eq 0 ]]
+then
+    PATHS="${LOCAL_PATH} ${HDD_PATH}"
+else
+    PATHS="${HDD_PATH} ${LOCAL_PATH}"
+fi
+
+# -r Recursive
+# -h Human readable sizes
+# -L Copy symlinks as files
+# -p Preserve permissions
+# -t Preserve timestamps
+# -g Preserve groups
+# -o Preserve owners
+# -v Verbose
+# -D Handle block file systems
+# -u Only Copy over newer modified files (or same create and larger file size)
+# --progress Show progress
+
+echo
+echo "rsync ${ARGS} ${PATHS}"
+echo
+
+if (! $DRY)
+then
+    read -p "Are you sure you want to run this command? (y/n) [n]" -n 1 -r
+
+    if [[ ! $REPLY =~ ^[Yy]$ ]]
+    then
+        echo
+        echo "Aborting sync..."
+        exit 1
+    fi
+fi
+
+rsync ${ARGS} ${PATHS}
+
+if ($DRY)
+then
+    echo
+    read -p "Do you want to run this command in anger? (y/n) [n]" -n 1 -r
+
+    if [[ ! $REPLY =~ ^[Yy]$ ]]
+    then
+        echo
+        echo "Aborting sync..."
+        exit 1
+    fi
+
+    echo
+    rsync ${ARGS/ --dry-run/} ${PATHS}
+fi
