@@ -173,7 +173,7 @@ alias beetupdate="docker exec -it beets /bin/bash -c 'beet update'"
 # docker exec -it beets /bin/bash -c 'beet import /music'
 
 # rsync
-alias sl="./scripts/sync-logic.sh"
+alias sl="$HOME/.dotfiles/scripts/sync-logic.sh"
 
 # SSH
 alias copyssh="pbcopy < $HOME/.ssh/id_rsa.pub"
