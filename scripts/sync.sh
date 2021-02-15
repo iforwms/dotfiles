@@ -4,8 +4,8 @@ DEFAULT_DIRECTION=0
 DEFAULT_DRY="Y"
 DEFAULT_DELETE="N"
 
-LOCAL_PATH="/Users/ifor/Logic/"
-HDD_PATH="/Volumes/IFOR2T/Logic/"
+LOCAL_PATH=$1
+HDD_PATH=$2
 ARGS="-rhlvut --progress --exclude=.DS_Store"
 
 echo "Logic Sync Utility"
