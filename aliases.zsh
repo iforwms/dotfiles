@@ -54,6 +54,7 @@ alias library="cd $HOME/Library"
 alias code="cd $HOME/code"
 alias ssd="$DOTFILES/scripts/shutdown.sh"
 
+alias dnsReset="sudo killall -HUP mDNSResponder"
 # Laravel
 alias a="php artisan"
 alias aw="sudo -u www-data php artisan"
