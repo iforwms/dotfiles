@@ -128,7 +128,20 @@ export PATH="/usr/local/opt/curl/bin:$PATH"
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 export PATH="$HOME/.cargo/bin:$PATH"
 
-FINDUTILS="/usr/local/opt/findutils/libexec/gnubin"
-if [ -d "$FINDUTILS" ]; then
-    export PATH="$FINDUTILS:$PATH"
-fi
+# Add all GNU paths
+for i in "/usr/local/opt/gnu-getopt/bin" \
+    "/usr/local/opt/findutils/libexec/gnubin" \
+    "/usr/local/opt/gnu-tar/libexec/gnubin" \
+    "/usr/local/opt/readline/lib/pkgconfig" \
+    "/usr/local/opt/openssl@1.1/bin" \
+    "/usr/local/opt/openldap/bin" \
+    "/usr/local/opt/openldap/sbin" \
+    "/usr/local/opt/curl/bin" \
+    "/usr/local/opt/sqlite/bin" \
+    "/usr/local/opt/gnu-tar/libexec/gnubin" \
+    "/usr/local/opt/gnu-indent/libexec/gnubin"
+do
+    if [ -d "$i" ]; then
+        export PATH="$i:$PATH"
+    fi
+done
