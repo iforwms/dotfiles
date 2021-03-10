@@ -46,7 +46,6 @@ alias doc="docker-compose"
 # alias dpurgei="docker rmi $(docker images -q)"
 # dbuild() { docker build -t=$1 .; }
 # dbash() { docker exec -it $(docker ps -aqf "name=$1") bash; }
-alias sed="gsed"
 
 # Directories
 alias dot="cd $DOTFILES"
