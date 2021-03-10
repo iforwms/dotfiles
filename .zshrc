@@ -133,6 +133,7 @@ for i in "/usr/local/opt/gnu-getopt/bin" \
     "/usr/local/opt/findutils/libexec/gnubin" \
     "/usr/local/opt/gnu-tar/libexec/gnubin" \
     "/usr/local/opt/readline/lib/pkgconfig" \
+    "/usr/local/opt/gnu-sed/libexec/gnubin" \
     "/usr/local/opt/openssl@1.1/bin" \
     "/usr/local/opt/openldap/bin" \
     "/usr/local/opt/openldap/sbin" \
