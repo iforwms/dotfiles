@@ -54,6 +54,7 @@ alias library="cd $HOME/Library"
 alias code="cd $HOME/code"
 alias ssd="$DOTFILES/scripts/shutdown.sh"
 
+alias dnsReset="sudo killall -HUP mDNSResponder"
 # Laravel
 alias a="php artisan"
 alias aw="sudo -u www-data php artisan"
@@ -132,6 +133,7 @@ alias ga='git add'
 alias gaa='git add .'
 alias gd='git diff'
 alias gds='git diff --staged'
+alias grs='git restore --staged'
 alias nah='git reset --hard && git clean -df'
 # alias apgi='git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached'
 # find ~/code -mindepth 1 -maxdepth 4 -type d -name .git -execdir git status -s \;
@@ -170,6 +172,10 @@ alias beetupdate="docker exec -it beets /bin/bash -c 'beet update'"
 # physical file structure of your collection, you will need to
 # run a fresh import on the clean music folder:
 # docker exec -it beets /bin/bash -c 'beet import /music'
+
+# rsync
+alias sl="$HOME/.dotfiles/scripts/sync.sh /Users/ifor/Logic/ /Volumes/IFOR2T/Logic/"
+alias sm="$HOME/.dotfiles/scripts/sync.sh /Users/ifor/Music/ /Volumes/IFOR2T/Music/"
 
 # SSH
 alias copyssh="pbcopy < $HOME/.ssh/id_rsa.pub"

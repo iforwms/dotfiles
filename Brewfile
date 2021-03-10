@@ -22,6 +22,7 @@ brew 'htop'
 brew 'httpie'
 brew 'mackup'
 brew 'mas' # Mac App Store manager
+brew 'netcat'
 brew 'pkg-config' # https://github.com/driesvints/dotfiles/issues/20
 brew 'reattach-to-user-namespace' # Required for tmux copy paste
 brew 'ripgrep'
@@ -32,8 +33,11 @@ brew 'wget'
 brew 'zlib' # Needed for Memcached
 
 # Development
+# brew 'php@7.2'
+# brew 'php@7.3'
 brew 'composer'
 brew 'ctags'
+brew 'findutils'
 brew 'gifsicle'
 brew 'imagemagick'
 brew 'jpegoptim'
@@ -45,8 +49,6 @@ brew 'nmap'
 brew 'node'
 brew 'optipng'
 brew 'php'
-# brew 'php@7.2'
-# brew 'php@7.3'
 brew 'phpunit'
 brew 'pngquant'
 brew 'proxychains-ng'
@@ -57,14 +59,18 @@ brew 'tmux'
 brew 'yarn'
 brew 'zsh'
 
+
 # Apps
+# cask 'caffeine'
+# cask 'mysqlworkbench'
+# cask 'phpstorm'
 cask 'alfred'
 cask 'android-file-transfer'
 cask 'android-studio'
 cask 'arduino'
 cask 'balsamiq-wireframes'
 cask 'bartender'
-# cask 'caffeine'
+cask 'burp-suite'
 cask 'coda'
 cask 'docker'
 cask 'firefox'
@@ -76,11 +82,9 @@ cask 'iterm2'
 cask 'java'
 cask 'kicad'
 cask 'lilypond'
-# cask 'mysqlworkbench'
 cask 'midi-monitor'
 cask 'moom'
 cask 'ngrok'
-# cask 'phpstorm'
 cask 'postman'
 cask 'pycharm'
 cask 'reaper'
@@ -93,7 +97,6 @@ cask 'vagrant'
 cask 'virtualbox' # Might need to allow access in Security settings
 cask 'virtualbox-extension-pack'
 cask 'vlc'
-
 # Quicklook
 cask 'qlcolorcode'
 cask 'qlmarkdown'
@@ -102,10 +105,10 @@ cask 'quicklook-csv'
 cask 'qlstephen'
 
 # Fonts
+cask 'font-fira-code'
 cask 'font-lato'
 cask 'font-open-sans'
 cask 'font-roboto'
-cask 'font-fira-code'
 
 # Mac App Store
 mas 'Bandwidth+', id: 490461369
