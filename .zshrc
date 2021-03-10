@@ -129,6 +129,6 @@ export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 export PATH="$HOME/.cargo/bin:$PATH"
 
 FINDUTILS="/usr/local/opt/findutils/libexec/gnubin"
-if [ -d "$FINDUTILS"]; then
+if [ -d "$FINDUTILS" ]; then
     export PATH="$FINDUTILS:$PATH"
 fi
