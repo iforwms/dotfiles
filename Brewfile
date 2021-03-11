@@ -12,6 +12,7 @@ brew 'cash-cli' # currency rates
 brew 'cmus' # terminal player
 brew 'coreutils' # Those that come with macOS are outdated
 brew 'dfu-programmer' # Flashing Arduino bootloaders
+brew 'xclip'
 brew 'dos2unix'
 brew 'entr'
 brew 'findutils'
