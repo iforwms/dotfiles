@@ -85,6 +85,9 @@ alias apk="./gradlew assembleDebug && scp ./app/build/outputs/apk/debug/app-debu
 # JS
 alias nfresh="rm -rf node_modules/ package-lock.json && yarn install"
 
+# gdb
+alias gdbinit="echo 'set disassembly-flavor intel' > $HOME/.gdbinit"
+
 # IP addresses
 alias ip="curl https://diagnostic.opendns.com/myip ; echo"
 alias lip="ifconfig tun0 | awk '/inet / {print \$2}'"
