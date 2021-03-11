@@ -161,6 +161,12 @@ function gitPurge() {
   # git gc --prune=now
 }
 
+# Compile asm > o > program
+function asm() {
+    nasm -f elf32 $1.asm -o $1.o
+    ld -m elf_i386 $1.o -o $1
+}
+
 # beets
 function beet() {
     docker exec -t beets /bin/bash -c "beet $1"
