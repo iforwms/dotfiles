@@ -13,8 +13,8 @@ sudo apt upgrade -y
 # TODO
 # Install Yarn, Node, Composer
 
-echo "Installing ZSH, tmux"
-sudo apt install -y zsh tmux
+echo "Installing ZSH, tmux, xclip"
+sudo apt install -y zsh tmux xclip
 
 echo "Setting ZSH as default shell"
 sudo sh -c "echo $(which zsh) >> /etc/shells" && chsh -s $(which zsh)
