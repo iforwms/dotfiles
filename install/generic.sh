@@ -82,6 +82,10 @@ echo "[VIM] Installing onedark color scheme"
 curl -fsSL -o $HOME/.dotfiles/.vim/colors/onedark.vim $RAW_GIT/joshdick/onedark.vim/master/colors/onedark.vim
 curl -fsSL -o $HOME/.dotfiles/.vim/autoload/onedark.vim $RAW_GIT/joshdick/onedark.vim/master/autoload/onedark.vim
 
+echo "[r2] Creating symlink for .radare2rc"
+rm -rf $HOME/.radare2rc
+ln -s $HOME/.dotfiles/.radare2rc $HOME/.radare2rc
+
 echo "[VIM] Creating symlink for .vimrc"
 rm -rf $HOME/.vimrc
 ln -s $HOME/.dotfiles/.vimrc $HOME/.vimrc
