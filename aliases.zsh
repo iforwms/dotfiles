@@ -55,6 +55,7 @@ alias ssd="$DOTFILES/scripts/shutdown.sh"
 
 alias dnsReset="sudo killall -HUP mDNSResponder"
 # Laravel
+alias llog="less storage/logs/laravel-$(date '+%Y-%m-%d').log"
 alias a="php artisan"
 alias aw="sudo -u www-data php artisan"
 alias ams="php artisan migrate:fresh --seed"
@@ -163,6 +164,18 @@ function gitPurge() {
   # git for-each-ref --format="delete %(refname)" refs/original | git update-ref --stdin
   # git reflog expire --expire=now --all
   # git gc --prune=now
+}
+
+# Create remote github repo
+function gri() {
+    curl -u 'iforwms' https://api.github.com/user/repos -d '{"name":"$1", "private": "true", "key": "$(cat ~/.ssh/id_rsa.pub)"}'
+    git init
+    git remote add origin git@github.com:iforwms/$1.git
+    # curl \
+    #     -X POST \
+    #     -H "Accept: application/vnd.github.v3+json" \
+    #     https://api.github.com/user/repos \
+    #     -d '{"name":"$1", "private": true, "key": "$(cat ~/.ssh/id_rsa.pub)"}'
 }
 
 # Compile asm > o > program
