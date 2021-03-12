@@ -4,7 +4,10 @@ e asm.cmtright=true
 # Shows pseudocode in disassembly. Eg mov eax, str.ok = > eax = str.ok
 e asm.pseudo = true
 
-# Solarized theme
+# Increase stack size in visual mode
+e stack.size = 128
+
+# Onedark theme
 eco onedark
 
 # Use UTF-8 to show cool arrows that do not look like crap :)
