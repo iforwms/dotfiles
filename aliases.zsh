@@ -52,6 +52,9 @@ alias dot="cd $DOTFILES"
 alias library="cd $HOME/Library"
 alias code="cd $HOME/code"
 alias ssd="$DOTFILES/scripts/shutdown.sh"
+alias ind="cd $HOME/code/indier"
+alias dom="cd $HOME/code/domino"
+alias kim="cd $HOME/code/kim"
 
 alias dnsReset="sudo killall -HUP mDNSResponder"
 # Laravel
