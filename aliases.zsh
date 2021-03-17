@@ -33,12 +33,13 @@ weather() { curl -4 wttr.in/${1:-yangshuo} }
 alias phpstorm='open -a /Applications/PhpStorm.app "`pwd`"'
 alias subl='open -a "/Applications/Sublime Text.app" "`pwd`"'
 alias c="clear"
-alias ping='ping -c 5'  # Pings with 5 packets, not unlimited
-alias df='df -h'        # Disk free, in gigabytes, not bytes
-alias du='du -h -c'     # Calculate total disk usage for a folder
+# alias ping='ping -c 5'  # Pings with 5 packets, not unlimited
+# alias df='df -h'        # Disk free, in gigabytes, not bytes
+# alias du='du -h -c'     # Calculate total disk usage for a folder
 # alias zbundle="antibody bundle < $DOTFILES/zsh_plugins.txt > $DOTFILES/zsh_plugins.sh"
 alias vimgolf='docker run --rm -it -e "key=4ff4186b1f258b4dd2755c104835abeb" kramos/vimgolf'
 alias deploy='sudo -u www-data ./deploy.sh'
+
 # Docker
 alias doc="docker-compose"
 # alias dstop="docker stop $(docker ps -a -q)"
@@ -46,6 +47,10 @@ alias doc="docker-compose"
 # alias dpurgei="docker rmi $(docker images -q)"
 # dbuild() { docker build -t=$1 .; }
 # dbash() { docker exec -it $(docker ps -aqf "name=$1") bash; }
+
+# Spoof timezone
+# America/Anchorage
+# function spoofTz
 
 # Directories
 alias dot="cd $DOTFILES"
