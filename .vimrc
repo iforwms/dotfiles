@@ -327,7 +327,7 @@ nnoremap <silent> <leader>F :Files ~<cr>
 if has("patch-8.2.191")
     let g:fzf_layout = { 'window': { 'width': 0.8, 'height': 0.8 } }
 endif
-let $FZF_DEFAULT_OPTS='--reverse'
+let $FZF_DEFAULT_OPTS='--reverse --color="bg+:#3887D1"'
 
 "Order lines by length
 vmap <leader>su !awk '{ print length(), $0 \| "sort -n \| cut -d\\  -f2-" }'<CR>
