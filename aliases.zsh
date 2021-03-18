@@ -63,7 +63,9 @@ alias kim="cd $HOME/code/kim"
 
 alias dnsReset="sudo killall -HUP mDNSResponder"
 # Laravel
-alias llog="less storage/logs/laravel-$(date '+%Y-%m-%d').log"
+function llog() {
+    less storage/logs/laravel-$(date '+%Y-%m-%d').log
+}
 alias a="php artisan"
 alias aw="sudo -u www-data php artisan"
 alias ams="php artisan migrate:fresh --seed"
