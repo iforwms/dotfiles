@@ -249,7 +249,7 @@ augroup CursorLine                                  "Only highlight cursor line 
         au WinLeave * setlocal nocursorline
 augroup END
 
-function GenerateSpellcheckFiles()
+function! GenerateSpellcheckFiles()
     for d in glob('~/.vim/spell/*.add', 1, 1)
         if filereadable(d) && (!filereadable(d . '.spl') || getftime(d) > getftime(d . '.spl'))
             exec 'mkspell! ' . fnameescape(d)
