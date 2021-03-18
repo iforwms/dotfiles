@@ -64,6 +64,7 @@ brew 'stockfish'
 brew 'svgo'
 brew 'tmux'
 brew 'yarn'
+brew 'zbar'
 brew 'zsh'
 
 
