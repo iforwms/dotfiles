@@ -152,6 +152,8 @@ do
     fi
 done
 
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
 ## History
 # For all commands prefix with a number to use an older commands
 # args, e.g. !606^. You have also search and replace arguments:
