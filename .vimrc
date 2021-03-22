@@ -5,7 +5,7 @@
 "--------General Preferences--------"
 filetype off
 set runtimepath+=$HOME/.dotfiles/lilypond/vim/
-set runtimepath+=/usr/local/opt/fzf
+set runtimepath+=$HOME/.fzf/bin/fzf
 filetype plugin on                                  "Enable filetype plugin.
 filetype indent on                                  "Enable indent plugin.
 filetype on
