@@ -63,7 +63,9 @@ alias kim="cd $HOME/code/kim"
 
 alias dnsReset="sudo killall -HUP mDNSResponder"
 # Laravel
-alias llog="less storage/logs/laravel-$(date '+%Y-%m-%d').log"
+function llog() {
+    less storage/logs/laravel-$(date '+%Y-%m-%d').log
+}
 alias a="php artisan"
 alias aw="sudo -u www-data php artisan"
 alias ams="php artisan migrate:fresh --seed"
@@ -98,8 +100,8 @@ alias nfresh="rm -rf node_modules/ package-lock.json && yarn install"
 alias gdbinit="echo 'set disassembly-flavor intel' > $HOME/.gdbinit"
 
 # IP addresses
-alias ip="curl https://diagnostic.opendns.com/myip ; echo"
-alias lip="ifconfig tun0 | awk '/inet / {print \$2}'"
+alias myip="curl https://diagnostic.opendns.com/myip ; echo"
+alias mylip="ifconfig tun0 | awk '/inet / {print \$2}'"
 # alias localip="ifconfig -a | grep -o 'inet6\? \(addr:\)\?\s\?\(\(\([0-9]\+\.\)\{3\}[0-9]\+\)\|[a-fA-F0-9:]\+\)' | awk '{ sub(/inet6? (addr:)? ?/, \"\"); print }'"
 
 # Lilypond
@@ -153,6 +155,8 @@ function ggs() {
     find -L $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -exec $HOME/.dotfiles/scripts/globalGitStatus.sh {} \;
 }
 function ggp() {
+    $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/.dotfiles
+
     find -L $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -exec $HOME/.dotfiles/scripts/globalGitPull.sh {} \;
      # | sed s/.git// | xargs -I % git -C % pull
 }
