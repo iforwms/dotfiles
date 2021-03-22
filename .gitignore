@@ -18,3 +18,4 @@ beets/*.pickle
 *.log
 .vim/view
 .vim/spell/*.spl
+coc.nvim-release
