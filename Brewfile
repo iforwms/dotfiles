@@ -16,7 +16,6 @@ brew 'xclip'
 brew 'dos2unix'
 brew 'entr'
 brew 'findutils'
-brew 'fzf' # Fuzzy file finder
 brew 'gawk'
 brew 'git'
 brew 'gnu-getopt'
@@ -33,7 +32,6 @@ brew 'mas' # Mac App Store manager
 brew 'netcat'
 brew 'pkg-config' # https://github.com/driesvints/dotfiles/issues/20
 brew 'reattach-to-user-namespace' # Required for tmux copy paste
-brew 'ripgrep'
 brew 'tldr' # Simpified man pages
 brew 'trash' # Manage the Trash bin
 brew 'tree' # List directories in a tree structure
