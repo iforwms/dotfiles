@@ -21,6 +21,11 @@ fi
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 
+# Add command line edit
+autoload edit-command-line
+zle -N edit-command-line
+bindkey -M vicmd v edit-command-line
+
 # Enable completions
 autoload -Uz compinit && compinit
 
@@ -146,3 +151,24 @@ do
         export PATH="$i:$PATH"
     fi
 done
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+## History
+# For all commands prefix with a number to use an older commands
+# args, e.g. !606^. You have also search and replace arguments:
+# !!:s^<old>^<new> - repeat the previous command after a
+# search and replace.
+
+# !^      first argument
+# !$      last argument
+# !*      all arguments
+# !:2     second argument
+
+# !:2-3   second to third arguments
+# !:2-$   second to last arguments
+# !:2*    second to last arguments
+# !:2-    second to next to last arguments
+
+# !:0     the command
+# !!      repeat the previous line

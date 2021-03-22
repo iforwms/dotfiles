@@ -249,7 +249,7 @@ augroup CursorLine                                  "Only highlight cursor line 
         au WinLeave * setlocal nocursorline
 augroup END
 
-function GenerateSpellcheckFiles()
+function! GenerateSpellcheckFiles()
     for d in glob('~/.vim/spell/*.add', 1, 1)
         if filereadable(d) && (!filereadable(d . '.spl') || getftime(d) > getftime(d . '.spl'))
             exec 'mkspell! ' . fnameescape(d)
@@ -327,7 +327,7 @@ nnoremap <silent> <leader>F :Files ~<cr>
 if has("patch-8.2.191")
     let g:fzf_layout = { 'window': { 'width': 0.8, 'height': 0.8 } }
 endif
-let $FZF_DEFAULT_OPTS='--reverse'
+let $FZF_DEFAULT_OPTS='--reverse --color="bg+:#2d323b,hl:#3786d1,hl+:#3786d1"'
 
 "Order lines by length
 vmap <leader>su !awk '{ print length(), $0 \| "sort -n \| cut -d\\  -f2-" }'<CR>
