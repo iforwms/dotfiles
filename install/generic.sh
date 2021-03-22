@@ -52,21 +52,21 @@ echo "[VIM] Installing commentary plugin"
 git clone https://github.com/tpope/vim-commentary $HOME/.dotfiles/.vim/pack/default/start/vim-commentary
 # vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-commentary/doc" -c q
 
-if !command -v fzf &> /dev/null
-then
-    echo "[VIM] Installing FZF"
-    sudo apt install -y fzf
-fi
+# if !command -v fzf &> /dev/null
+# then
+#     echo "[VIM] Installing FZF"
+#     sudo apt install -y fzf
+# fi
 
-echo "[VIM] Installing FZF plugin"
-git clone https://github.com/junegunn/fzf.vim $HOME/.dotfiles/.vim/pack/default/start/fzf.vim
-# vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/fzf.vim/doc" -c q
+# echo "[VIM] Installing FZF plugin"
+# git clone https://github.com/junegunn/fzf.vim $HOME/.dotfiles/.vim/pack/default/start/fzf.vim
+# # vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/fzf.vim/doc" -c q
 
 echo "[VIM] Installing Vim Fugitive checkout plugin"
 git clone https://github.com/tpope/vim-fugitive $HOME/.dotfiles/.vim/pack/default/start/vim-fugitive
 
-echo "[VIM] Installing FZF checkout plugin"
-git clone https://github.com/stsewd/fzf-checkout.vim $HOME/.dotfiles/.vim/pack/default/start/fzf-checkout.vim
+# echo "[VIM] Installing FZF checkout plugin"
+# git clone https://github.com/stsewd/fzf-checkout.vim $HOME/.dotfiles/.vim/pack/default/start/fzf-checkout.vim
 
 echo "[VIM] Installing PHP import namespace plugin"
 git clone https://github.com/arnaud-lb/vim-php-namespace $HOME/.dotfiles/.vim/pack/default/start/vim-php-namespace
@@ -101,3 +101,6 @@ ln -s $HOME/.dotfiles/.ctags $HOME/.ctags
 echo "[GIT] Creating symlink for .gitconfig"
 rm -rf $HOME/.gitconfig
 ln -s $HOME/.dotfiles/.gitconfig $HOME/.gitconfig
+
+echo "[FZF] Installing FZF, ripgrep and rust"
+/bin/bash $HOME/.dotfiles/scripts/fzf.sh
