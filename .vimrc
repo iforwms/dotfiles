@@ -400,7 +400,7 @@ hi CursorLineNr ctermbg=235 ctermfg=39           "Current line number formatting
 hi NonText ctermbg=235 ctermfg=red cterm=none       "EOL etc text formatting.
 hi LineNr ctermbg=234                                "Set line number formatting.
 hi VertSplit ctermbg=238                           "Set vertical split separator color.
-hi TabLineFill ctermfg=red ctermbg=236         "Set main tab bg (right).
+"hi TabLineFill ctermfg=red ctermbg=0         "Set main tab bg (right).
 hi TabLine ctermfg=244 ctermbg=236           "Set unselected tabs formatting.
 hi TabLineSel ctermfg=120 ctermbg=236             "Set active tab formatting.
 hi Title ctermfg=White                              "Set window count per tab formatting.
