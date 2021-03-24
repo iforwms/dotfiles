@@ -223,7 +223,7 @@ nmap <leader>gs :G<CR>
 nmap <leader>gj :diffget //3<CR>
 
 "Merge from right pane (merge conflict)
-nmap <leader>ga :diffget //2<CR>
+nmap <leader>gf :diffget //2<CR>
 
 "set spell                                          "Enable spell-checking.
 let g:tmux_navigator_disable_when_zoomed = 1        "Disable tmux navigator when zooming the Vim pane
