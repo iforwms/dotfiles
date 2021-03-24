@@ -42,6 +42,7 @@ brew 'zlib' # Needed for Memcached
 # brew 'php@7.2'
 # brew 'php@7.3'
 brew 'composer'
+brew 'chafa'
 brew 'ctags'
 brew 'gifsicle'
 brew 'imagemagick'
