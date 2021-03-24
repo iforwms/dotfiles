@@ -70,3 +70,4 @@ echo "[VIM] Creating symlink for .vimrc"
 rm -rf $HOME/.vimrc
 ln -s $HOME/.dotfiles/.vimrc $HOME/.vimrc
 
+/bin/bash $HOME/.dotfiles/scripts/fzf.sh
