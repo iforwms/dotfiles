@@ -316,6 +316,9 @@ nnoremap <silent> <leader>f :GFiles<cr>
 "Invoke FZF respecting .gitignore
 nnoremap <silent> <leader>gf :Files<cr>
 
+"Invoke FZF buffer search
+nnoremap <silent> <leader>b :Buffers<cr>
+
 "Invoke FZF tag search
 nnoremap <silent> <leader>c :Tags<cr>
 
