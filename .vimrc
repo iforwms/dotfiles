@@ -207,8 +207,14 @@ nnoremap <leader>prw :CocSearch <C-R>=expand("<cword>")<CR><CR>
 "-------End COC Config--------
 
 "-------Vim Fugitive------
+"Shortcut for committing changes
+nnoremap <leader>gps :Git push<CR>
+
+"Shortcut for committing changes
+nnoremap <leader>gc :Git commit<CR>
+
 "Shortcut for checking out branches
-nnoremap <leader>gc :GCheckout<CR>
+nnoremap <leader>gco :GBranches<CR>
 
 "Git status
 nmap <leader>gs :G<CR>
