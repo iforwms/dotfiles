@@ -82,6 +82,9 @@ nnoremap <silent> ]b : bnext <CR>
 nnoremap <silent> [B :b first <CR>
 nnoremap <silent> ]B :b last <CR>
 
+" Edit current pane in new tab
+nmap <leader>wo :tabedit %<cr>
+
 " Use <cr> to confirm completion, `<C-g>u` means break undo chain at current
 " position. Coc only does snippet and additional edit on confirm.
 " <cr> could be remapped by other vim plugin, try `:verbose imap <CR>`.
