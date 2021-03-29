@@ -499,8 +499,10 @@ augroup AutoSaveFolds
   " view files are about 500 bytes
   " bufleave but not bufwinleave captures closing 2nd tab
   " nested is needed by bufwrite* (if triggered via other autocmd)
-  autocmd BufWinLeave,BufLeave,BufWritePost ?* nested silent! mkview!
-  autocmd BufWinEnter ?* silent! loadview
+  if !&diff
+    autocmd BufWinLeave,BufLeave,BufWritePost ?* nested silent! mkview!
+    autocmd BufWinEnter ?* silent! loadview
+  endif
 augroup END
 
 "--------Function for PHP namespace import -------"
