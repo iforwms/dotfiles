@@ -213,6 +213,9 @@ nnoremap <leader>prw :CocSearch <C-R>=expand("<cword>")<CR><CR>
 "Shortcut for committing changes
 nnoremap <leader>gps :Git push<CR>
 
+"Shortcut for showing git diff
+nnoremap <leader>gh :Gvdiff!<CR>
+
 "Shortcut for committing changes
 nnoremap <leader>gc :Git commit<CR>
 
