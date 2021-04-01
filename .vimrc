@@ -214,7 +214,7 @@ nnoremap <leader>prw :CocSearch <C-R>=expand("<cword>")<CR><CR>
 nnoremap <leader>gps :Git push<CR>
 
 "Shortcut for showing git diff
-nnoremap <leader>gh :Gvdiff!<CR>
+nnoremap <leader>gh :Gvdiffsplit!<CR>
 
 "Shortcut for committing changes
 nnoremap <leader>gc :Git commit<CR>
