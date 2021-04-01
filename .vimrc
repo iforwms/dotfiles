@@ -214,7 +214,7 @@ nnoremap <leader>prw :CocSearch <C-R>=expand("<cword>")<CR><CR>
 nnoremap <leader>gps :Git push<CR>
 
 "Shortcut for showing git diff
-nnoremap <leader>gh :Gvdiffsplit!<CR>
+nnoremap <leader>vd :Gvdiffsplit!<CR>
 
 "Shortcut for committing changes
 nnoremap <leader>gc :Git commit<CR>
@@ -224,12 +224,6 @@ nnoremap <leader>gco :GBranches<CR>
 
 "Git status
 nmap <leader>gs :G<CR>
-
-"Merge from left pane (merge conflict)
-nmap <leader>gj :diffget //3<CR>
-
-"Merge from right pane (merge conflict)
-nmap <leader>gf :diffget //2<CR>
 
 "set spell                                          "Enable spell-checking.
 let g:tmux_navigator_disable_when_zoomed = 1        "Disable tmux navigator when zooming the Vim pane
@@ -503,8 +497,14 @@ augroup AutoSaveFolds
   " bufleave but not bufwinleave captures closing 2nd tab
   " nested is needed by bufwrite* (if triggered via other autocmd)
   if !&diff
-    autocmd BufWinLeave,BufLeave,BufWritePost ?* nested silent! mkview!
-    autocmd BufWinEnter ?* silent! loadview
+      autocmd BufWinLeave,BufLeave,BufWritePost ?* nested silent! mkview!
+      autocmd BufWinEnter ?* silent! loadview
+  else
+      "Merge from left pane (merge conflict)
+      nmap dg :diffget //3<CR>
+
+      "Merge from right pane (merge conflict)
+      nmap dh :diffget //2<CR>
   endif
 augroup END
 
