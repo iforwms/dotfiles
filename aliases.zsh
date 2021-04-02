@@ -59,6 +59,7 @@ alias code="cd $HOME/code"
 alias ssd="$DOTFILES/scripts/shutdown.sh"
 alias ind="cd $HOME/code/indier"
 alias dom="cd $HOME/code/domino"
+alias exp="cd $HOME/code/expednet"
 alias kim="cd $HOME/code/kim"
 
 alias dnsReset="sudo killall -HUP mDNSResponder"
