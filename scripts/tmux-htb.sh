@@ -3,6 +3,12 @@
 if [[ ! $1 ]]
 then
     echo 'Usage: ./tmux-htb.sh [box name]'
+
+    echo
+    echo "Available boxes:"
+    echo $(find $HOME/htb -maxdepth 1 -type d ! -name '.git'|awk -F/ 'BEGIN{ORS=" "} NR!=1 {print $NF}')
+    echo
+
     exit 1
 else
     DIR=$HOME/htb/$1
