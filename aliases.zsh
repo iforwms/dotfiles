@@ -157,6 +157,7 @@ function ggs() {
 }
 function ggp() {
     $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/.dotfiles
+    $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/htb
 
     find -L $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -exec $HOME/.dotfiles/scripts/globalGitPull.sh {} \;
      # | sed s/.git// | xargs -I % git -C % pull
