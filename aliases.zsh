@@ -240,6 +240,7 @@ alias tkl="tmux kill-session -t"
 
 # Tmux session scripts
 alias dev="$HOME/.dotfiles/scripts/tmux-dev.sh"
+alias htb="$HOME/.dotfiles/scripts/tmux-htb.sh"
 alias indier="$HOME/.dotfiles/scripts/tmux-indier.sh"
 alias ide="$HOME/.dotfiles/scripts/tmux-ide.sh"
 
