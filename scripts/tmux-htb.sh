@@ -18,7 +18,13 @@ else
 
     echo "Setting up $1"
     mkdir -p $DIR/{nmap,gobuster,www}
-    touch $DIR/notes.md
+    cp -n $HOME/htb/notes.template.md $DIR/$1.md
+    sed -i "s/{{box_name}}/$1/" $DIR/$1.md
+    if [[ $2 ]]
+    then
+        sed -i "s/{{ip_address}}/$2/" $DIR/$1.md
+    fi
+
 fi
 
 ## Setup dev environment ##

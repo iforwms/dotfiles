@@ -245,7 +245,7 @@ function md2pdf() {
   then
     echo "Filename required"
   else
-    pandoc $1 --variable mainfont="Open Sans" --variable sansfont="Roboto" --variable monofont="Fira Code" --variable fontsize=12pt --metadata pagetitle="$1" --from=gfm --pdf-engine=wkhtmltopdf --output 1.pdf
+    pandoc $1 --variable mainfont="Open Sans" --variable sansfont="Roboto" --variable monofont="Fira Code" --variable fontsize=12pt --metadata pagetitle="$1" --from=gfm --pdf-engine=wkhtmltopdf --output $1.pdf
   fi
 }
 
