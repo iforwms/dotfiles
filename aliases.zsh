@@ -241,7 +241,12 @@ alias tkl="tmux kill-session -t"
 
 # Create PDF from markdown
 function md2pdf() {
-    pandoc $1 --from=gfm --pdf-engine=wkhtmltopdf --output $1.pdf
+  if [[ ! $1 ]]
+  then
+    echo "Filename required"
+  else
+    pandoc $1 --variable mainfont="Open Sans" --variable sansfont="Roboto" --variable monofont="Fira Code" --variable fontsize=12pt --metadata pagetitle="$1" --from=gfm --pdf-engine=wkhtmltopdf --output 1.pdf
+  fi
 }
 
 # Tmux session scripts
