@@ -19,3 +19,4 @@ beets/*.pickle
 .vim/view
 .vim/spell/*.spl
 coc.nvim-release
+wireshark/80211_keys
