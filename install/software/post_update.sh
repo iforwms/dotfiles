@@ -16,6 +16,8 @@ function post_update_android() {
 
   ppi "Symlinking termux config files"
   mkdir -p $HOME/.termux
+  rm -rf $HOME/.termux/colors.properties
+  rm -rf $HOME/.termux/termux.properties
   ln -s $HOME/.dotfiles/termux/colors.properties $HOME/.termux/colors.properties
   ln -s $HOME/.dotfiles/termux/termux.properties $HOME/.termux/termux.properties
 }
