@@ -3,6 +3,8 @@
 source $HOME/.dotfiles/scripts/pretty_print.sh
 
 function post_install_mac() {
+    sudo -v
+
     ppi "Symlink Mackup config file and folder to the home directory"
     rm -rf $HOME/.mackup.cfg
     ln -s $HOME/.dotfiles/.mackup.cfg $HOME/.mackup.cfg
@@ -31,6 +33,9 @@ function post_install_mac() {
     # mkdir -p $HOME/.config/beets
     # rm -rf $HOME/.config/beets/config.yaml
     # ln -s $HOME/.dotfiles/beets/config.yaml $HOME/.config/beets/config.yaml
+
+    ppi "Installing CLI tools for Xcode"
+    xcode-select --install 2>/dev/null
 
     ppi "Updating macOS preferences"
     # We will run this last because this will reload the shell
