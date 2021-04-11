@@ -7,7 +7,7 @@ tap 'homebrew/cask-versions'
 
 # Binaries
 brew 'awscli'
-brew 'bash' # Latest Bash version
+#brew 'bash' # Latest Bash version
 brew 'cash-cli' # currency rates
 brew 'cmus' # terminal player
 brew 'coreutils' # Those that come with macOS are outdated
@@ -17,61 +17,55 @@ brew 'dos2unix'
 brew 'entr'
 brew 'findutils'
 brew 'gawk'
-brew 'git'
+#brew 'git' #EXTRACT
 brew 'gnu-getopt'
 brew 'gnu-indent'
-brew 'gnu-sed'
 brew 'gnu-sed'
 brew 'gnu-tar'
 brew 'gnutls'
 brew 'grep'
-brew 'htop'
+#brew 'htop' #EXTRACT
 brew 'httpie'
 brew 'mackup'
 brew 'mas' # Mac App Store manager
-brew 'netcat'
+#brew 'netcat' #EXTRACT
 brew 'pkg-config' # https://github.com/driesvints/dotfiles/issues/20
 brew 'reattach-to-user-namespace' # Required for tmux copy paste
-brew 'tldr' # Simpified man pages
 brew 'trash' # Manage the Trash bin
 brew 'tree' # List directories in a tree structure
-brew 'wget'
+#brew 'wget' #EXTRACT
 brew 'zlib' # Needed for Memcached
 
 # Development
 # brew 'php@7.2'
 # brew 'php@7.3'
-brew 'composer'
-brew 'chafa'
-brew 'ctags'
+#brew 'composer' # EXTRACT
+#brew 'chafa' #EXTRACT
+#brew 'ctags' # EXTRACT
 brew 'gifsicle'
-brew 'imagemagick'
+#brew 'imagemagick' # EXTRACT
 brew 'jpegoptim'
-brew 'jq'
+#brew 'jq' # EXTRACT
 brew 'mkcert'
-brew 'mysql'
-brew 'nginx'
-brew 'nmap'
-brew 'node'
+#brew 'mysql' # EXTRACT
+#brew 'nginx' # EXTRACT
+#brew 'nmap' # EXTRACT
+#brew 'node' # EXTRACT
 brew 'optipng'
-brew 'php'
+#brew 'php' # EXTRACT
 brew 'phpunit'
 brew 'pngquant'
 brew 'proxychains-ng'
-brew 'redis'
+# brew 'redis' #EXTRACT
 brew 'stockfish'
 brew 'svgo'
-brew 'tmux'
-brew 'watch'
-brew 'yarn'
-brew 'zbar'
-brew 'zsh'
+#brew 'tmux' # EXTRACT
+#brew 'watch' # EXTRACT
+#brew 'yarn' # EXTRACT
+#brew 'zsh' # EXTRACT
 
 
 # Apps
-# cask 'caffeine'
-# cask 'mysqlworkbench'
-# cask 'phpstorm'
 cask 'alfred'
 cask 'android-file-transfer'
 cask 'android-studio'
@@ -106,6 +100,7 @@ cask 'vagrant'
 cask 'virtualbox' # Might need to allow access in Security settings
 cask 'virtualbox-extension-pack'
 cask 'vlc'
+
 # Quicklook
 cask 'qlcolorcode'
 cask 'qlmarkdown'

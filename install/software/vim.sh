@@ -66,8 +66,16 @@ rm -rf $RAW_GIT/joshdick/onedark.vim/master/autoload/onedark.vim
 curl -fsSL -o $HOME/.dotfiles/.vim/colors/onedark.vim $RAW_GIT/joshdick/onedark.vim/master/colors/onedark.vim
 curl -fsSL -o $HOME/.dotfiles/.vim/autoload/onedark.vim $RAW_GIT/joshdick/onedark.vim/master/autoload/onedark.vim
 
+echo "[VIM] Installing FZF plugin"
+rm -rf $HOME/.vim/pack/default/start/fzf
+rm -rf $HOME/.vim/pack/default/start/fzf.vim
+git clone https://github.com/junegunn/fzf.git ~/.vim/pack/default/start/fzf
+git clone https://github.com/junegunn/fzf.vim $HOME/.dotfiles/.vim/pack/default/start/fzf.vim
+
+echo "[VIM] Installing FZF checkout plugin"
+rm -rf $HOME/.vim/pack/default/start/fzf-checkout.vim
+git clone https://github.com/stsewd/fzf-checkout.vim $HOME/.dotfiles/.vim/pack/default/start/fzf-checkout.vim
+
 echo "[VIM] Creating symlink for .vimrc"
 rm -rf $HOME/.vimrc
 ln -s $HOME/.dotfiles/.vimrc $HOME/.vimrc
-
-/bin/bash $HOME/.dotfiles/scripts/fzf.sh
