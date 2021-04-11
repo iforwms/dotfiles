@@ -3,14 +3,20 @@
 source $HOME/.dotfiles/scripts/pretty_print.sh
 
 if [[ $(uname -a|grep "Darwin") ]]; then
-  ppi "Installing using Homebrew"
-  brew install tmux
+  post_update_mac()
 elif [[ $(uname -a|grep "Android") ]]; then
   post_update_android()
 else
-  ppi "Installing using apt"
-  sudo apt install tmux
+  post_update_linux()
 fi
+
+function post_update_mac() {
+  ppi "Post update mac"
+}
+
+function post_update_linux() {
+  ppi "Post update linux"
+}
 
 function post_update_android() {
   ppi "Allow termux access to local storage"
