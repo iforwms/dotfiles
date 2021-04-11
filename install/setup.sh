@@ -15,7 +15,7 @@ then
 fi
 
 GENERIC="\
-    update \
+    pre_install \
     zsh \
     vim \
     git \
@@ -57,7 +57,7 @@ else
     TO_INSTALL="${TO_INSTALL} ${MAC}"
 fi
 
-TO_INSTALL="${TO_INSTALL} post_update"
+TO_INSTALL="${TO_INSTALL} post_install"
 
 $HOME/.dotfiles/install/installer.sh $TO_INSTALL
 
