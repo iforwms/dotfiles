@@ -21,7 +21,7 @@ GENERIC="\
     git \
     tmux \
 "
-GENERIC="whop"
+GENERIC="pre_install"
 
 TO_INSTALL=$GENERIC
 
