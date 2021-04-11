@@ -41,7 +41,6 @@ brew 'zlib' # Needed for Memcached
 # brew 'php@7.3'
 #brew 'composer' # EXTRACT
 #brew 'chafa' #EXTRACT
-#brew 'ctags' # EXTRACT
 brew 'gifsicle'
 #brew 'imagemagick' # EXTRACT
 brew 'jpegoptim'
@@ -59,7 +58,6 @@ brew 'proxychains-ng'
 # brew 'redis' #EXTRACT
 brew 'stockfish'
 brew 'svgo'
-#brew 'tmux' # EXTRACT
 #brew 'watch' # EXTRACT
 #brew 'yarn' # EXTRACT
 #brew 'zsh' # EXTRACT
