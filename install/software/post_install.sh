@@ -26,7 +26,6 @@ function post_install_mac() {
     tic $HOME/.dotfiles/tmux/256-italic-terminfo
     tic -x $HOME/.dotfiles/tmux/tmux-terminfo
 
-    # Install python?
     # ppi "Installing beets"
     # pip3 install beets
     # ppi "Setting up beets"

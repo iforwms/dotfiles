@@ -29,7 +29,7 @@ GENERIC="pre_install"
 TO_INSTALL=$GENERIC
 
 MAC="\
-    mac_specific \
+    brew \
 "
 
 TERMUX="\
