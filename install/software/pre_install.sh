@@ -2,15 +2,15 @@
 
 source $HOME/.dotfiles/scripts/pretty_print.sh
 
-function post_update_mac() {
-  ppi "Post update mac"
+function pre_install_mac() {
+  ppi "Pre install mac"
 }
 
-function post_update_linux() {
-  ppi "Post update linux"
+function pre_install_linux() {
+  ppi "Pre install linux"
 }
 
-function post_update_android() {
+function pre_install_android() {
   ppi "Allow termux access to local storage"
   termux-setup-storage
 
@@ -23,9 +23,9 @@ function post_update_android() {
 }
 
 if [[ $(uname -a|grep "Darwin") ]]; then
-  post_update_mac
+  pre_install_mac
 elif [[ $(uname -a|grep "Android") ]]; then
-  post_update_android
+  pre_install_android
 else
-  post_update_linux
+  pre_install_linux
 fi
