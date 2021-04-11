@@ -15,6 +15,8 @@ then
 fi
 
 GENERIC="\
+    update \
+    zsh \
     vim \
     git \
     tmux \
@@ -42,19 +44,14 @@ mkdir $HOME/code 2> /dev/null
 if (( $1 == 1 ))
 then
     TO_INSTALL="${TO_INSTALL} ${SERVER}"
-    # source $HOME/.dotfiles/install/server.sh
 elif (( $1 == 4 ))
 then
     TO_INSTALL="${TO_INSTALL} ${TERMUX}"
-    # source $HOME/.dotfiles/install/mac-1.sh
 else
     TO_INSTALL="${TO_INSTALL} ${MAC}"
-    # source $HOME/.dotfiles/install/termux.sh
 fi
 
 $HOME/.dotfiles/install/installer.sh $TO_INSTALL
-
-# source $HOME/.dotfiles/install/generic.sh
 
 # if (( $1 > 1 && $1 < 4 )); then
 #     source $HOME/.dotfiles/install/mac-2.sh
