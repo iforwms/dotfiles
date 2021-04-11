@@ -20,6 +20,9 @@ GENERIC="\
     vim \
     git \
     tmux \
+    xclip \
+    node \
+    yarn \
 "
 GENERIC="pre_install"
 
@@ -40,6 +43,7 @@ TERMUX="\
 "
 
 SERVER="\
+    chafa \
     test \
 "
 
