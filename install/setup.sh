@@ -4,7 +4,7 @@ source $HOME/.dotfiles/scripts/pretty_print.sh
 
 if [ -z $1 ] || (( $1 < 1 )) || (( $1 > 4 ))
 then
-    echo "Please choose an installation type:"
+    echo "Choose an installation type:"
     echo "1: Server"
     echo "2: iMac"
     echo "3: MacBook"
@@ -47,7 +47,6 @@ SERVER="\
     test \
 "
 
-echo
 ppi "Creating a code directory in $HOME"
 mkdir $HOME/code 2> /dev/null
 
@@ -64,7 +63,3 @@ fi
 TO_INSTALL="${TO_INSTALL} post_install"
 
 $HOME/.dotfiles/install/installer.sh $TO_INSTALL
-
-# if (( $1 > 1 && $1 < 4 )); then
-#     source $HOME/.dotfiles/install/mac-2.sh
-# fi
