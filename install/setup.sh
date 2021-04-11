@@ -30,7 +30,13 @@ MAC="\
 "
 
 TERMUX="\
-    termux_special \
+   tree  \
+   php  \
+   python  \
+   yarn  \
+   nmap  \
+   ncat  \
+   xclip  \
 "
 
 SERVER="\
@@ -50,6 +56,8 @@ then
 else
     TO_INSTALL="${TO_INSTALL} ${MAC}"
 fi
+
+TO_INSTALL="${TO_INSTALL} post_update"
 
 $HOME/.dotfiles/install/installer.sh $TO_INSTALL
 
