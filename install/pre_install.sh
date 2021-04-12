@@ -41,4 +41,4 @@ else
     pre_install_linux
 fi
 
-source $HOME/.dotfiles/install/software/update.sh
+source $HOME/.dotfiles/install/update.sh
