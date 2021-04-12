@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source $HOME/.dotfiles/scripts/pretty_print.sh
+
 ppi "Cloning repo..."
 rm -rf $HOME/.oh-my-zsh
 git clone --depth 1 https://github.com/robbyrussell/oh-my-zsh.git $HOME/.oh-my-zsh
