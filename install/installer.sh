@@ -7,7 +7,11 @@ FAILED=""
 
 for COMMAND in "$@"
 do
-    INSTALLER="$HOME/.dotfiles/install/software/$COMMAND.sh"
+    if [[ $COMMAND == "pre_install" ]] || [[ $COMMAND == "post_install" ]]; then
+        INSTALLER="$HOME/.dotfiles/install/$COMMAND.sh"
+    else
+        INSTALLER="$HOME/.dotfiles/install/software/$COMMAND.sh"
+    fi
 
     if [[ -f $INSTALLER ]]; then
         # if command -v $COMMAND &> /dev/null

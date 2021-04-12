@@ -12,13 +12,13 @@ then
     echo "   3: MacBook"
     echo "   4: Termux"
     echo
-    echo "   Usage: ./install.sh [type]"
+    echo "   Usage: ./setup.sh [type]"
     echo
     exit
 fi
 
 GENERIC="\
-    ../pre_install \
+    pre_install \
     zsh \
     vim \
     git \
@@ -73,6 +73,6 @@ else
     TO_INSTALL="${TO_INSTALL} ${MAC}"
 fi
 
-TO_INSTALL="${TO_INSTALL} ../post_install"
+TO_INSTALL="${TO_INSTALL} post_install"
 
 $HOME/.dotfiles/install/installer.sh $TO_INSTALL
