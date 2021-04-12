@@ -2,6 +2,17 @@
 
 source $HOME/.dotfiles/scripts/pretty_print.sh
 
+if [[ $(uname -a|grep "Darwin") ]]; then
+  ppi "Installing using Homebrew"
+  brew install zsh
+elif [[ $(uname -a|grep "Android") ]]; then
+  ppi "Installing using pkg"
+  pkg install zsh
+else
+  ppi "Installing using apt-get"
+  sudo apt-get install -y zsh
+fi
+
 ppi "Cloning repo..."
 rm -rf $HOME/.oh-my-zsh
 git clone --depth 1 https://github.com/robbyrussell/oh-my-zsh.git $HOME/.oh-my-zsh
