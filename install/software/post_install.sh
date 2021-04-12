@@ -42,11 +42,11 @@ function post_install_mac() {
 }
 
 function post_install_linux() {
-    ppi "Post install linux"
+    ppi "No Linux post-install, skipping..."
 }
 
 function post_install_android() {
-    ppi "Post install android"
+    ppi "No Android post-install, skipping..."
 }
 
 if [[ $(uname -a|grep "Darwin") ]]; then

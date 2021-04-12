@@ -3,11 +3,22 @@
 source $HOME/.dotfiles/scripts/pretty_print.sh
 
 function pre_install_mac() {
-  ppi "Pre install mac"
+    ppi "Installing Homebrew"
+    if test ! $(which brew); then
+        grep 199.232.28.133 /etc/hosts -c || sudo -- sh -c "echo 199.232.28.133 raw.githubusercontent.com >> /etc/hosts"
+
+        ppi "Homebrew not found, downloading installer"
+        /bin/bash -c '/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"'
+    fi
+
+    if test ! $(which brew); then
+        ppw "Brew install failed. Exiting..."
+        exit
+    fi
 }
 
 function pre_install_linux() {
-  ppi "Pre install linux"
+  ppi "No Linux pre-install, skipping..."
 }
 
 function pre_install_android() {
