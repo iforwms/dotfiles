@@ -4,13 +4,16 @@ source $HOME/.dotfiles/scripts/pretty_print.sh
 
 if [ -z $1 ] || (( $1 < 1 )) || (( $1 > 4 ))
 then
-    echo "Choose an installation type:"
-    echo "1: Server"
-    echo "2: iMac"
-    echo "3: MacBook"
-    echo "4: Termux"
     echo
-    echo "Usage: ./install.sh [type]"
+    echo "   Choose an installation type:"
+    echo
+    echo "   1: Server"
+    echo "   2: iMac"
+    echo "   3: MacBook"
+    echo "   4: Termux"
+    echo
+    echo "   Usage: ./install.sh [type]"
+    echo
     exit
 fi
 
