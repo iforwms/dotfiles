@@ -13,8 +13,8 @@ else
   sudo apt install mysql
 fi
 
-# TODO - Install from source
 function install_from_src() {
+    ppi "TODO"
 }
 
 # ppi "Creating symlink for .mysql"

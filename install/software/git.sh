@@ -10,11 +10,11 @@ elif [[ $(uname -a|grep "Android") ]]; then
   pkg install git
 else
   ppi "Installing using apt"
-  sudo apt install git
+  sudo apt install -y git
 fi
 
-# TODO - Install from source
 function install_from_src() {
+    ppi "TODO"
 }
 
 ppi "Creating symlink for .gitconfig"

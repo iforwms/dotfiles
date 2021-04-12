@@ -4,19 +4,19 @@ source $HOME/.dotfiles/scripts/pretty_print.sh
 
 if [[ $(uname -a|grep "Darwin") ]]; then
   ppi "Installing using Homebrew"
-  brew install netcat
+  brew install curl
 elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
-  pkg install netcat
+  pkg install curl
 else
   ppi "Installing using apt"
-  sudo apt install netcat
+  sudo apt install -y curl
 fi
 
-# TODO - Install from source
 function install_from_src() {
+    ppi "TODO"
 }
 
-# ppi "Creating symlink for .netcat"
-# rm -rf $HOME/.netcat
-# ln -s $HOME/.dotfiles/.netcat $HOME/.netcat
+# ppi "Creating symlink for .curl"
+# rm -rf $HOME/.curl
+# ln -s $HOME/.dotfiles/.curl $HOME/.curl
