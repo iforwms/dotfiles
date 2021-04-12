@@ -9,8 +9,8 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
   pkg install mysql
 else
-  ppi "Installing using apt"
-  sudo apt install mysql
+  ppi "Installing using apt-get"
+  sudo apt-get install mysql
 fi
 
 function install_from_src() {

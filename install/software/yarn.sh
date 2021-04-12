@@ -9,8 +9,8 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
   pkg install yarn
 else
-  ppi "Installing using apt"
-  sudo apt install -y yarn
+  ppi "Installing using apt-get"
+  sudo apt-get install -y yarn
 fi
 
 function install_from_src() {

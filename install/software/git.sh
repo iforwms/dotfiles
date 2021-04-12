@@ -9,8 +9,8 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
   pkg install git
 else
-  ppi "Installing using apt"
-  sudo apt install -y git
+  ppi "Installing using apt-get"
+  sudo apt-get install -y git
 fi
 
 function install_from_src() {

@@ -9,8 +9,8 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
   pkg install xclip
 else
-  ppi "Installing using apt"
-  sudo apt install -y xclip
+  ppi "Installing using apt-get"
+  sudo apt-get install -y xclip
 fi
 
 function install_from_src() {

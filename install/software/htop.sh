@@ -9,8 +9,8 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
   pkg install htop
 else
-  ppi "Installing using apt"
-  sudo apt install -y htop
+  ppi "Installing using apt-get"
+  sudo apt-get install -y htop
 fi
 
 function install_from_src() {

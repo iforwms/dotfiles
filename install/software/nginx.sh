@@ -9,8 +9,8 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
   pkg install nginx
 else
-  ppi "Installing using apt"
-  sudo apt install -y nginx
+  ppi "Installing using apt-get"
+  sudo apt-get install -y nginx
 fi
 
 function install_from_src() {

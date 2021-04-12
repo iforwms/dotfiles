@@ -9,8 +9,8 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
   pkg install nmap
 else
-  ppi "Installing using apt"
-  sudo apt install -y nmap
+  ppi "Installing using apt-get"
+  sudo apt-get install -y nmap
 fi
 
 function install_from_src() {
