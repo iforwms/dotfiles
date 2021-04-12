@@ -17,4 +17,4 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.dotfil
 git clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.dotfiles/plugins/zsh-autosuggestions
 
 ppi "Setting ZSH as default shell"
-sudo sh -c "ppi $(which zsh) >> /etc/shells" && chsh -s $(which zsh)
+sudo sh -c "echo $(which zsh) >> /etc/shells" && chsh -s $(which zsh)
