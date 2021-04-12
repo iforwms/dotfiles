@@ -135,6 +135,7 @@ export PATH="$HOME/.cargo/bin:$PATH"
 
 # Add all GNU paths
 for i in "/usr/local/opt/gnu-getopt/bin" \
+    "/usr/local/opt/coreutils/libexec/gnubin" \
     "/usr/local/opt/findutils/libexec/gnubin" \
     "/usr/local/opt/gnu-tar/libexec/gnubin" \
     "/usr/local/opt/readline/lib/pkgconfig" \

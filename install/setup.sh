@@ -23,6 +23,11 @@ GENERIC="\
     xclip \
     node \
     yarn \
+    tree  \
+    php  \
+    python  \
+    nmap  \
+    ncat  \
 "
 GENERIC="pre_install"
 
@@ -33,18 +38,10 @@ MAC="\
 "
 
 TERMUX="\
-   tree  \
-   php  \
-   python  \
-   yarn  \
-   nmap  \
-   ncat  \
-   xclip  \
 "
 
 SERVER="\
     chafa \
-    test \
 "
 
 ppi "Creating a code directory in $HOME"
