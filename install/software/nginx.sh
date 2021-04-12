@@ -10,11 +10,11 @@ elif [[ $(uname -a|grep "Android") ]]; then
   pkg install nginx
 else
   ppi "Installing using apt"
-  sudo apt install nginx
+  sudo apt install -y nginx
 fi
 
-# TODO - Install from source
 function install_from_src() {
+    ppi "TODO"
 }
 
 # ppi "Creating symlink for .nginx"

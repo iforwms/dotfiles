@@ -19,20 +19,20 @@ fi
 
 GENERIC="\
     pre_install \
-    zsh \
-    vim \
+    wget \
+    curl \
     git \
+    zsh \
+    python  \
+    php  \
+    composer \
+    vim \
     tmux \
     node \
-    composer \
     yarn \
     jq \
     tree  \
-    php  \
     watch \
-    wget \
-    curl \
-    python  \
     imagemagick \
     nmap  \
     ncat  \

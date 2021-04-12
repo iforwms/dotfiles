@@ -10,11 +10,11 @@ elif [[ $(uname -a|grep "Android") ]]; then
   pkg install xclip
 else
   ppi "Installing using apt"
-  sudo apt install xclip
+  sudo apt install -y xclip
 fi
 
-# TODO - Install from source
 function install_from_src() {
+    ppi "TODO"
 }
 
 # ppi "Creating symlink for .xclip"

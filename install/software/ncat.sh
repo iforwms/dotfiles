@@ -10,11 +10,11 @@ elif [[ $(uname -a|grep "Android") ]]; then
   pkg install ncat
 else
   ppi "Installing using apt"
-  sudo apt install ncat
+  sudo apt install -y ncat
 fi
 
-# TODO - Install from source
 function install_from_src() {
+    ppi "TODO"
 }
 
 # ppi "Creating symlink for .ncat"

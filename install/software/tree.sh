@@ -10,11 +10,11 @@ elif [[ $(uname -a|grep "Android") ]]; then
   pkg install tree
 else
   ppi "Installing using apt"
-  sudo apt install tree
+  sudo apt install -y tree
 fi
 
-# TODO - Install from source
 function install_from_src() {
+    ppi "TODO"
 }
 
 # ppi "Creating symlink for .tree"

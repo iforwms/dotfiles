@@ -10,7 +10,7 @@ elif [[ $(uname -a|grep "Android") ]]; then
   pkg install burpsuite
 else
   ppi "Installing using apt"
-  sudo apt install burpsuite
+  sudo apt install -y burpsuite
 fi
 
 # TODO - Install from source

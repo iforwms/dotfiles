@@ -10,11 +10,11 @@ elif [[ $(uname -a|grep "Android") ]]; then
   pkg install htop
 else
   ppi "Installing using apt"
-  sudo apt install htop
+  sudo apt install -y htop
 fi
 
-# TODO - Install from source
 function install_from_src() {
+    ppi "TODO"
 }
 
 # ppi "Creating symlink for .htop"

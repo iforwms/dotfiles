@@ -10,11 +10,11 @@ elif [[ $(uname -a|grep "Android") ]]; then
   pkg install jq
 else
   ppi "Installing using apt"
-  sudo apt install jq
+  sudo apt install -y jq
 fi
 
-# TODO - Install from source
 function install_from_src() {
+    ppi "TODO"
 }
 
 # ppi "Creating symlink for .jq"

@@ -19,9 +19,9 @@ do
             # ppi "$COMMAND already installed, skipping"
         # else
             ppi "Installing $COMMAND..."
-            $INSTALLER
+            EXIT_CODE=$($INSTALLER)
 
-            if [[ $? != 0 ]]; then
+            if [[ $EXIT_CODE != 0 ]]; then
                 FAILED="${FAILED} $INSTALLER"
             fi
         # fi
