@@ -9,8 +9,8 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
   pkg install tree
 else
-  ppi "Installing using apt"
-  sudo apt install -y tree
+  ppi "Installing using apt-get"
+  sudo apt-get install -y tree
 fi
 
 function install_from_src() {

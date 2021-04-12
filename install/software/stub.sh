@@ -9,8 +9,8 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
   pkg install {{STUB}}
 else
-  ppi "Installing using apt"
-  sudo apt install {{STUB}}
+  ppi "Installing using apt-get"
+  sudo apt-get install {{STUB}}
 fi
 
 # TODO - Install from source

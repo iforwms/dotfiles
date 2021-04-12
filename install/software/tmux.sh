@@ -9,8 +9,8 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
   pkg install tmux
 else
-  ppi "Installing using apt"
-  sudo apt install -y tmux
+  ppi "Installing using apt-get"
+  sudo apt-get install -y tmux
 fi
 
 # TODO - Install from source

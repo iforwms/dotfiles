@@ -9,8 +9,8 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
   pkg install burpsuite
 else
-  ppi "Installing using apt"
-  sudo apt install -y burpsuite
+  ppi "Installing using apt-get"
+  sudo apt-get install -y burpsuite
 fi
 
 # TODO - Install from source

@@ -9,8 +9,8 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
   pkg install node
 else
-  ppi "Installing using apt"
-  sudo apt install -y node
+  ppi "Installing using apt-get"
+  sudo apt-get install -y node
 fi
 
 function install_from_src() {

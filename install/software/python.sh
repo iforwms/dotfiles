@@ -9,8 +9,8 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
   pkg install python
 else
-  ppi "Installing using apt"
-  sudo apt install -y python
+  ppi "Installing using apt-get"
+  sudo apt-get install -y python
 fi
 
 function install_from_src() {

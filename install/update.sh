@@ -9,7 +9,7 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Updating pkg definitions"
   pkg upgrade
 else
-  ppi "Updating apt"
-  sudo apt update
+  ppi "Updating apt-get"
+  sudo apt-get update
 fi
 

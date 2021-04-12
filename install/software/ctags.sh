@@ -9,8 +9,8 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
   pkg install ctags
 else
-  ppi "Installing using apt"
-  sudo apt install -y ctags
+  ppi "Installing using apt-get"
+  sudo apt-get install -y ctags
 fi
 
 # TODO - Install from source

@@ -9,8 +9,8 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
   pkg install curl
 else
-  ppi "Installing using apt"
-  sudo apt install -y curl
+  ppi "Installing using apt-get"
+  sudo apt-get install -y curl
 fi
 
 function install_from_src() {

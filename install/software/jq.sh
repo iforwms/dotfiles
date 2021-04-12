@@ -9,8 +9,8 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
   pkg install jq
 else
-  ppi "Installing using apt"
-  sudo apt install -y jq
+  ppi "Installing using apt-get"
+  sudo apt-get install -y jq
 fi
 
 function install_from_src() {

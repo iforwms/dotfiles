@@ -9,8 +9,8 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
   pkg install imagemagick
 else
-  ppi "Installing using apt"
-  sudo apt install -y imagemagick
+  ppi "Installing using apt-get"
+  sudo apt-get install -y imagemagick
 fi
 
 function install_from_src() {

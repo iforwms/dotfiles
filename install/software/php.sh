@@ -9,8 +9,8 @@ elif [[ $(uname -a|grep "Android") ]]; then
   ppi "Installing using pkg"
   pkg install php
 else
-  ppi "Installing using apt"
-  sudo apt install -y php
+  ppi "Installing using apt-get"
+  sudo apt-get install -y php
 fi
 
 function install_from_src() {
