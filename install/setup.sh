@@ -22,6 +22,7 @@ GENERIC="\
     tmux \
     xclip \
     node \
+    composer \
     yarn \
     tree  \
     php  \
