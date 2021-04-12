@@ -20,29 +20,41 @@ GENERIC="\
     vim \
     git \
     tmux \
-    xclip \
     node \
     composer \
     yarn \
+    jq \
     tree  \
     php  \
+    watch \
+    wget \
+    curl \
     python  \
+    imagemagick \
     nmap  \
     ncat  \
 "
-GENERIC="../pre_install"
 
 TO_INSTALL=$GENERIC
 
 MAC="\
     brew \
+    mysql \
+    nginx \
+    burpsuite \
 "
 
 TERMUX="\
+    xclip \
+    htop \
 "
 
 SERVER="\
     chafa \
+    htop \
+    mysql \
+    nginx \
+    xclip \
 "
 
 ppi "Creating a code directory in $HOME"
