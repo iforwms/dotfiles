@@ -32,6 +32,7 @@ function pp() {
     RESET="\033[0m"
     NOW="$(date '+%Y-%m-%d %H:%M:%S') "
 
+    echo
     echo -e "  ${FG}${NOW}${LEVEL}${SELF_NAME}${1}${RESET}"
     echo
 
