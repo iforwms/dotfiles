@@ -2,6 +2,15 @@
 
 source $HOME/.dotfiles/scripts/pretty_print.sh
 
+if [[ ! $1 ]]; then
+    echo
+    echo "   Usage: ./installer.sh [packages to install]"
+    echo
+    echo "   See the software dir for available packages"
+    echo
+    exit 0
+fi
+
 MISSING=""
 FAILED=""
 
