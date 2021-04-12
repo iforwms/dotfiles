@@ -36,6 +36,10 @@ function post_install_mac() {
     ppi "Installing CLI tools for Xcode"
     xcode-select --install 2>/dev/null
 
+    ppi "Installing all brew dependencies (See Brewfile)"
+    brew tap homebrew/bundle
+    brew bundle
+
     ppi "Updating macOS preferences"
     # We will run this last because this will reload the shell
     source .macos

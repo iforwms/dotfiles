@@ -15,7 +15,7 @@ then
 fi
 
 GENERIC="\
-    pre_install \
+    ../pre_install \
     zsh \
     vim \
     git \
@@ -29,7 +29,7 @@ GENERIC="\
     nmap  \
     ncat  \
 "
-GENERIC="pre_install"
+GENERIC="../pre_install"
 
 TO_INSTALL=$GENERIC
 
@@ -57,6 +57,6 @@ else
     TO_INSTALL="${TO_INSTALL} ${MAC}"
 fi
 
-TO_INSTALL="${TO_INSTALL} post_install"
+TO_INSTALL="${TO_INSTALL} ../post_install"
 
 $HOME/.dotfiles/install/installer.sh $TO_INSTALL

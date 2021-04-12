@@ -4,15 +4,20 @@ source $HOME/.dotfiles/scripts/pretty_print.sh
 
 MISSING=""
 
-for i in "$@"
+for COMMAND in "$@"
 do
-    INSTALLER="$HOME/.dotfiles/install/software/$i.sh"
+    INSTALLER="$HOME/.dotfiles/install/software/$COMMAND.sh"
 
     if [[ -f $INSTALLER ]]; then
-        ppi "Installing $i..."
-        $INSTALLER
+        if command -v $COMMAND &> /dev/null
+        then
+            ppi "$COMMAND already installed, skipping"
+        else
+            ppi "Installing $COMMAND..."
+            $INSTALLER
+        fi
     else
-        MISSING="$i ${MISSING}"
+        MISSING="$COMMAND ${MISSING}"
     fi
 done;
 
