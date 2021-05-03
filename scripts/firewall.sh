@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# Drop ICMP echo-request messages sent to broadcast or multicast addresses
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts
+
+# Drop source routed packets
+echo 0 > /proc/sys/net/ipv4/conf/all/accept_source_route
+
+# Enable TCP SYN cookie protection from SYN floods
+echo 1 > /proc/sys/net/ipv4/tcp_syncookies
+
+# Don't accept ICMP redirect messages
+echo 0 > /proc/sys/net/ipv4/conf/all/accept_redirects
+
+# Don't send ICMP redirect messages
+echo 0 > /proc/sys/net/ipv4/conf/all/send_redirects
+
+# Enable source address spoofing protection
+echo 1 > /proc/sys/net/ipv4/conf/all/rp_filter
+
+# Log packets with impossible source addresses
+echo 1 > /proc/sys/net/ipv4/conf/all/log_martians
+
+# Flush all chains
+iptables --flush
+
+# Allow unlimited traffic on the loopback interface
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
+
+# Set default policies
+iptables --policy INPUT DROP
+iptables --policy OUTPUT DROP
+iptables --policy FORWARD DROP
+
+# Previously initiated and accepted exchanges bypass rule checking
+# Allow unlimited outbound traffic
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A OUTPUT -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+
+# Rate  limit SSH for attack protection
+iptables -A INPUT -p tcp --dport 22 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j DROP
+iptables -A INPUT -p tcp --dport 22 -m state --state NEW -m recent --set
+iptables -A INPUT -p tcp --dport 22 -m state --state NEW -j ACCEPT
+
+# Allow certain ports to be accessible from the outside
+# iptables -A INPUT -p tcp --dport 3306 -m state --state NEW -j ACCEPT  #MySQL
+
+# Other rules for future use if needed.  Uncomment to activate
+iptables -A INPUT -p tcp --dport 80 -m state --state NEW -j ACCEPT    # http
+iptables -A INPUT -p tcp --dport 443 -m state --state NEW -j ACCEPT   # https
+
+# UDP packet rule.  This is just a random udp packet rule as an example only
+# iptables -A INPUT -p udp --dport 5021 -m state --state NEW -j ACCEPT
+
+# Allow pinging of your server
+iptables -A INPUT -p icmp --icmp-type 8 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+
+
+# Drop all other traffic
+iptables -A INPUT -j DROP
+
+# print the activated rules to the console when script is completed
+iptables -nL
