@@ -24,8 +24,8 @@ ln -s $HOME/.dotfiles/.zshrc $HOME/.zshrc
 ppi "Downloading plugins..."
 rm -rf $HOME/.dotfiles/zsh/plugins/zsh-autosuggestions
 rm -rf $HOME/.dotfiles/zsh/plugins/zsh-syntax-highlighting
-git clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.dotfiles/zsh/plugins/zsh-autosuggestions
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.dotfiles/zsh/plugins/zsh-syntax-highlighting
+git clone --depth 1 https://github.com/zsh-users/zsh-autosuggestions $HOME/.dotfiles/zsh/plugins/zsh-autosuggestions
+git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.dotfiles/zsh/plugins/zsh-syntax-highlighting
 
 ppi "Setting ZSH as default shell"
 if [[ $(uname -a|grep "Android") ]]; then
