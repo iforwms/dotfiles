@@ -211,19 +211,19 @@ nnoremap <leader>prw :CocSearch <C-R>=expand("<cword>")<CR><CR>
 
 "-------Vim Fugitive------
 "Shortcut for committing changes
-nnoremap <leader>gps :Git push<CR>
+nnoremap <leader>ep :Git push<CR>
 
 "Shortcut for showing git diff
-nnoremap <leader>vd :Gvdiffsplit!<CR>
+nnoremap <leader>ed :Gvdiffsplit!<CR>
 
 "Shortcut for committing changes
-nnoremap <leader>gc :Git commit<CR>
+nnoremap <leader>ec :Git commit<CR>
 
 "Shortcut for checking out branches
-nnoremap <leader>gco :GBranches<CR>
+nnoremap <leader>eo :GBranches<CR>
 
 "Git status
-nmap <leader>gs :G<CR>
+nmap <leader>es :G<CR>
 
 "set spell                                          "Enable spell-checking.
 let g:tmux_navigator_disable_when_zoomed = 1        "Disable tmux navigator when zooming the Vim pane
