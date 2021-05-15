@@ -38,4 +38,4 @@ function install_from_src() {
 
 ppi "Creating symlink for .tmux.conf"
 rm -rf $HOME/.tmux.conf
-ln -s $HOME/.dotfiles/.tmux.conf $HOME/.tmux.conf
+ln -s $HOME/.dotfiles/tmux/.tmux.conf $HOME/.tmux.conf

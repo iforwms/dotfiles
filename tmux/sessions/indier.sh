@@ -2,9 +2,9 @@
 
 ## Setup dev environment for Indier Outdoor ##
 if ! tmux has-session -t indier; then
-    # If not session called indier create a window called IndierFrontend
+    # If not session called indier create a window called react
     # in the frontend folder.
-    tmux new -s indier -d -n IndierFrontend -c ~/code/indier/indier-api
+    tmux new -s indier -d -n react -c ~/code/indier/indier-api
 
     # Split window for main API development
     tmux split-window -t indier:1 -v -p 20 -c ~/code/indier/indier-frontend
