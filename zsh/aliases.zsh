@@ -238,6 +238,11 @@ alias t="tmux"
 alias ta="tmux a"
 alias tls="tmux list-sessions"
 alias tkl="tmux kill-session -t"
+function tcs() {
+    tmux detach 2>/dev/null
+
+    $HOME/.dotfiles/tmux/sessions/$1.sh
+}
 
 # Create PDF from markdown
 function md2pdf() {
@@ -248,12 +253,6 @@ function md2pdf() {
     pandoc $1 --variable mainfont="Open Sans" --variable sansfont="Roboto" --variable monofont="Fira Code" --variable fontsize=12pt --metadata pagetitle="$1" --from=gfm --pdf-engine=wkhtmltopdf --output $1.pdf
   fi
 }
-
-# Tmux session scripts
-alias dev="$HOME/.dotfiles/scripts/tmux-dev.sh"
-alias htb="$HOME/.dotfiles/scripts/tmux-htb.sh"
-alias indier="$HOME/.dotfiles/scripts/tmux-indier.sh"
-alias ide="$HOME/.dotfiles/scripts/tmux-ide.sh"
 
 # Given a tmux session name, add suffixes until it is unique
 function _tmux_get_unique_id() {
