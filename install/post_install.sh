@@ -42,7 +42,7 @@ function post_install_mac() {
 
     ppi "Updating macOS preferences"
     # We will run this last because this will reload the shell
-    source .macos
+    source $HOME/.dotfiles/install/.macos
 }
 
 function post_install_linux() {
