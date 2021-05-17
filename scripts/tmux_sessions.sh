@@ -11,4 +11,4 @@ fi
 
 $HOME/.dotfiles/tmux/sessions/$1.sh
 
-ppi "$i up and running!"
+ppi "$1 up and running!"
