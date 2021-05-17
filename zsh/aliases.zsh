@@ -245,14 +245,7 @@ function tcs() {
 }
 
 # Create PDF from markdown
-function md2pdf() {
-  if [[ ! $1 ]]
-  then
-    echo "Filename required"
-  else
-    pandoc $1 --variable mainfont="Open Sans" --variable sansfont="Roboto" --variable monofont="Fira Code" --variable fontsize=12pt --metadata pagetitle="$1" --from=gfm --pdf-engine=wkhtmltopdf --output $1.pdf
-  fi
-}
+alias md2pdf=$DOTFILES/scripts/markdown2pdf.sh
 
 # Given a tmux session name, add suffixes until it is unique
 function _tmux_get_unique_id() {
