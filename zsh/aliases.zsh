@@ -238,11 +238,7 @@ alias t="tmux"
 alias ta="tmux a"
 alias tls="tmux list-sessions"
 alias tkl="tmux kill-session -t"
-function tcs() {
-    tmux detach 2>/dev/null
-
-    $HOME/.dotfiles/tmux/sessions/$1.sh
-}
+alias tcs=$DOTFILES/scripts/tmux_sessions.sh
 
 # Create PDF from markdown
 alias md2pdf=$DOTFILES/scripts/markdown2pdf.sh

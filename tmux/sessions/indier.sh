@@ -27,9 +27,6 @@ if ! tmux has-session -t indier; then
     # Start Homestead server.
     tmux send-keys -t indier:1.1 'hs up' Enter
 
-    # Set active pane to main API pane on both wincows.
+    # Set active pane to main API pane on both windows.
     tmux select-pane -t indier:1.1
 fi
-
-# Attach to indier session.
-tmux a -t indier

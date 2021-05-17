@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source $HOME/.dotfiles/scripts/pretty_print.sh
-
 ## Setup dev environment for Domino Education ##
 if ! tmux has-session -t domino; then
     tmux new -s domino -d -n api -c ~/code/domino/domino-api
@@ -24,6 +22,3 @@ if ! tmux has-session -t domino; then
 #     # Set active pane to main API pane on both wincows.
 #     tmux select-pane -t domino:1.1
 fi
-
-# Attach to domino session.
-ppi "Domino session ready."
