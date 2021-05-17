@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source $HOME/.dotfiles/scripts/pretty_print.sh
+
 if [[ ! $(uname -a|grep "Darwin") ]]; then
     ppe "Session must only be started on an iOS device."
     exit 1
