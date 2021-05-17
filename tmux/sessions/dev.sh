@@ -94,6 +94,3 @@ if ! tmux has-session -t dev; then
     # Select API as main window.
     tmux select-window -t dev:2
 fi
-
-# Attach to dev session.
-tmux a -t dev

@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source $HOME/.dotfiles/scripts/pretty_print.sh
-
 if [[ ! $(uname -a|grep "Darwin") ]]; then
     ppe "Session must only be started on an iOS device."
     exit 1
@@ -13,5 +11,3 @@ fi
 
 tmux new -s vpn -d -n vpn -c $HOME/code
 tmux send-keys -t vpn:1.1 'networksetup -setsocksfirewallproxy "Wi-Fi" localhost 2080 && ssh -D 2080 clients' Enter
-
-ppi "VPN up and running!"

@@ -58,6 +58,3 @@ if ! tmux has-session -t htb; then
     # Select API as main window.
     tmux select-window -t htb:2
 fi
-
-# Attach to htb session.
-tmux a -t htb
