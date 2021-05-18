@@ -159,6 +159,11 @@ function ggp() {
     $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/.dotfiles
     $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/obsidian
 
+    $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/code/expednet/moodle/mod/aliyun
+    $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/code/expednet/moodle/payment/gateway/alipay
+    $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/code/expednet/moodle/payment/gateway/blueocean
+    $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/code/expednet/moodle/payment/gateway/wechat
+
     find -L $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -exec $HOME/.dotfiles/scripts/globalGitPull.sh {} \;
      # | sed s/.git// | xargs -I % git -C % pull
 }
