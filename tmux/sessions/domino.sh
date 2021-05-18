@@ -4,21 +4,25 @@
 if ! tmux has-session -t domino; then
     tmux new -s domino -d -n api -c ~/code/domino/domino-api
 
-    tmux split-window -t domino:1 -v -p 20 -c ~/code/domino/domino-api
+    # API
+    tmux split-window -t domino:1 -h -p 20 -c ~/code/domino/domino-api
+    tmux send-keys -t domino:1.2 'hs up' Enter
 
-    tmux new-window -t domino -n study ~/code/domino/domino-frontend
-    tmux split-window -t domino:1.2 -h -p 66 -c ~/code/domino/domino-api
-    tmux send-keys -t domino:1.3 'yr && PORT=3001 yrs' Enter
+    # React Admin Site
+    tmux new-window -t domino -n admin -c ~/code/domino/domino-admin
+    tmux split-window -t domino:2 -h -p 25 -c ~/code/domino/domino-admin
+    tmux send-keys -t domino:2.2 'yr && PORT=3001 yrs' Enter
+    tmux split-window -t domino:2.2 -v -p 50 -c ~/code/domino/domino-admin
+    tmux send-keys -t domino:2.3 'yr css' Enter
 
-#     # Watch CSS file for changes.
-#     tmux send-keys -t domino:1.4 'yr css' Enter
+    # React Study Site
+    tmux new-window -t domino -n study -c ~/code/domino/domino-frontend
+    tmux split-window -t domino:3 -h -p 25 -c ~/code/domino/domino-frontend
+    tmux send-keys -t domino:3.2 'yr && PORT=3000 yrs' Enter
+    tmux split-window -t domino:3.2 -v -p 50 -c ~/code/domino/domino-frontend
+    tmux send-keys -t domino:3.3 'yr css' Enter
 
-#     # Run Git status.
-#     tmux send-keys -t domino:1.2 'gs' Enter
-
-#     # Start Homestead server.
-#     tmux send-keys -t domino:1.1 'hs up' Enter
-
-#     # Set active pane to main API pane on both wincows.
-#     tmux select-pane -t domino:1.1
+    tmux select-pane -t domino:3.1
+    tmux select-pane -t domino:2.1
+    tmux select-pane -t domino:1.1
 fi
