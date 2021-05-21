@@ -153,8 +153,17 @@ alias nah='git reset --hard && git clean -df'
 # alias apgi='git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached'
 # find ~/code -mindepth 1 -maxdepth 4 -type d -name .git -execdir git status -s \;
 function ggs() {
+    $HOME/.dotfiles/scripts/globalGitStatus.sh $HOME/.dotfiles
+    $HOME/.dotfiles/scripts/globalGitStatus.sh $HOME/obsidian
+
+    $HOME/.dotfiles/scripts/globalGitStatus.sh $HOME/code/expednet/moodle/mod/aliyun
+    $HOME/.dotfiles/scripts/globalGitStatus.sh $HOME/code/expednet/moodle/payment/gateway/alipay
+    $HOME/.dotfiles/scripts/globalGitStatus.sh $HOME/code/expednet/moodle/payment/gateway/blueocean
+    $HOME/.dotfiles/scripts/globalGitStatus.sh $HOME/code/expednet/moodle/payment/gateway/wechat
+
     find -L $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -exec $HOME/.dotfiles/scripts/globalGitStatus.sh {} \;
 }
+
 function ggp() {
     $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/.dotfiles
     $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/obsidian
@@ -167,6 +176,7 @@ function ggp() {
     find -L $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -exec $HOME/.dotfiles/scripts/globalGitPull.sh {} \;
      # | sed s/.git// | xargs -I % git -C % pull
 }
+
 function gitPurge() {
   git filter-branch --force --index-filter \
   "git rm --cached --ignore-unmatch $1" \
