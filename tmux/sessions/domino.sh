@@ -22,6 +22,10 @@ if ! tmux has-session -t domino; then
     tmux split-window -t domino:3.2 -v -p 50 -c ~/code/domino/domino-frontend
     tmux send-keys -t domino:3.3 'yr css' Enter
 
+    # SSH Session
+    tmux new-window -t domino -n server
+    tmux send-keys -t domino:4.1 'ssh dc' Enter
+
     tmux select-pane -t domino:3.1
     tmux select-pane -t domino:2.1
     tmux select-pane -t domino:1.1
