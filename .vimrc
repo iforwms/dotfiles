@@ -311,7 +311,11 @@ nnoremap <leader><space> :nohlsearch<CR>
 "Prettify current file
 function! Prettify()
     let curPos = getcurpos()
-    exe "%!prettier --stdin-filepath %"
+    let cmd = "%!prettier --stdin-filepath %"
+    if (&ft=='python')
+        let cmd = "!black %"
+    endif
+    exe cmd
     call setpos('.', curPos)
 endfunction
 nnoremap <leader>p :call Prettify()<cr>
