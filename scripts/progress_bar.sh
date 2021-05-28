@@ -1,0 +1,9 @@
+#!/bin/bash
+
+function progress() {
+    total=$1
+    current=$2
+    message=$3
+
+    echo -ne "[$current / $total] $message\r"
+}
