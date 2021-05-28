@@ -62,6 +62,8 @@ alias dom="cd $HOME/code/domino"
 alias exp="cd $HOME/code/expednet"
 alias kim="cd $HOME/code/kim"
 
+alias knot=$DOTFILES/scripts/animated_knots.sh
+
 alias dnsReset="sudo killall -HUP mDNSResponder"
 # Laravel
 function llog() {

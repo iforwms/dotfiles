@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source $DOTFILES/scripts/progress_bar.sh
+
 if [ ! $1 ]; then
     echo "Enter knot name and number of images."
     exit 1
@@ -16,15 +18,17 @@ fi
 mkdir $name 2>/dev/null
 
 for i in $(seq 1 $2); do
-    printf -v num "%02d" $i
-    new_name="${name}R${num}.jpg"
+    printf -v new_name "%sR%02d.jpg" $name $i
+    printf -v url "https://www.animatedknots.com/photos/%s/%sR%d.jpg" $1 $1 $i
 
-    echo "Fetching $new_name"
-
-    wget -q -O ./$name/$new_name "https://www.animatedknots.com/photos/$1/${1}R${i}.jpg"
+    progress $2 $i "Fetching images..."
+    wget -q -O ./$name/$new_name $url
 done
+
+cp "${name}/${new_name}" "${name}/${name}R00.jpg"
 
 echo "Done fetching, preparing gif..."
 
-ffmpeg -framerate 1 -pattern_type glob -i "$name/*.jpg" -r 15 -vf scale=512:-1 "${name}/${name}.gif"
+ffmpeg -loglevel quiet -framerate 1 -pattern_type glob -i "$name/*.jpg" -r 15 -vf scale=512:-1 "${name}/${name}.gif"
 
+echo "All done!"
