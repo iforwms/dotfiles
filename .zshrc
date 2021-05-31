@@ -3,9 +3,9 @@ export DOTFILES=$HOME/.dotfiles
 
 # Export China Homebrew Repos
 #export HOMEBREW_BREW_GIT_REMOTE=https://mirrors.ustc.edu.cn/brew.git
-export HOMEBREW_BREW_GIT_REMOTE=https://github.com/Homebrew/brew.git
+# export HOMEBREW_BREW_GIT_REMOTE=https://github.com/Homebrew/brew.git
 #export HOMEBREW_CORE_GIT_REMOTE=https://mirrors.ustc.edu.cn/homebrew-core.git
-export HOMEBREW_CORE_GIT_REMOTE=https://github.com/Homebrew/homebrew-core.git
+# export HOMEBREW_CORE_GIT_REMOTE=https://github.com/Homebrew/homebrew-core.git
 
 # Set rg as the default search for FZF
 if command -v rg &> /dev/null
