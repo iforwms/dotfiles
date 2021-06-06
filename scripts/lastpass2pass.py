@@ -15,18 +15,12 @@ class Record:
         self.totp = row[3]
         self.extra = row[4]
         self.name = row[5]
-        self.grouping = row[6]
-        self.fav = row[7]
 
     def name():
         return self.name
 
     def __str__(self):
-        s = ""
-        s += self.password + "\n---\n"
-        if self.grouping:
-            s += self.grouping + " / "
-
+        s = self.password + "\n---\n"
         s += self.name + "\n"
 
         if self.username:
@@ -74,16 +68,14 @@ def main():
     print(f"Found {len(records)} records.")
     record_no = 0
     for record in records:
-        url = record.url.replace("192.168.0.1", "localhost").replace(
-            "192.168.1.1", "localhost"
-        )
+        url = record.url
         extract = tldextract.extract(url)
         dirname = (extract.domain + "." + extract.suffix).lstrip(".")
         filepath = dirname
         filepath = filepath.rstrip(".") + "/"
 
         filename = ""
-        if extract.subdomain:
+        if extract.subdomain and extract.subdomain != "www":
             filename += extract.subdomain + "."
 
         if extract.domain:
@@ -92,14 +84,15 @@ def main():
         if extract.suffix:
             filename += extract.suffix
 
-        filename = filename.strip(".")
+        website = filename.strip(".")
+        record_name = website + "/" + record.username
 
-        if os.path.isfile(basepath + filepath + filename + ".gpg"):
-            filename += "_" + str(record_no)
+#         if os.path.isfile(basepath + filepath + filename + ".gpg"):
+#             filename += "_" + str(record_no)
 
-        print(filepath, filename)
+        # print(filepath, filename)
 
-        cmd = f"pass insert -m {filepath + filename}"
+        cmd = f"pass insert -m {record_name}"
         print(cmd)
         # continue
         result = subprocess.run(
