@@ -122,12 +122,6 @@ else
   export EDITOR='vim'
 fi
 
-alias vi='vi -c "let g:tty='\''$(tty)'\''"'
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-# Example aliases
 export PATH="/usr/local/opt/curl/bin:$PATH"
 
 # ImageMagick setup

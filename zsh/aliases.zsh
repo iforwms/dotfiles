@@ -6,6 +6,8 @@
 # sudo apt -y install php7.4
 # sudo apt-get install -y php7.4-{bcmath,curl,bz2,intl,xml,gd,mbstring,mysql,zip}
 
+alias vi='vi -c "let g:tty='\''$(tty)'\''"'
+
 # Shortcuts
 alias -- -='cd -'
 alias ...=../..
@@ -21,16 +23,15 @@ alias 6='cd -6'
 alias 7='cd -7'
 alias 8='cd -8'
 alias 9='cd -9'
-alias _='sudo '
+# alias _='sudo '
 alias reloadcli="source $HOME/.zshrc"
 alias hosts="sudo vim /etc/hosts"
 alias bi="brew install"
 alias killPhotoA="launchctl disable user/$(id -u)/com.apple.photoanalysisd"
 # alias reloaddns="dscacheutil -flushcache && sudo killall -HUP mDNSResponder"
 # alias ll="/usr/local/opt/coreutils/libexec/gnubin/ls -ahlF --color --group-directories-first"
-alias ll="LC_COLLATE=C ls -lah"
 weather() { curl -4 wttr.in/${1:-yangshuo} }
-alias phpstorm='open -a /Applications/PhpStorm.app "`pwd`"'
+# alias phpstorm='open -a /Applications/PhpStorm.app "`pwd`"'
 alias subl='open -a "/Applications/Sublime Text.app" "`pwd`"'
 alias c="clear"
 # alias ping='ping -c 5'  # Pings with 5 packets, not unlimited
@@ -39,6 +40,8 @@ alias c="clear"
 # alias zbundle="antibody bundle < $DOTFILES/zsh_plugins.txt > $DOTFILES/zsh_plugins.sh"
 alias vimgolf='docker run --rm -it -e "key=4ff4186b1f258b4dd2755c104835abeb" kramos/vimgolf'
 alias deploy='sudo -u www-data ./deploy.sh'
+alias l='ls -lAh --color=auto'
+alias ls='ls -A --color=auto'
 
 # Docker
 alias doc="docker-compose"
