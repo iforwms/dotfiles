@@ -19,7 +19,7 @@ git clone --depth 1 https://github.com/robbyrussell/oh-my-zsh.git $HOME/.oh-my-z
 
 ppi "Creating symlink for .zshrc"
 rm -rf $HOME/.zshrc
-ln -s $HOME/.dotfiles/.zshrc $HOME/.zshrc
+ln -s $HOME/.dotfiles/zsh/.zshrc $HOME/.zshrc
 
 ppi "Downloading plugins..."
 rm -rf $HOME/.dotfiles/zsh/plugins/zsh-autosuggestions
