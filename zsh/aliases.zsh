@@ -171,6 +171,8 @@ function ggs() {
 }
 
 function ggp() {
+    pass git pull
+
     $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/.dotfiles
     $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/obsidian
 
