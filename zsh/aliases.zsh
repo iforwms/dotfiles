@@ -43,6 +43,7 @@ alias deploy='sudo -u www-data ./deploy.sh'
 alias l='ls -lAh --color=auto'
 alias ls='ls -A --color=auto'
 
+alias randpw="$DOTFILES/scripts/random_password.sh"
 # Docker
 alias doc="docker-compose"
 # alias dstop="docker stop $(docker ps -a -q)"
