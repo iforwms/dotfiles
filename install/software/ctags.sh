@@ -13,8 +13,8 @@ else
   sudo apt-get install -y ctags
 fi
 
-# TODO - Install from source
 function install_from_src() {
+# TODO - Install from source
 }
 
 ppi "Creating symlink for .ctags"

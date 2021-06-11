@@ -64,6 +64,7 @@ alias ssd="$DOTFILES/scripts/shutdown.sh"
 alias ind="cd $HOME/code/indier"
 alias dom="cd $HOME/code/domino"
 alias exp="cd $HOME/code/expednet"
+alias obs="cd $HOME/obsidian"
 alias kim="cd $HOME/code/kim"
 
 alias knot=$DOTFILES/scripts/animated_knots.sh
