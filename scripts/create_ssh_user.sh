@@ -36,7 +36,7 @@ if [ $? -ne 0 ]; then
 fi
 
 ppi "Setting user password."
-sudo usermod -p $PASS $1
+sudo usermod -p $(echo $PASS|mkpasswd -m sha-512 -s) $1
 
 pps "User account for $1 created successfully!"
 
