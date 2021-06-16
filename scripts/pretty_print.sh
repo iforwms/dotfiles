@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # Pretty print echo statements
