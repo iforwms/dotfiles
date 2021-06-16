@@ -3,9 +3,6 @@
 source $HOME/.dotfiles/scripts/pretty_print.sh
 source $HOME/.dotfiles/scripts/guess_external_ip.sh
 
-echo $(guess_external_ip)
-exit
-
 if [[ ! $1 ]]; then
     ppe "Please enter a username and optional group."
     ppi "usage: ./create_ssh_user.sh USER [GROUP]"
