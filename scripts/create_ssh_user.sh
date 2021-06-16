@@ -1,7 +1,6 @@
 #!/bin/bash
 
 source $HOME/.dotfiles/scripts/pretty_print.sh
-source $HOME/.dotfiles/scripts/guess_external_ip.sh
 
 if [[ ! $1 ]]; then
     ppe "Please enter a username and optional group."
@@ -70,12 +69,20 @@ pps "Account and SSH keys generated successfully."
 
 CREDENTIALS=/tmp/CREDENTIALS
 ZIP=$HOME/$(uname -n)_login_for_$1.tar.gz
-IP=$(guess_external_ip)
 
-echo "Found the following server IP addresses:"
-ppi $IP
+URLS=$(grep -hRi server_name /etc/nginx/sites-enabled 2>/dev/null|sed -E 's/[[:space:]]+server_name //;s/;//;s/^\.//'|sort -u|tr '\n' ' ')
+
+if [[ $URLS ]]; then
+    ppi "Finding IP addresses for the following URLs:\n\n      - $(echo $URLS|sed 's/ /\n      - /g')"
+
+    ppi "Found the following server IP addresses:"
+    dig +short $URLS|sort|uniq -c|sort -nr|awk '{print "      ",$2}'
+fi
+
 echo
 read -p "Please enter server IP address: " IP
+
+exit
 
 echo "SSH login: $1@$IP" >> $CREDENTIALS
 echo "Account password: $PASS" >> $CREDENTIALS
