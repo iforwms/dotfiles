@@ -8,19 +8,34 @@ if [[ ! $1 ]]; then
     exit 1
 fi
 
-ppi "Checking if user already exists."
+echo
+echo -n "Enter a password for $1: "
+read -s PASS
+echo
+echo
+read -s -p "Confirm password: " PASS_CONFIRM
+echo
+if [ $PASS != $PASS_CONFIRM ]; then
+    ppe "Passwords do not match."
+    exit 1
+fi
+
+ppi "Passwords match - checking if user already exists."
 if id "$1" &>/dev/null; then
     ppw "User $1 already exists, exiting."
     exit 1
 fi
 
 ppi "User does not exist, creating account."
-sudo adduser --gecos "" $1
+sudo adduser --disabled-password --gecos "" $1
 
 if [ $? -ne 0 ]; then
     ppe "Failed to create user."
     exit 1
 fi
+
+ppi "Setting user password."
+sudo usermod -p $PASS $1
 
 pps "User account for $1 created successfully!"
 
@@ -52,13 +67,32 @@ sudo chown -R $1:$1 /home/$1/
 
 pps "Account and SSH keys generated successfully."
 
-sudo tar -czf $HOME/ssh_keys_for_$1.tar.gz -C /home/$1/.ssh id_rsa id_rsa.pub
+CREDENTIALS=/tmp/CREDENTIALS
+ZIP=$HOME/$(uname -n)_login_for_$1.tar.gz
+IP="123.0.0.1"
+
+# search fpr apache and nginx for hostnames
+# use dig to get ip
+
+read -p "Found the following server IP address: $IP, is this correct? [y/n] " -n 1 -r
+echo
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+   read -p "Please enter the correct server IP address: " IP
+fi
+
+echo "SSH login: $1@$IP" >> $CREDENTIALS
+echo "Account password: $PASS" >> $CREDENTIALS
+
+sudo tar -czf $ZIP -C /home/$1/.ssh id_rsa id_rsa.pub -C /tmp CREDENTIALS
 
 if [ $? -ne 0 ]; then
     ppe "Failed to generate SSH key tar file."
     exit 1
 fi
 
-ppi "SSH keys can be found here: $HOME/ssh_keys_for_$1.tar.gz"
+rm -f $CREDENTIALS
+
+ppi "SSH keys can be found here: $ZIP"
 
 exit 0
