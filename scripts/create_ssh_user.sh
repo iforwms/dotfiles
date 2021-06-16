@@ -75,12 +75,10 @@ CREDENTIALS=/tmp/CREDENTIALS
 ZIP=$HOME/$(uname -n)_login_for_$1.tar.gz
 IP=$(guess_external_ip)
 
-read -p "Found the following server IP address: $IP, is this correct? [y/n] " -n 1 -r
+echo "Found the following server IP addresses:"
+ppi $IP
 echo
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-   read -p "Please enter the correct server IP address: " IP
-fi
+read -p "Please enter server IP address: " IP
 
 echo "SSH login: $1@$IP" >> $CREDENTIALS
 echo "Account password: $PASS" >> $CREDENTIALS
