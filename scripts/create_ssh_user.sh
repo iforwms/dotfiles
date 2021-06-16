@@ -1,6 +1,10 @@
 #!/bin/bash
 
 source $HOME/.dotfiles/scripts/pretty_print.sh
+source $HOME/.dotfiles/scripts/guess_external_ip.sh
+
+echo $(guess_external_ip)
+exit
 
 if [[ ! $1 ]]; then
     ppe "Please enter a username and optional group."
@@ -69,10 +73,7 @@ pps "Account and SSH keys generated successfully."
 
 CREDENTIALS=/tmp/CREDENTIALS
 ZIP=$HOME/$(uname -n)_login_for_$1.tar.gz
-IP="123.0.0.1"
-
-# search fpr apache and nginx for hostnames
-# use dig to get ip
+IP=$(guess_external_ip)
 
 read -p "Found the following server IP address: $IP, is this correct? [y/n] " -n 1 -r
 echo

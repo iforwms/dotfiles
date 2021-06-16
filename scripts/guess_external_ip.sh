@@ -1,0 +1,7 @@
+#!/bin/bash
+
+function guess_external_ip() {
+    urls=$(grep -hRi server_name /etc/nginx/sites-enabled|sed -E 's/[[:space:]]+server_name //;s/;//;s/^\.//'|sort -u|tr '\n' ' ')
+
+    echo $(dig +short $urls|sort|uniq -c|sort -nr|awk '{print NR,$2}')
+}
