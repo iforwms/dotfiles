@@ -71,6 +71,7 @@ CREDENTIALS=/tmp/CREDENTIALS
 ZIP=$HOME/$(uname -n)_login_for_$1.tar.gz
 
 URLS=$(grep -hRi server_name /etc/nginx/sites-enabled 2>/dev/null|sed -E 's/[[:space:]]+server_name //;s/;//;s/^\.//'|sort -u|tr '\n' ' ')
+URLS=$URLS+$(grep -hRi ServerName /etc/apache2/sites-available 2>/dev/null|sed -E 's/[[:space:]]+ServerName //;s/;//;s/^\.//'|sort -u|tr '\n' ' ')
 
 if [[ $URLS ]]; then
     ppi "Finding IP addresses for the following URLs:\n\n      - $(echo $URLS|sed 's/ /\n      - /g')"
