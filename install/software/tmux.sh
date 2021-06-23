@@ -15,7 +15,7 @@ fi
 
 ppi "Installing Tmux Resurrect"
 rm -rf $HOME/.dotfiles/tmux/plugins/tmux-resurrect
-git clone --depth 1 https://github.com/tmux-plugins/tmux-resurrect $HOME/.dotfiles/tmux/plugins/tmux-resurrect
+git clone --depth 1 git@github.com:tmux-plugins/tmux-resurrect $HOME/.dotfiles/tmux/plugins/tmux-resurrect
 
 # TODO - Install from source
 function install_from_src() {
