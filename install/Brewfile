@@ -24,9 +24,11 @@ brew 'grep'
 brew 'httpie'
 brew 'mackup'
 brew 'mas' # Mac App Store manager
-brew 'pkg-config' # https://github.com/driesvints/dotfiles/issues/20
+brew 'pandoc'
+brew 'parallels'
 brew 'pass'
 brew 'pinentry-mac'
+brew 'pkg-config' # https://github.com/driesvints/dotfiles/issues/20
 brew 'reattach-to-user-namespace' # Required for tmux copy paste
 brew 'trash' # Manage the Trash bin
 brew 'zlib' # Needed for Memcached
@@ -43,7 +45,6 @@ brew 'pngquant'
 brew 'proxychains-ng'
 brew 'stockfish'
 brew 'svgo'
-
 
 # Apps
 cask 'alfred'
@@ -64,8 +65,8 @@ cask 'java'
 cask 'lilypond'
 cask 'midi-monitor'
 cask 'moom'
-cask 'obsidian'
 cask 'ngrok'
+cask 'obsidian'
 cask 'postman'
 cask 'sublime-text'
 cask 'tableplus'
@@ -80,9 +81,9 @@ cask 'vlc'
 # Quicklook
 cask 'qlcolorcode'
 cask 'qlmarkdown'
-cask 'quicklook-json'
-cask 'quicklook-csv'
 cask 'qlstephen'
+cask 'quicklook-csv'
+cask 'quicklook-json'
 
 # Fonts
 cask 'font-fira-code'
@@ -96,6 +97,6 @@ mas 'Clocker', id: 1056643111
 mas 'Microsoft Excel', id: 462058435
 mas 'Microsoft PowerPoint', id: 462062816
 mas 'Microsoft Word', id: 462054704
+mas 'Trello', id: 1278508951
 mas 'WeChat', id: 836500024
 mas 'Wunderlist', id: 410628904
-mas 'Trello', id: 1278508951
