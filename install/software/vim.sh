@@ -13,46 +13,46 @@ mkdir -p $HOME/.dotfiles/.vim/pack/default/start
 
 ppi "Installing syntax highlighting plugin"
 rm -rf $HOME/.dotfiles/.vim/pack/default/start/vim-polyglot
-git clone --depth 1 https://github.com/sheerun/vim-polyglot $HOME/.dotfiles/.vim/pack/default/start/vim-polyglot
+git clone --depth 1 git@github.com:sheerun/vim-polyglot $HOME/.dotfiles/.vim/pack/default/start/vim-polyglot
 # vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-polyglot/doc" -c q
 
 ppi "Installing abolish plugin"
 rm -rf $HOME/.dotfiles/.vim/pack/default/start/vim-abolish
-git clone --depth 1 https://github.com/tpope/vim-abolish $HOME/.dotfiles/.vim/pack/default/start/vim-abolish
+git clone --depth 1 git@github.com:tpope/vim-abolish $HOME/.dotfiles/.vim/pack/default/start/vim-abolish
 # vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-abolish/doc" -c q
 
 ppi "Installing surround plugin"
 rm -rf $HOME/.dotfiles/.vim/pack/default/start/vim-surround
-git clone --depth 1 https://github.com/tpope/vim-surround $HOME/.dotfiles/.vim/pack/default/start/vim-surround
+git clone --depth 1 git@github.com:tpope/vim-surround $HOME/.dotfiles/.vim/pack/default/start/vim-surround
 # vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-surround/doc" -c q
 
 ppi "Installing Wakatime plugin"
 rm -rf $HOME/.dotfiles/.vim/pack/default/start/vim-wakatime
-git clone --depth 1 https://github.com/wakatime/vim-wakatime $HOME/.dotfiles/.vim/pack/default/start/vim-wakatime
+git clone --depth 1 git@github.com:wakatime/vim-wakatime $HOME/.dotfiles/.vim/pack/default/start/vim-wakatime
 # vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-wakatime/doc" -c q
 
 ppi "Installing documentation plugin"
 rm -rf $HOME/.dotfiles/.vim/pack/default/start/vim-doge
-git clone --depth 1 https://github.com/kkoomen/vim-doge $HOME/.dotfiles/.vim/pack/default/start/vim-doge
+git clone --depth 1 git@github.com:kkoomen/vim-doge $HOME/.dotfiles/.vim/pack/default/start/vim-doge
 # vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-doge/doc" -c q
 
 ppi "Installing rust plugin"
 rm -rf $HOME/.dotfiles/.vim/pack/plugins/start/rust.vim
-git clone --depth 1 https://github.com/rust-lang/rust.vim $HOME/.dotfiles/.vim/pack/plugins/start/rust.vim
+git clone --depth 1 git@github.com:rust-lang/rust.vim $HOME/.dotfiles/.vim/pack/plugins/start/rust.vim
 # vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-commentary/doc" -c q
 
 ppi "Installing commentary plugin"
 rm -rf $HOME/.dotfiles/.vim/pack/default/start/vim-commentary
-git clone --depth 1 https://github.com/tpope/vim-commentary $HOME/.dotfiles/.vim/pack/default/start/vim-commentary
+git clone --depth 1 git@github.com:tpope/vim-commentary $HOME/.dotfiles/.vim/pack/default/start/vim-commentary
 # vim -u NONE -c "helptags $HOME/.dotfiles/.vim/pack/default/start/vim-commentary/doc" -c q
 
 ppi "Installing Vim Fugitive checkout plugin"
 rm -rf $HOME/.dotfiles/.vim/pack/default/start/vim-fugitive
-git clone --depth 1 https://github.com/tpope/vim-fugitive $HOME/.dotfiles/.vim/pack/default/start/vim-fugitive
+git clone --depth 1 git@github.com:tpope/vim-fugitive $HOME/.dotfiles/.vim/pack/default/start/vim-fugitive
 
 ppi "Installing PHP import namespace plugin"
 rm -rf $HOME/.dotfiles/.vim/pack/default/start/vim-php-namespace
-git clone --depth 1 https://github.com/arnaud-lb/vim-php-namespace $HOME/.dotfiles/.vim/pack/default/start/vim-php-namespace
+git clone --depth 1 git@github.com:arnaud-lb/vim-php-namespace $HOME/.dotfiles/.vim/pack/default/start/vim-php-namespace
 
 ppi "Installing coc"
 COC_INSTALL=$HOME/.dotfiles/.vim/pack/coc/start
@@ -71,12 +71,12 @@ curl -fsSL -o $HOME/.dotfiles/.vim/autoload/onedark.vim $RAW_GIT/joshdick/onedar
 ppi "Installing FZF plugin"
 rm -rf $HOME/.vim/pack/default/start/fzf
 rm -rf $HOME/.vim/pack/default/start/fzf.vim
-git clone --depth 1 https://github.com/junegunn/fzf.git ~/.vim/pack/default/start/fzf
-git clone --depth 1 https://github.com/junegunn/fzf.vim $HOME/.dotfiles/.vim/pack/default/start/fzf.vim
+git clone --depth 1 git@github.com:junegunn/fzf.git ~/.vim/pack/default/start/fzf
+git clone --depth 1 git@github.com:junegunn/fzf.vim $HOME/.dotfiles/.vim/pack/default/start/fzf.vim
 
 ppi "Installing FZF checkout plugin"
 rm -rf $HOME/.vim/pack/default/start/fzf-checkout.vim
-git clone --depth 1 https://github.com/stsewd/fzf-checkout.vim $HOME/.dotfiles/.vim/pack/default/start/fzf-checkout.vim
+git clone --depth 1 git@github.com:stsewd/fzf-checkout.vim $HOME/.dotfiles/.vim/pack/default/start/fzf-checkout.vim
 
 ppi "Creating symlink for .vimrc"
 rm -rf $HOME/.vimrc
