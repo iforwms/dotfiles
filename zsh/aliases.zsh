@@ -259,7 +259,7 @@ alias pc='proxychains4'
 
 # Tmux
 alias t="tmux"
-alias ta="tmux a"
+alias ta="tmux a||tmux"
 alias tat="tmux a -t"
 alias tls="tmux list-sessions"
 alias tkl="tmux kill-session -t"
