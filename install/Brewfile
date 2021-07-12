@@ -9,6 +9,7 @@ tap 'homebrew/cask-versions'
 brew 'awscli'
 brew 'cash-cli' # currency rates
 brew 'cmus' # terminal player
+brew 'colordiff'
 brew 'coreutils' # Those that come with macOS are outdated
 brew 'dfu-programmer' # Flashing Arduino bootloaders
 brew 'dos2unix'
