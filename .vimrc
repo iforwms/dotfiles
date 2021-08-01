@@ -82,6 +82,16 @@ nnoremap <silent> ]b : bnext <CR>
 nnoremap <silent> [B :b first <CR>
 nnoremap <silent> ]B :b last <CR>
 
+" Keep page centered during searches
+nnoremap n nzzzv
+nnoremap N Nzzzv
+
+" Keep join string in same cursor position
+nnoremap J mzJ`z
+
+" Add additional undo points
+" inoremap , ,<c-g>u
+
 " Edit current pane in new tab
 nmap <c-w><c-t> :tabedit %<cr>
 
