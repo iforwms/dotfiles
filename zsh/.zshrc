@@ -163,6 +163,11 @@ man() {
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+# nvm setup
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+#
 ## History
 # For all commands prefix with a number to use an older commands
 # args, e.g. !606^. You have also search and replace arguments:
