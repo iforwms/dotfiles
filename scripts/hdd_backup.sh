@@ -10,12 +10,33 @@
 # delete - Delete file on the destination that don't exist on source; clean up deleted files in backup
 # stats - Give some file-transfer stats
 
-echo "########### Drive mirroring starting at `date` ###########"
+SOURCE=/Volumes/IFOR2T
+DEST=/Volumes/IFOR2T_Backup
 
-SOURCE=/Volumes/IFOR2TB
-DEST=/Volumes/IFOR2TB_Backup
+if [ ! -d $SOURCE ]; then
+    echo "Source drive not found, aborting..."
+    exit 1
+fi
 
-rsync -ahvAE --dry-run --delete --stats $SOURCE $DEST 2>&1 | tee /var/log/hdd-backup.log
+if [ ! -d $DEST ]; then
+    echo "Destination drive not found, aborting..."
+    exit 1
+fi
 
-echo "########### Drive mirroring completed at `date` ###########"
+echo "########### HDD backup starting at $(date) ###########"
+
+rsync -ahvAE --delete --stats $SOURCE $DEST 2>&1 | tee /Users/ifor/hdd-backup.log
+
+if [ "$?" -eq 0 ];
+then
+    echo
+    echo "########### HDD backup completed at $(date) ###########"
+    echo
+    exit 0
+else
+    echo
+    echo "HDD backup failed."
+    echo
+    exit 1
+fi
 
