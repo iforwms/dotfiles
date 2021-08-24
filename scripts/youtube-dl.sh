@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Add check for youtube-dl
+
+CMD=$1
+if [ $2 ]; then
+    CMD="-f 'bestvideo[height<=$2]+bestaudio/best[height<=[$2]' $CMD"
+fi
+
+youtube-dl $CMD
