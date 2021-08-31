@@ -27,7 +27,7 @@ if ! tmux has-session -t domino; then
     tmux send-keys -t domino:4.1 'ssh dc' Enter
 
     # Logs
-    tmux new-window -t domino -n logs
+    tmux new-window -t domino -n logs -c ~/code/domino/domino-api
     tmux send-keys -t domino:5.1 'llog' Enter
 
     tmux select-pane -t domino:3.1
