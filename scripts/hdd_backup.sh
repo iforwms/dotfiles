@@ -10,7 +10,7 @@
 # delete - Delete file on the destination that don't exist on source; clean up deleted files in backup
 # stats - Give some file-transfer stats
 
-SOURCE=/Volumes/IFOR2T
+SOURCE=/Volumes/IFOR2T/
 DEST=/Volumes/IFOR2T_Backup
 
 if [ ! -d $SOURCE ]; then
