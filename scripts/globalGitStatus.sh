@@ -2,8 +2,8 @@
 
 repoPath=`echo $1 | sed "s/\/.git//"`
 repoName=`basename $repoPath`
-branchName=`git -C $repoPath rev-parse --abbrev-ref HEAD`
-status=`git -C $repoPath status -s`
+branchName=`git -C $repoPath rev-parse --abbrev-ref HEAD 2>/dev/null`
+status=`git -C $repoPath status -s 2>/dev/null`
 
 # If files are modified, show details
 if [[ ! -z "$status" ]]; then
