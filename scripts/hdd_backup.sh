@@ -11,7 +11,7 @@
 # stats - Give some file-transfer stats
 
 SOURCE=/Volumes/IFOR2T/
-DEST=/Volumes/IFOR2T_Backup
+DEST=/Volumes/IFOR2T_BACKUP
 
 if [ ! -d $SOURCE ]; then
     echo "Source drive not found, aborting..."
