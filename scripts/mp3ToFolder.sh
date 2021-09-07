@@ -142,10 +142,10 @@ function processAudioFiles()
         DESTINATION="${NEW_PATH}/${FILENAME}.${EXT}"
 
         if [[ $FORCE_MOVE == true ]]; then
-            log "Attemping to move ${LINE} to ${DESTINATION}"
+            log "Attempting to move ${LINE} to ${DESTINATION}"
             mv "${LINE}" "${DESTINATION}"
         else
-            log "Attemping to copy ${LINE} to ${DESTINATION}"
+            log "Attempting to copy ${LINE} to ${DESTINATION}"
             cp "${LINE}" "${DESTINATION}"
         fi
     done < $TEMP_FILELIST
