@@ -11,17 +11,21 @@ for property in $properties; do
     declare ${property}="$temp"
 done
 
-echo "Finished setting vars"
+echo
 for property in $properties; do
     echo ${property} - ${!property}
 done
+echo
 
 if [ -z "$album" -a "$album" == "" ]; then
     album="Unknown - ${artist}"
 fi
 
 if [ -z "$title" -a "$title" == "" ]; then
-    echo "[ERROR] ${1} has no meta data, skipping..." | tee -a $HOME/Music/music_copying.log
+    time=$(date '+[%Y-%m-%d %H:%M:%S]')
+    echo
+    echo "${time} [ERROR] ${1} has no meta data, skipping..." | tee -a $HOME/Music/music_copying.log
+    echo
 else
     # TODO: Clean this mess up!
     # dir="${artist}/[${year}] ${album}"
@@ -32,7 +36,7 @@ else
     album="${album//\//_}"
 
     dir="${album}"
-    full_dir="${HOME}/Music/downloads/${dir}"
+    full_dir="/Volumes/IFOR2T_BACKUP/Music/downloads/${dir}"
     track=$(echo $track|cut -d'/' -f1)
     track="${track//\//_}"
     track=$(printf %02d $track)
@@ -42,7 +46,10 @@ else
 
     mkdir -p "${full_dir}" 2>/dev/null
 
-    echo "[INFO] Copying ${1} to ${full_dir}" | tee -a $HOME/Music/music_copying.log
-    mv "$1" "${full_dir}/${filename}.${ext}"
+    time=$(date '+[%Y-%m-%d %H:%M:%S]')
+    echo
+    echo "${time} [INFO] Copying ${1} to ${full_dir}" | tee -a $HOME/Music/music_copying.log
+    echo
+    cp "$1" "${full_dir}/${filename}.${ext}"
 fi
 
