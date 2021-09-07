@@ -73,9 +73,7 @@ function showError()
     FG="\033[${COLOR}m"
     RESET="\033[0m"
 
-    echo
-    echo -e "${FG}  ${TIMESTAMP} [ERROR] ${MESSAGE}${RESET}"
-    echo
+    echo -e "${FG}${TIMESTAMP} [ERROR] ${MESSAGE}${RESET}"
 }
 
 function checkDirExists()
@@ -147,7 +145,8 @@ function processAudioFiles()
         DESTINATION="${NEW_PATH}/${FILENAME}.${EXT}"
 
         local TIMESTAMP=$(date '+[%Y-%m-%d %H:%M:%S]')
-        echo "${TIMESTAMP} [INFO] [${INC}/${COUNT}] Processing ${ARTIST}-${ALBUM}-${TRACK}"
+        PERCENT=$(printf '%.2f\n' $(echo "${INC}/${COUNT}*100" | bc -l))
+        echo "${TIMESTAMP} [INFO] [${INC}/${COUNT} (${PERCENT}%)] Processing ${ARTIST}-${ALBUM}-${TRACK}"
 
         if [[ $FORCE_MOVE == true ]]; then
             log "Attempting to move ${LINE} to ${DESTINATION}"
