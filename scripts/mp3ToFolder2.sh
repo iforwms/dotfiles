@@ -6,11 +6,13 @@ VERSION=0.0.1
 RELEASE=20210907
 VERBOSE=false
 FORCE_MOVE=false
+CLEAN=false
 
 ONLY_CONSOLE=false
 ONLY_LOG=false
 INSTALL_LOG=/tmp/mp3ToFolder.log
-
+TEMP_FILELIST=/tmp/mp3ToFolder_folders-to-process
+TEMP_CLEAN_LIST=/tmp/mp3ToFolder_folders-to-delete
 INPUT_DIR=""
 OUTPUT_DIR=""
 
@@ -22,11 +24,12 @@ function showHelp()
     echo "  Read audio file metadata them move the files to a new directory structure."
     echo "  NOTE: This software requires the ffprobe package from ffmpeg to work."
     echo
-    echo "  Syntax: ${NAME} -i <input directory> -o <output directory> [-vm|h|V]"
+    echo "  Syntax: ${NAME} -i <input directory> -o <output directory> [-vmc|h|V]"
     echo
     echo "  Options:"
     echo "    i     Full path to input directory."
     echo "    o     Full path to output directory."
+    echo "    c     Attempt to clean empty directories if moving files."
     echo "    v     Turn on verbose mode."
     echo "    m     Force moving files instead of copying."
     echo "    h     Print this Help."
@@ -87,10 +90,83 @@ function checkDirExists()
 
 function generateAudioFileList()
 {
-    TEMP_LIST=/tmp/mp3ToFolder_folders-to-process
     log "Generating audio list for ${1}"
-    find ${1} -type f -name '*.mp3' -o -name '*.flac' -o -name '*.m4a' > $TEMP_LIST
-    log "Audio list generated, found $(wc -l < $TEMP_LIST) files."
+    find ${1} -type f -name '*.mp3' -o -name '*.flac' -o -name '*.m4a' > $TEMP_FILELIST
+    log "Audio list generated, found $(wc -l < $TEMP_FILELIST) files."
+}
+
+function getAudioMeta()
+{
+    PROPERTIES="YEAR DISC DATE ALBUM TRACK ARTIST TITLE DISCTOTAL TRACKTOTAL"
+    for PROPERTY in $PROPERTIES; do
+        local TEMP=$(ffprobe -loglevel quiet -show_entries format_tags="$PROPERTY" "$1" | sed "1d;\$d;s/tag:${PROPERTY}=//i")
+        export ${PROPERTY}="$TEMP"
+    done
+
+    for PROPERTY in $PROPERTIES; do
+        log "${PROPERTY} - ${!PROPERTY}"
+    done
+}
+
+function processAudioFiles()
+{
+    log "Beginning to process audio files."
+    while read LINE; do
+        getAudioMeta "$LINE"
+        # TODO: Trim output_dir ending slash?
+
+        TITLE="${TITLE//\//_}"
+        ARTIST="${ARTIST//\//_}"
+        ALBUM="${ALBUM//\//_}"
+
+        if [ -z "$ALBUM" -a "$ALBUM" == "" ]; then
+            ALBUM="Unknown - ${ARTIST}"
+        fi
+
+        if [ -z "$TITLE" -a "$TITLE" == "" ]; then
+            showError "${LINE} has no meta data, skipping..."
+            continue
+        fi
+
+        TRACK=$(echo $TRACK|cut -d'/' -f1)
+        TRACK="${TRACK//\//_}"
+        TRACK=$(printf %02d $TRACK)
+
+        FILENAME="${TRACK} ${ARTIST} - ${TITLE}"
+        EXT="${LINE##*.}"
+
+        NEW_PATH="${OUTPUT_DIR}/${ALBUM}"
+
+        mkdir -p "${NEW_PATH}" 2>/dev/null
+
+        DESTINATION="${NEW_PATH}/${FILENAME}.${EXT}"
+
+        if [[ $FORCE_MOVE == true ]]; then
+            log "Attemping to move ${LINE} to ${DESTINATION}"
+            mv "${LINE}" "${DESTINATION}"
+        else
+            log "Attemping to copy ${LINE} to ${DESTINATION}"
+            cp "${LINE}" "${DESTINATION}"
+        fi
+    done < $TEMP_FILELIST
+}
+
+function cleanDirs()
+{
+    log "Checking for empty directories in ${1}"
+
+    find $1 -maxdepth 1 -type d -exec du -s {} \; | sort -rn | awk '$1 == 0 {print $0}' | cut -d/ -f2- > $TEMP_CLEAN_LIST
+
+    log "Found $(wc -l < $TEMP_CLEAN_LIST) empty directories."
+
+    # due to the 'cut' above we lose the leading slash
+    while read LINE; do
+        log "Removing /${LINE}"
+        rm -rf "/$LINE"
+    done < $TEMP_CLEAN_LIST
+
+    # Purge ALBUM covers
+    # find . -type f -name 'cover*.jp*g' -o -name 'cover*.png' -delete
 }
 
 function main()
@@ -102,13 +178,17 @@ function main()
     fi
 
     # Get the options, leading : silences errors
-    while getopts ":hmvVi:o:" option; do
+    while getopts ":hmvcVi:o:" option; do
         case $option in
             i)
                 INPUT_DIR=${OPTARG}
                 ;;
             o)
                 OUTPUT_DIR=${OPTARG}
+                ;;
+            c)
+                CLEAN=true
+                echo "Clean directories is ON"
                 ;;
             v)
                 VERBOSE=true
@@ -149,6 +229,11 @@ function main()
     checkDirExists "$OUTPUT_DIR"
     checkForFfmpeg
     generateAudioFileList "$INPUT_DIR"
+    processAudioFiles
+
+    if [[ $CLEAN == true && $FORCE_MOVE == true ]]; then
+        cleanDirs "$INPUT_DIR"
+    fi
 }
 
 # If/else block to allow logging to various places
@@ -161,77 +246,3 @@ else
 fi
 
 exit 0
-# Make sure to use find with $(pwd) to get the full path
-# of the files if using this script with multiple
-# files.
-
-####################
-# TODO
-# - Allow batch or single folder/file modes
-# - Clean up empty folders
-####################
-
-properties="year disc date album track artist title disctotal tracktotal"
-
-for property in $properties; do
-    temp=$(ffprobe -loglevel quiet -show_entries format_tags="$property" "$1" | sed "1d;\$d;s/tag:${property}=//i")
-    declare ${property}="$temp"
-done
-
-echo
-for property in $properties; do
-    echo ${property} - ${!property}
-done
-echo
-
-if [ -z "$album" -a "$album" == "" ]; then
-    album="Unknown - ${artist}"
-fi
-
-if [ -z "$title" -a "$title" == "" ]; then
-    time=$(date '+[%Y-%m-%d %H:%M:%S]')
-    echo
-    echo "${time} [ERROR] ${1} has no meta data, skipping..." | tee -a $HOME/Music/music_copying.log
-    echo
-else
-    # TODO: Clean this mess up!
-    # dir="${artist}/[${year}] ${album}"
-    # dir="${artist}/${album}"
-
-    title="${title//\//_}"
-    artist="${artist//\//_}"
-    album="${album//\//_}"
-
-    dir="${album}"
-    full_dir="/Volumes/IFOR2T_BACKUP/Music/downloads/${dir}"
-    track=$(echo $track|cut -d'/' -f1)
-    track="${track//\//_}"
-    track=$(printf %02d $track)
-    # filename="${track} - ${title}"
-    filename="${track} ${artist} - ${title}"
-    ext="${1##*.}"
-
-    mkdir -p "${full_dir}" 2>/dev/null
-
-    time=$(date '+[%Y-%m-%d %H:%M:%S]')
-    echo
-    echo "${time} [INFO] Copying ${1} to ${full_dir}" | tee -a $HOME/Music/music_copying.log
-    echo
-    cp "$1" "${full_dir}/${filename}.${ext}"
-fi
-
-
-# Generate list of all audio files to process
-find $(pwd) -type f -name '*.mp3' -o -name '*.flac' -o -name '*.m4a' > ../music_to_process
-
-# Process all audio files
-while read line; do ~/.dotfiles/scripts/mp3ToFolder.sh "$line"; done < ../music_to_process
-
-# delete small directories
-find . -maxdepth 1 -type d -exec du -s {} \; | sort -rn | awk '$1 == 0 {print $0}' | cut -d. -f2- > ../todelete
-
-# due to the 'cut' above we lose the leading period
-while read line; do rm -rf ".$line"; done < ../todelete
-
-# Purge album covers
-find . -type f -name 'cover*.jp*g' -o -name 'cover*.png' -delete
