@@ -58,7 +58,7 @@ function checkForFfmpeg()
 
 function log()
 {
-    TIMESTAMP=$(date '+[%Y-%m-%d %H:%M:%S]')
+    local TIMESTAMP=$(date '+[%Y-%m-%d %H:%M:%S]')
    local MESSAGE="${@}"
    if [[ "${VERBOSE}" == true ]]; then
       echo "${TIMESTAMP} [DEBUG] ${MESSAGE}"
@@ -67,7 +67,7 @@ function log()
 
 function showError()
 {
-    TIMESTAMP=$(date '+[%Y-%m-%d %H:%M:%S]')
+    local TIMESTAMP=$(date '+[%Y-%m-%d %H:%M:%S]')
     local MESSAGE="${@}"
     COLOR=31 #red
     FG="\033[${COLOR}m"
@@ -111,6 +111,10 @@ function getAudioMeta()
 function processAudioFiles()
 {
     log "Beginning to process audio files."
+
+    COUNT=$(wc -l < $TEMP_FILELIST)
+    INC=0
+
     while read LINE; do
         getAudioMeta "$LINE"
         # TODO: Trim output_dir ending slash?
@@ -125,6 +129,7 @@ function processAudioFiles()
 
         if [ -z "$TITLE" -a "$TITLE" == "" ]; then
             showError "${LINE} has no meta data, skipping..."
+            ((INC++))
             continue
         fi
 
@@ -141,6 +146,9 @@ function processAudioFiles()
 
         DESTINATION="${NEW_PATH}/${FILENAME}.${EXT}"
 
+        local TIMESTAMP=$(date '+[%Y-%m-%d %H:%M:%S]')
+        echo "${TIMESTAMP} [INFO] [${INC}/${COUNT}] Processing ${ARTIST}-${ALBUM}-${TRACK}"
+
         if [[ $FORCE_MOVE == true ]]; then
             log "Attempting to move ${LINE} to ${DESTINATION}"
             mv "${LINE}" "${DESTINATION}"
@@ -148,6 +156,8 @@ function processAudioFiles()
             log "Attempting to copy ${LINE} to ${DESTINATION}"
             cp "${LINE}" "${DESTINATION}"
         fi
+
+        ((INC++))
     done < $TEMP_FILELIST
 }
 
