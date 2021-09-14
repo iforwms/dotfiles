@@ -240,7 +240,7 @@ alias beetupdate="docker exec -it beets /bin/bash -c 'beet update'"
 # docker exec -it beets /bin/bash -c 'beet import /music'
 
 # rsync
-alias sl="$HOME/.dotfiles/scripts/sync.sh /Users/ifor/Logic/ /Volumes/IFOR2T/Logic/"
+alias sl="$HOME/.dotfiles/scripts/sync.sh /Users/ifor/Logic/ /Volumes/IFOR2T/Music/Logic/"
 alias sm="$HOME/.dotfiles/scripts/sync.sh /Users/ifor/Music/ /Volumes/IFOR2T/Music/"
 
 # SSH
