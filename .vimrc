@@ -323,6 +323,9 @@ nnoremap <leader><space> :nohlsearch<CR>
 function! Prettify()
     let curPos = getcurpos()
     let cmd = "%!prettier --stdin-filepath %"
+    if (&ft=='sh')
+        let cmd = "!shellcheck %"
+    endif
     if (&ft=='python')
         let cmd = "!black %"
     endif
