@@ -136,10 +136,10 @@ alias yra='yarn add'
 alias yrs='yarn start'
 
 # Django
-alias pm="python manage.py"
-alias pi="pip install"
-alias p="python"
-alias sv="source venv/bin/activate"
+# alias pm="python manage.py"
+# alias pi="pip install"
+# alias p="python"
+# alias sv="source venv/bin/activate"
 
 # Git
 alias gl='git log --oneline --all --graph --decorate --pretty=format:"%Cgreen%h %Cred%d %Creset%s  %Cblue(%ar) <%an>" $*'
