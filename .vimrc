@@ -319,12 +319,22 @@ cnoreabbrev <expr> W ((getcmdtype() is# ':' && getcmdline() is# 'W')?('w'):('W')
 "Shortcut to turn off search highlighting.
 nnoremap <leader><space> :nohlsearch<CR>
 
+"Set shellcheck as default compiler for bash scripts
+augroup Linting
+    autocmd!
+    set errorformat+=%f:%l:%c\ %m
+    autocmd FileType sh compiler shellcheck
+    autocmd BufWritePost *.sh silent make! <afile> | silent redraw!
+    autocmd QuickFixCmdPost [^l]* cwindow
+augroup END
+
 "Prettify current file
 function! Prettify()
     let curPos = getcurpos()
     let cmd = "%!prettier --stdin-filepath %"
     if (&ft=='sh')
-        let cmd = "!shellcheck %"
+        let cmd = ":silent make! % | silent redraw!"
+        set local errorformat+=%f:%l:%c\ %m
     endif
     if (&ft=='python')
         let cmd = "!black %"

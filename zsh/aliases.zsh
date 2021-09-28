@@ -169,6 +169,8 @@ function ggs() {
     $HOME/.dotfiles/scripts/globalGitStatus.sh $HOME/code/expednet/moodle/payment/gateway/wechat
 
     find -L $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -exec $HOME/.dotfiles/scripts/globalGitStatus.sh {} \;
+
+    pass git status
 }
 
 function ggp() {
