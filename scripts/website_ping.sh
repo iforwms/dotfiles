@@ -1,18 +1,31 @@
 #!/bin/bash
 
-echo "Checking if website is up"
-
 WEBSITES=(
   dominochinese.com
+  booking.indier.net
+  kimtaichichina.com
+  yangshuotaichi.com
+  yibuparks.com
+  expednet.cn
   iforwms.com
   thyme.cors.tech
   cors.tech
 )
+MESSAGE=""
+
+function checkHost()
+{
+  # nc -z -w 3 $1 80
+  nmap $1 -PN -p 80 | grep -iq open && echo "OK" || echo "FAIL"
+}
 
 for SITE in "${WEBSITES[@]}"; do
-    ping -n 1 $SITE
+  STATUS=$(checkHost $SITE)
+  MESSAGE="${MESSAGE}${SITE}: ${STATUS}\n"
 done
 
-# IF OS is Darwin
-# osascript -e 'display notification "Lorem ipsum dolor sit amet" with title "Title"'
+if [[ $(uname -a|grep "Darwin") ]]; then
+  #osascript -e "display notification \"${MESSAGE}\" with title \"Websites down!\""
+  osascript -e "display alert \"Website Status\" message \"${MESSAGE}\""
+fi
 
