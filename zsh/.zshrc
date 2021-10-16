@@ -186,3 +186,4 @@ export NVM_DIR="$HOME/.nvm"
 
 # !:0     the command
 # !!      repeat the previous line
+module_init
