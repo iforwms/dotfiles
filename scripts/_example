@@ -11,70 +11,68 @@ set -o pipefail # Exit the script if an error occurs in a pipe
 # TODO
 # Warnings and errors should go to STDERR, anything parsable should go to STDOUT.
 
-err() {
-      echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
-  }
+installed() { command -v "$1" >/dev/null 2>&1; }
 
-_log()
-{
-    echo "----------"
-    echo "log ${FUNCNAME} ${@}"
-    echo "----------"
+die() { >&2 echo -e "Fatal: ${*}"; exit 1; }
+
+err() {
+  echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
 }
 
-_main()
-{
-    for n in 0 1 2 3 4 5
-    do
-          echo "BASH_VERSINFO[$n] = ${BASH_VERSINFO[$n]}"
-      done
+log() {
+  echo "----------"
+  echo "log ${*}"
+  echo "----------"
+}
 
-      _log "${FUNCNAME}:${LINENO} testing 123"
+main() {
+  deps=(bash)
+  for dep in "${deps[@]}"; do
+    installed "${dep}" || die "Missing required dependency: '${dep}'"
+  done
 
-      __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-      __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
-      __base="$(basename ${__file} .sh)"
-      __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
+  for n in 0 1 2 3 4 5
+  do
+    echo "BASH_VERSINFO[$n] = ${BASH_VERSINFO[$n]}"
+  done
 
-      arg1="${1:-}"
-       echo $__dir
-       echo $__file
-       echo $__base
-       echo $__root
-       echo $arg1
+  _log "${FUNCNAME[0]}:${LINENO} testing 123"
 
+#   __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+#   __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
+#   __base="$(basename "${__file}" .sh)"
 
-    if [[ "${OSTYPE}" = "linux-gnu" ]]; then
-        echo "GNU Linux"
-    elif [[ "${OSTYPE}" = "darwin"* ]]; then
-        echo "Mac OSX"
-    elif [[ "${OSTYPE}" = "cygwin" ]]; then
-        echo "POSIX compatibility layer and Linux environment emulation for Windows"
-    elif [[ "${OSTYPE}" = "msys" ]]; then
-        echo "Lightweight shell and GNU utilities compiled for Windows (part of MinGW)"
-    elif [[ "${OSTYPE}" = "win32" ]]; then
-        echo "I'm not sure this can happen."
-    elif [[ "${OSTYPE}" = "freebsd"* ]]; then
-        echo "..."
-    else
-        echo "Unknown."
-    fi
+  if [[ "${OSTYPE}" = "linux-gnu" ]]; then
+    echo "GNU Linux"
+  elif [[ "${OSTYPE}" = "darwin"* ]]; then
+    echo "Mac OSX"
+  elif [[ "${OSTYPE}" = "cygwin" ]]; then
+    echo "POSIX compatibility layer and Linux environment emulation for Windows"
+  elif [[ "${OSTYPE}" = "msys" ]]; then
+    echo "Lightweight shell and GNU utilities compiled for Windows (part of MinGW)"
+  elif [[ "${OSTYPE}" = "win32" ]]; then
+    echo "I'm not sure this can happen."
+  elif [[ "${OSTYPE}" = "freebsd"* ]]; then
+    echo "..."
+  else
+    echo "Unknown."
+  fi
 
-    err "Some error message"
+  err "Some error message"
 
-    echo sleeping
-    sleep 3
-    exit 0
+  echo sleeping
+  sleep 3
+  exit 0
 }
 
 # Avoid temporary files, e.g. diff <(wget -O - url1) <(wget -O - url2)
 
-_help_wanted() {
-    [ "$#" -ge "1" ] && [ "$1" = '-h' ] || [ "$1" = '--help' ] || [ "$1" = "-?" ]
+help_wanted() {
+  [ "$#" -ge "1" ] && [ "$1" = '-h' ] || [ "$1" = '--help' ] || [ "$1" = "-?" ]
 }
 
-_usage() {
-    echo "Example usage."
+usage() {
+  echo "Example usage."
 }
 
 # if help_wanted "$@"; then
@@ -82,18 +80,18 @@ _usage() {
 #     exit 0
 # fi
 
-_finish() {
-    result=$?
-    echo "Cleaning up after myself"
-    exit ${result}
+finish() {
+  result=$?
+  echo "Cleaning up after myself"
+  exit ${result}
 }
 
-_ctrl_c() {
-    echo "** Trapped CTRL-C"
-    exit 1
+ctrl_c() {
+  echo "** Trapped CTRL-C"
+  exit 1
 }
 
-trap _finish EXIT ERR
-trap _ctrl_c INT
+trap finish EXIT ERR
+trap ctrl_c INT
 
-_main "${@}"
+main "${@}"
