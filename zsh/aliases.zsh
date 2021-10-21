@@ -37,13 +37,13 @@ alias c="clear"
 # alias ping='ping -c 5'  # Pings with 5 packets, not unlimited
 # alias df='df -h'        # Disk free, in gigabytes, not bytes
 # alias du='du -h -c'     # Calculate total disk usage for a folder
-# alias zbundle="antibody bundle < $DOTFILES/zsh_plugins.txt > $DOTFILES/zsh_plugins.sh"
+# alias zbundle="antibody bundle < $DOTFILES/zsh_plugins.txt > $DOTFILES/zsh_plugins"
 alias vimgolf='docker run --rm -it -e "key=4ff4186b1f258b4dd2755c104835abeb" kramos/vimgolf'
-alias deploy='sudo -u www-data ./deploy.sh'
+alias deploy='sudo -u www-data ./deploy'
 alias l='ls -lAh --color=auto'
 alias ls='ls -A --color=auto'
 
-alias randpw="$DOTFILES/scripts/random_password.sh"
+alias randpw="$DOTFILES/scripts/random_password"
 # Docker
 alias doc="docker-compose"
 # alias dstop="docker stop $(docker ps -a -q)"
@@ -60,14 +60,14 @@ alias doc="docker-compose"
 alias dot="cd $DOTFILES"
 alias library="cd $HOME/Library"
 alias code="cd $HOME/code"
-alias ssd="$DOTFILES/scripts/shutdown.sh"
+alias ssd="$DOTFILES/scripts/shutdown"
 alias ind="cd $HOME/code/indier"
 alias dom="cd $HOME/code/domino"
 alias exp="cd $HOME/code/expednet"
 alias obs="cd $HOME/obsidian"
 alias kim="cd $HOME/code/kim"
 
-alias knot=$DOTFILES/scripts/animated_knots.sh
+alias knot=$DOTFILES/scripts/animated_knots
 
 alias dnsReset="sudo killall -HUP mDNSResponder"
 # Laravel
@@ -149,7 +149,7 @@ alias gco='git checkout'
 alias gca='git commit -am'
 alias gcam='git commit --amend'
 alias gps='git push'
-alias gpd='git push && ./deploy-remote.sh'
+alias gpd='git push && ./deploy-remote'
 alias gpl='git pull'
 alias ga='git add'
 alias gaa='git add .'
@@ -160,15 +160,15 @@ alias nah='git reset --hard && git clean -df'
 # alias apgi='git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached'
 # find ~/code -mindepth 1 -maxdepth 4 -type d -name .git -execdir git status -s \;
 function ggs() {
-    $HOME/.dotfiles/scripts/globalGitStatus.sh $HOME/.dotfiles
-    $HOME/.dotfiles/scripts/globalGitStatus.sh $HOME/obsidian
+    $HOME/.dotfiles/scripts/globalGitStatus $HOME/.dotfiles
+    $HOME/.dotfiles/scripts/globalGitStatus $HOME/obsidian
 
-    $HOME/.dotfiles/scripts/globalGitStatus.sh $HOME/code/expednet/moodle/mod/aliyun
-    $HOME/.dotfiles/scripts/globalGitStatus.sh $HOME/code/expednet/moodle/payment/gateway/alipay
-    $HOME/.dotfiles/scripts/globalGitStatus.sh $HOME/code/expednet/moodle/payment/gateway/blueocean
-    $HOME/.dotfiles/scripts/globalGitStatus.sh $HOME/code/expednet/moodle/payment/gateway/wechat
+    $HOME/.dotfiles/scripts/globalGitStatus $HOME/code/expednet/moodle/mod/aliyun
+    $HOME/.dotfiles/scripts/globalGitStatus $HOME/code/expednet/moodle/payment/gateway/alipay
+    $HOME/.dotfiles/scripts/globalGitStatus $HOME/code/expednet/moodle/payment/gateway/blueocean
+    $HOME/.dotfiles/scripts/globalGitStatus $HOME/code/expednet/moodle/payment/gateway/wechat
 
-    find -L $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -exec $HOME/.dotfiles/scripts/globalGitStatus.sh {} \;
+    find -L $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -exec $HOME/.dotfiles/scripts/globalGitStatus {} \;
 
     pass git status
 }
@@ -176,15 +176,15 @@ function ggs() {
 function ggp() {
     pass git pull
 
-    $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/.dotfiles
-    $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/obsidian
+    $HOME/.dotfiles/scripts/globalGitPull $HOME/.dotfiles
+    $HOME/.dotfiles/scripts/globalGitPull $HOME/obsidian
 
-    $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/code/expednet/moodle/mod/aliyun
-    $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/code/expednet/moodle/payment/gateway/alipay
-    $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/code/expednet/moodle/payment/gateway/blueocean
-    $HOME/.dotfiles/scripts/globalGitPull.sh $HOME/code/expednet/moodle/payment/gateway/wechat
+    $HOME/.dotfiles/scripts/globalGitPull $HOME/code/expednet/moodle/mod/aliyun
+    $HOME/.dotfiles/scripts/globalGitPull $HOME/code/expednet/moodle/payment/gateway/alipay
+    $HOME/.dotfiles/scripts/globalGitPull $HOME/code/expednet/moodle/payment/gateway/blueocean
+    $HOME/.dotfiles/scripts/globalGitPull $HOME/code/expednet/moodle/payment/gateway/wechat
 
-    find -L $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -exec $HOME/.dotfiles/scripts/globalGitPull.sh {} \;
+    find -L $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -exec $HOME/.dotfiles/scripts/globalGitPull {} \;
      # | sed s/.git// | xargs -I % git -C % pull
 }
 
@@ -242,8 +242,8 @@ alias beetupdate="docker exec -it beets /bin/bash -c 'beet update'"
 # docker exec -it beets /bin/bash -c 'beet import /music'
 
 # rsync
-alias sl="$HOME/.dotfiles/scripts/sync.sh /Users/ifor/Logic/ /Volumes/IFOR2T/Music/Logic/"
-alias sm="$HOME/.dotfiles/scripts/sync.sh /Users/ifor/Music/ /Volumes/IFOR2T/Music/"
+alias sl="$HOME/.dotfiles/scripts/sync /Users/ifor/Logic/ /Volumes/IFOR2T/Music/Logic/"
+alias sm="$HOME/.dotfiles/scripts/sync /Users/ifor/Music/ /Volumes/IFOR2T/Music/"
 
 # SSH
 alias copyssh="pbcopy < $HOME/.ssh/id_rsa.pub"
@@ -265,11 +265,11 @@ alias ta="tmux a||tmux"
 alias tat="tmux a -t"
 alias tls="tmux list-sessions"
 alias tkl="tmux kill-session -t"
-alias tcs=$DOTFILES/scripts/tmux_sessions.sh
+alias tcs=$DOTFILES/scripts/tmux_sessions
 
 # Create PDF from markdown
-alias md2pdf=$DOTFILES/scripts/markdown2pdf.sh
-# alias ytd=$DOTFILES/scripts/youtube-dl.sh
+alias md2pdf=$DOTFILES/scripts/markdown2pdf
+# alias ytd=$DOTFILES/scripts/youtube-dl
 alias yt='youtube-dl'
 
 # Given a tmux session name, add suffixes until it is unique
