@@ -6,21 +6,24 @@ set -o pipefail # Exit the script if an error occurs in a pipe
 # set -o xtrace # Enable bash debug output
 # set -o verbose # Enable verbose output
 
-log()
+# TODO
+# Warnings and errors should go to STDERR, anything parsable should go to STDOUT.
+
+_log()
 {
     echo "----------"
     echo "log ${FUNCNAME} ${@}"
     echo "----------"
 }
 
-main()
+_main()
 {
     for n in 0 1 2 3 4 5
     do
           echo "BASH_VERSINFO[$n] = ${BASH_VERSINFO[$n]}"
       done
 
-      log "${FUNCNAME}:${LINENO} testing 123"
+      _log "${FUNCNAME}:${LINENO} testing 123"
 
       __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
       __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
@@ -57,11 +60,11 @@ main()
 
 # Avoid temporary files, e.g. diff <(wget -O - url1) <(wget -O - url2)
 
-help_wanted() {
+_help_wanted() {
     [ "$#" -ge "1" ] && [ "$1" = '-h' ] || [ "$1" = '--help' ] || [ "$1" = "-?" ]
 }
 
-usage() {
+_usage() {
     echo "Example usage."
 }
 
@@ -70,18 +73,18 @@ usage() {
 #     exit 0
 # fi
 
-finish() {
+_finish() {
     result=$?
     echo "Cleaning up after myself"
     exit ${result}
 }
 
-ctrl_c() {
+_ctrl_c() {
     echo "** Trapped CTRL-C"
     exit 1
 }
 
-trap finish EXIT ERR
-trap ctrl_c INT
+trap _finish EXIT ERR
+trap _ctrl_c INT
 
-main "${@}"
+_main "${@}"
