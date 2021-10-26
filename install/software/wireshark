@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source $HOME/.dotfiles/scripts/pretty_print.sh
+source $HOME/.dotfiles/scripts/logger.sh
 
 ppi "Creating symlink for wireshark config"
 rm -rf $HOME/.config/wireshark
