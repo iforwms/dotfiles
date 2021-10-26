@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 AUTHOR="Ifor Waldo Williams <ifor@cors.tech>"
 NAME=mp3ToFolder

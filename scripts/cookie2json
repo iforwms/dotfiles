@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Pass a path to a Netscape standard cookie text file
 # as used by curl etc and convert to a json object.
