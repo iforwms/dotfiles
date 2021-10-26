@@ -1,102 +1,120 @@
 #!/bin/bash
 
-source $HOME/.dotfiles/scripts/pretty_print.sh
+set -o errexit  # Exit the script if any command fails (add "|| true" to allow failing)
+set -o nounset  # Exit the script if an undeclared variable is used
+set -o pipefail # Exit the script if an error occurs in a pipe
+# set -o xtrace # Enable bash debug output
+# set -o verbose # Enable verbose output
 
-if [[ ! $1 ]]; then
-    ppe "Please enter a username and optional group."
-    ppi "usage: ./create_ssh_user.sh USER [GROUP]"
+source "${HOME}/.dotfiles/scripts/logger.sh"
+
+readonly username="${1}"
+readonly group="${2:-}"
+
+if [[ -z "${username}" ]]; then
+    log_e "Please enter a username and optional group."
+    log "usage: ./create_ssh_user.sh USER [GROUP]"
     exit 1
 fi
 
 echo
-echo -n "Enter a password for $1: "
-read -s PASS
+echo -n "Enter a password for ${username}: "
+read -rs pass
 echo
 echo
-read -s -p "Confirm password: " PASS_CONFIRM
+read -rs -p "Confirm password: " PASS_CONFIRM
 echo
-if [ $PASS != $PASS_CONFIRM ]; then
-    ppe "Passwords do not match."
+if [ "${pass}" != "${PASS_CONFIRM}" ]; then
+    log_e "Passwords do not match."
     exit 1
 fi
 
-ppi "Passwords match - checking if user already exists."
-if id "$1" &>/dev/null; then
-    ppw "User $1 already exists, exiting."
+log "Passwords match - checking if user already exists."
+if id "${username}" &>/dev/null; then
+    log_w "User ${username} already exists, exiting."
     exit 1
 fi
 
-ppi "User does not exist, creating account."
-sudo adduser --disabled-password --gecos "" $1
+log "User does not exist, creating account."
+add_user=$(sudo adduser --disabled-password --gecos "" "${username}")
 
-if [ $? -ne 0 ]; then
-    ppe "Failed to create user."
+if [[ $add_user ]]; then
+    log_e "Failed to create user."
     exit 1
 fi
 
-ppi "Setting user password."
-sudo usermod -p $(echo $PASS|mkpasswd -m sha-512 -s) $1
+log "Setting user password."
+sudo usermod -p "$(echo "${pass}"|mkpasswd -m sha-512 -s)" "{$username}"
 
-pps "User account for $1 created successfully!"
+log "User account for ${username} created successfully!"
 
-if [[ $2 ]]; then
-    ppi "Found a group, adding $1 to $2 group."
-    sudo usermod -a -G $2 $1
+if [[ -n "${group}" ]]; then
+    log "Found a group, adding ${username} to ${group} group."
+    sudo usermod -a -G "${group}" "${username}"
 fi
 
-ppi "Generating SSH keys for $1"
-sudo mkdir -p /home/$1/.ssh
-sudo ssh-keygen -q -N '' -t rsa -b 4096 -C '' -f /home/$1/.ssh/id_rsa
+log "Generating SSH keys for ${username}"
+sudo mkdir -p "/home/${username}/.ssh"
+ssh_key=$(sudo ssh-keygen -q -N '' -t rsa -b 4096 -C '' -f "/home/${username}/.ssh/id_rsa")
 
-if [ $? -ne 0 ]; then
-    ppe "Failed to create SSH keys."
+if [[ $ssh_key ]]; then
+    log_e "Failed to create SSH keys."
     exit 1
 fi
 
-pps "SSH keys generated successfully."
+log "SSH keys generated successfully."
 
-ppi "Touching /home/$1/.ssh/authorized_keys"
-sudo touch /home/$1/.ssh/authorized_keys
+log "Touching /home/${username}/.ssh/authorized_keys"
+sudo touch "/home/${username}/.ssh/authorized_keys"
 
-ppi "Copying public key to /home/$1/.ssh/authorized_keys"
-cat /home/$1/.ssh/id_rsa.pub | sudo tee -a /home/$1/.ssh/authorized_keys >/dev/null
+log "Copying public key to /home/${username}/.ssh/authorized_keys"
+cat "/home/${username}/.ssh/id_rsa.pub" | sudo tee -a "/home/${username}/.ssh/authorized_keys" >/dev/null
 
-ppi "Fixing permissions."
-sudo chmod 600 /home/$1/.ssh/authorized_keys
-sudo chown -R $1:$1 /home/$1/
+log "Fixing permissions."
+sudo chmod 600 "/home/${username}/.ssh/authorized_keys"
+sudo chown -R "${username}:${username}" "/home/${username}/"
 
-pps "Account and SSH keys generated successfully."
+log "Account and SSH keys generated successfully."
 
-CREDENTIALS=/tmp/CREDENTIALS
-ZIP=$HOME/$(uname -n)_login_for_$1.tar.gz
+credentials=/tmp/credentials
+zip=$HOME/$(uname -n)_login_for_${username}.tar.gz
 
-URLS=$(grep -hRi server_name /etc/nginx/sites-enabled 2>/dev/null|sed -E 's/[[:space:]]+server_name //;s/;//;s/^\.//'|sort -u|tr '\n' ' ')
-URLS=$URLS+$(grep -hRi ServerName /etc/apache2/sites-available 2>/dev/null|sed -E 's/[[:space:]]+ServerName //;s/;//;s/^\.//'|sort -u|tr '\n' ' ')
+urls=$(
+    grep -hRi server_name /etc/nginx/sites-enabled 2>/dev/null \
+        | sed -E 's/[[:space:]]+server_name //;s/;//;s/^\.//' \
+        | sort -u \
+        | tr '\n' ' '
+    )
+urls=$urls+$(
+    grep -hRi ServerName /etc/apache2/sites-available 2>/dev/null \
+        | sed -E 's/[[:space:]]+ServerName //;s/;//;s/^\.//' \
+        | sort -u \
+        | tr '\n' ' '
+    )
 
-if [[ $URLS ]]; then
-    ppi "Finding IP addresses for the following URLs:\n\n      - $(echo $URLS|sed 's/ /\n      - /g')"
-
-    ppi "Found the following server IP addresses:"
-    dig +short $URLS|sort|uniq -c|sort -nr|awk '{print "      ",$2}'
+if [[ $urls ]]; then
+    log "Finding IP addresses for the following URLs:\n\n      - $(echo "$urls" | sed 's/ /\n      - /g')"
+    log "Found the following server IP addresses:"
+    dig +short "$urls" | sort | uniq -c | sort -nr | awk '{print "      ",${GROUP}}'
 fi
 
 echo
-read -p "Please enter server IP address: " IP
+read -rp "Please enter server IP address: " IP
 
 exit
 
-echo "SSH login: $1@$IP" >> $CREDENTIALS
-echo "Account password: $PASS" >> $CREDENTIALS
+echo "SSH login: ${username}@$IP" >> $credentials
+echo "Account password: $pass" >> $credentials
 
-sudo tar -czf $ZIP -C /home/$1/.ssh id_rsa id_rsa.pub -C /tmp CREDENTIALS
+creds=$(sudo tar -czf "$zip" -C "/home/${username}/.ssh" id_rsa id_rsa.pub -C /tmp credentials)
 
-if [ $? -ne 0 ]; then
-    ppe "Failed to generate SSH key tar file."
+if [[ "$creds" ]]; then
+    log_e "Failed to generate SSH key tar file."
     exit 1
 fi
 
-rm -f $CREDENTIALS
+rm -f $credentials
 
-ppi "SSH keys can be found here: $ZIP"
+log "SSH keys can be found here: $zip"
 
 exit 0
