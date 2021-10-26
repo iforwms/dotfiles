@@ -4,6 +4,7 @@
 # as used by curl etc and convert to a json object.
 COOKIE=$1
 
-jq -crRs 'split("\n")[5:-1] | map([split("\t")[]] | { "domain":.[0], "httpOnly": true, "flag": .[1], "path": .[2], "secure": true, "expiration": .[4], "name": .[5], "value": .[6] })' "$COOKIE" | \
-sed 's/"false"/false/gi;s/"true"/true/gi;s/#HttpOnly_//g' | tee "${COOKIE}.json"
+jq -crRs 'split("\n")[5:-1] | map([split("\t")[]] | { "domain":.[0], "httpOnly": true, "flag": .[1], "path": .[2], "secure": true, "expiration": .[4], "name": .[5], "value": .[6] })' "$COOKIE" \
+    | sed 's/"false"/false/gi;s/"true"/true/gi;s/#HttpOnly_//g' \
+    | tee "${COOKIE}.json"
 
