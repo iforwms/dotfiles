@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source $HOME/.dotfiles/scripts/pretty_print.sh
+source $HOME/.dotfiles/scripts/logger.sh
 
 ppi "Installing chafa"
 sudo add-apt-get-repository ppa:hpjansson/chafa

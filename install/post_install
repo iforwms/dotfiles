@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source $HOME/.dotfiles/scripts/pretty_print.sh
+source $HOME/.dotfiles/scripts/logger.sh
 
 function post_install_mac() {
     sudo -v
