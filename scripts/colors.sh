@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 [ "$TERM" = "unknown" ] && TERM='' # use default
 term=${TERM:-xterm-<t_CO>color} # use xterm as default if no terminal set
