@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -o errexit  # Exit the script if any command fails (add "|| true" to allow failing)
 set -o nounset  # Exit the script if an undeclared variable is used
