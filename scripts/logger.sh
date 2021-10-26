@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Pretty print statements
+# Logging Script
 #
 # ifor@cors.tech
 
@@ -37,7 +37,7 @@ log() {
     local log_dir="${HOME}/logs"
 
     self_name="$(basename "$0")"
-    line_no="${BASH_LINENO[0]}"
+    # line_no="${BASH_LINENO[0]}"
 
     local message_level="INFO"
     if [[ -n $2 ]]; then
@@ -49,9 +49,9 @@ log() {
     mkdir -p "${log_dir}" 2>/dev/null
     touch "${log_dir}/${self_name}.log"
 
-    printf -v output "${_log_color[$message_level]}%s [%s:%s] %s: %s\n" "${now}" "${self_name}" "${line_no}" "${message_level}" "${line}$(reset)"
+    printf -v output "${_log_color[$message_level]}%s [%s] %s: %s\n" "${now}" "${self_name}" "${message_level}" "${line}$(reset)"
 
-    echo -n "${output}"
+    echo -n "${output}" >&2
 
     # shellcheck disable=2005 # Decolor is search and replace
     echo "$(decolor "${output}")" >> "${HOME}/logs/${self_name}.log"
