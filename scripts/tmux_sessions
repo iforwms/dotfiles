@@ -6,7 +6,7 @@ readonly session="${1}"
 
 if [[ -z $session ]]; then
     log_w "Session name required, available sessions:"
-    find $HOME/.dotfiles/tmux/sessions -type f -name "*.sh" -printf "    - %f\n" \
+    find $HOME/.dotfiles/tmux/sessions -type f -printf "    - %f\n" \
         | sed "s/.sh$//" \
         | sort
     exit 1
