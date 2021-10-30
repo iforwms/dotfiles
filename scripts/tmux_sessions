@@ -1,14 +1,17 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-source $HOME/.dotfiles/scripts/pretty_print.sh
+# shellcheck source=/dev/null
+source "${HOME}/.dotfiles/scripts/logger.sh"
 
-if [[ ! $1 ]]; then
-    ppw "Session name required, available sessions:"
-    find $HOME/.dotfiles/tmux/sessions -type f -name "*.sh" -printf "    - %f\n"|sed "s/.sh$//"|sort
-    echo
+readonly session="${1}"
+
+if [[ -z $session ]]; then
+    log_w "Session name required, available sessions:"
+    find "${HOME}/.dotfiles/tmux/sessions" -type f -printf "    - %f\n" \
+        | sort
     exit 1
 fi
 
-$HOME/.dotfiles/tmux/sessions/$1.sh
+"${HOME}/.dotfiles/tmux/sessions/${session}"
 
-ppi "$1 up and running!"
+log "${session} up and running!"

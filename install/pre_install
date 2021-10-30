@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source $HOME/.dotfiles/scripts/pretty_print.sh
+source $HOME/.dotfiles/scripts/logger.sh
 
 function pre_install_mac() {
     ppi "Checking for Homebrew install."

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source $HOME/.dotfiles/scripts/pretty_print
+source $HOME/.dotfiles/scripts/logger
 
 if [[ $(uname -a|grep "Darwin") ]]; then
   ppi "Updating Homebrew"

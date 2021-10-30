@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 echo "Current settings:"
 grep -n 'PermitRootLogin\|PasswordAuthentication\|ChallengeResponseAuthentication\|UsePam' /etc/ssh/sshd_config|grep -v '#'
