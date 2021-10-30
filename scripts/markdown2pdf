@@ -1,11 +1,19 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-source $HOME/.dotfiles/scripts/pretty_print.sh
+source $HOME/.dotfiles/scripts/logger.sh
 
-if [[ ! $1 ]]; then
-    ppe "Filename required."
+if [[ -z $1 ]]; then
+    log_e "Filename required."
     exit 1
 fi
 
-pandoc $1 --variable mainfont="Open Sans" --variable sansfont="Roboto" --variable monofont="Fira Code" --variable fontsize=12pt --metadata pagetitle="$1" --from=gfm --pdf-engine=wkhtmltopdf --output $1.pdf
+pandoc $1 \
+    --variable mainfont="Open Sans" \
+    --variable sansfont="Roboto" \
+    --variable monofont="Fira Code" \
+    --variable fontsize=12pt \
+    --metadata pagetitle="$1" \
+    --from=gfm \
+    --pdf-engine=wkhtmltopdf \
+    --output $1.pdf
 

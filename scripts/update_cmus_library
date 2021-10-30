@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # To bind, type the following command in cmus
 # :bind -f common u shell ~/.dotfiles/scripts/update-cmus-library.sh

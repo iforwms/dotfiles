@@ -2,7 +2,7 @@
 
 RAW_GIT=https://raw.githubusercontent.com
 
-source $HOME/.dotfiles/scripts/pretty_print.sh
+source $HOME/.dotfiles/scripts/logger.sh
 
 ppi "Setting up..."
 rm -rf $HOME/.vim
