@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd ~/code/expednet/moodle/payment/gateway/blueocean/amd grunt amd
+zip -r ~/clients/exped/plugin_builds/blueocean_$(sed -nE '/version/ s/.*([0-9]{10}).*/\1/p' blueocean/version.php).zip blueocean -x "**/.git/*" "**/.gitignore" "**/tags" "**/.DS_Store" "**/build.sh" && cd ~/clients/exped/plugin_builds && ls -lah
