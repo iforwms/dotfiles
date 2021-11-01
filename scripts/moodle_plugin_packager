@@ -1,4 +1,25 @@
 #!/bin/bash
 
-cd ~/code/expednet/moodle/payment/gateway/blueocean/amd grunt amd
-zip -r ~/clients/exped/plugin_builds/blueocean_$(sed -nE '/version/ s/.*([0-9]{10}).*/\1/p' blueocean/version.php).zip blueocean -x "**/.git/*" "**/.gitignore" "**/tags" "**/.DS_Store" "**/build.sh" && cd ~/clients/exped/plugin_builds && ls -lah
+# cd ~/code/expednet/moodle/payment/gateway/blueocean/amd grunt amd
+output_dir="/Users/ifor/clients/exped/plugin_builds"
+plugin_name="${1}"
+plugin_dir="${2}"
+
+if [[ -z "${plugin_name}" ]]; then
+    echo "Plugin name required."
+    exit 1
+fi
+
+if [[ -z "${plugin_dir}" ]]; then
+    echo "Plugin directory required."
+    exit 1
+fi
+
+version=$(sed -nE '/version/ s/.*([0-9]{10}).*/\1/p' "${plugin_dir}/version.php")
+
+cd "${plugin_dir}/../"
+zip -r "${output_dir}/${plugin_name}_${version}.zip" "${plugin_name}" \
+    -x "**/.git/*" "**/.gitignore" "**/tags" "**/.DS_Store" \
+       "**/build" "**/*.pdf" "**/.env"
+
+ls -lah "${output_dir}"
