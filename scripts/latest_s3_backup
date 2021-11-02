@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+folder="DominoApiBackup"
+bucket="dc-materials"
+
+if [[ -n $1 ]]; then folder="${1%/}"; fi
+if [[ -n $2 ]]; then bucket="${2%/}"; fi
+
+latest=$(aws s3 ls "${bucket}/${folder}/" --human | sort -rn | head -1)
+
+if [[ -z "${latest}" ]]; then
+    echo "Failed to find a backup in ${folder}."
+    exit 1
+fi
+
+filesize=$(echo "${latest}" | awk '{ print $3,$4 }')
+filename=$(echo "${latest}" | awk '{ print $5 }')
+remote_filepath="${bucket}/${folder}/${filename}"
+
+echo "Attempting to download ${remote_filepath} (${filesize}) to $(pwd)."
+
+aws s3 cp "s3://${remote_filepath}" "$(pwd)"
+
