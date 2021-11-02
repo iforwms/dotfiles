@@ -123,6 +123,7 @@ else
 fi
 
 export PATH="/usr/local/opt/curl/bin:$PATH"
+export PATH="${DOTFILES}/scripts:$PATH"
 
 # ImageMagick setup
 export DISPLAY=:0
