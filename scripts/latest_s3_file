@@ -6,11 +6,29 @@ set -o pipefail # Exit the script if an error occurs in a pipe
 # set -o xtrace # Enable bash debug output
 # set -o verbose # Enable verbose output
 
-# Set default options
+# Default options
 remote_folder="DominoApiBackup"
 local_folder="$(pwd)"
 bucket="dc-materials"
 
+usage() {
+    cat <<MSG
+
+    Download the latest file in an S3 folder.
+
+    Usage: ./latest_s3_file [options]
+
+    Options:
+        -b, --bucket <name>         Name of your S3 bucket.
+        -r, --remote-folder <path>  The full path to your rbackup directory.
+        -l, --local-folder <path>   Full path to your local download directory.
+        -p, --profile <name>        S3 profile if not using your default profile.
+        -h, --help                  Display this usage information.
+
+MSG
+}
+
+# Parse arguments
 while [ $# -gt 0 ]; do
     case "$1" in
         -b|--bucket)
@@ -25,11 +43,15 @@ while [ $# -gt 0 ]; do
         -p|--profile)
             profile="--profile=${2}"
             ;;
+        -h|--help)
+            usage
+            exit 1
+            ;;
     esac
     shift
 done
 
-echo "Connecting to s3, if the script ends without warning, no file was found, please check your args list and try again."
+echo "Connecting to S3, if the script ends without warning, no file was found, please check your args list and try again."
 echo
 latest=$(
 # shellcheck disable=2086
