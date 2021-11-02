@@ -1,23 +1,54 @@
 #!/usr/bin/env bash
 
-folder="DominoApiBackup"
+set -o errexit  # Exit the script if any command fails (add "|| true" to allow failing)
+set -o nounset  # Exit the script if an undeclared variable is used
+set -o pipefail # Exit the script if an error occurs in a pipe
+# set -o xtrace # Enable bash debug output
+# set -o verbose # Enable verbose output
+
+# Set default options
+remote_folder="DominoApiBackup"
+local_folder="$(pwd)"
 bucket="dc-materials"
 
-if [[ -n $1 ]]; then folder="${1%/}"; fi
-if [[ -n $2 ]]; then bucket="${2%/}"; fi
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -b|--bucket)
+            bucket="${2%/}"
+            ;;
+        -r|--remote-folder)
+            remote_folder="${2%/}"
+            ;;
+        -l|--local-folder)
+            local_folder="${2%/}"
+            ;;
+        -p|--profile)
+            profile="--profile=${2}"
+            ;;
+    esac
+    shift
+done
 
-latest=$(aws s3 ls "${bucket}/${folder}/" --human | sort -rn | head -1)
+echo "Connecting to s3, if the script ends without warning, no file was found, please check your args list and try again."
+echo
+latest=$(
+# shellcheck disable=2086
+    aws s3 ls "${bucket}/${remote_folder}/" ${profile:-} --human \
+        | sort -rn \
+        | head -1
+)
 
 if [[ -z "${latest}" ]]; then
-    echo "Failed to find a backup in ${folder}."
+    echo "Failed to find any files in ${remote_folder}."
     exit 1
 fi
 
 filesize=$(echo "${latest}" | awk '{ print $3,$4 }')
 filename=$(echo "${latest}" | awk '{ print $5 }')
-remote_filepath="${bucket}/${folder}/${filename}"
+remote_filepath="${bucket}/${remote_folder}/${filename}"
 
-echo "Attempting to download ${remote_filepath} (${filesize}) to $(pwd)."
-
-aws s3 cp "s3://${remote_filepath}" "$(pwd)"
+echo "Attempting to download ${remote_filepath} (${filesize}) to ${local_folder}."
+echo
+# shellcheck disable=2086
+aws s3 cp "s3://${remote_filepath}" "${local_folder}" ${profile:-}
 
