@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+# Description of the Script
+# Version 2021110300
+# Copyright 2021 Ifor Waldo Williams <ifor@cors.tech>
+
+echo "Enter the required information to generate your iRealPro URL"
+
+echo -n "Title: "
+read -r title
+
+echo -n "Artist (LastName FirstName): "
+read -r artist
+
+echo -n "Style (Swing, Ballad etc): "
+read -r style
+
+echo -n "Key Signature (C, Db, F- etc): "
+read -r key
+
+echo -n "Time Signature (44, 68 etc): "
+read -r time
+
+echo -n "Chord Progression: "
+read -r music
+
+if [[ -z "${time}" ]]; then
+    time="T${time}"
+fi
+
+url="irealbook://${title}=${artist}=${style}=${key}=n=${music}"
+
+echo "Raw URL: ${url}"
+echo
+echo "Encoded: ${url}" |  sed 's/ /%20/g;s/{/%7B/g;s/}/%7D/g;s/|/%7C/g;s/\[/%5B/g;s/]/%5D/g;s/</%3C/g;s/>/%3E/g;s/\^/%5E/g;'
+echo
+
+exit 0
