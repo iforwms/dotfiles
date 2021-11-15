@@ -1,0 +1,197 @@
+#!/usr/bin/env bash
+
+# Generate playlist from a song list.
+# Version 2021111500
+# Copyright 2021 Ifor Waldo Williams <ifor@cors.tech>
+
+# Optionally add default arguments here.
+
+dependencies=()
+
+main() {
+    if [[ "$#" -eq 0 ]]; then
+        usage
+    fi
+
+    local playlist_name=$1
+    local playlist_file=$2
+
+    log "Playlist name: ${playlist_name}."
+
+    json="{ 'name': '${playlist_name}', 'playlist': ["
+    if [[ -r "${playlist_file}" ]]; then
+        while read -r f; do
+            json+=$(parse_line "${f}")
+        done < temp
+    else
+        for f in "${@}"; do
+            json+=$(parse_line "${f}")
+        done
+    fi
+    json+='] }'
+
+    echo "${json/\},]/\}]}" | tr "'" '"'
+    exit 0
+}
+
+parse_line() {
+    local line="${1}"
+    log "${line}"
+    artist=$(parse_artist "${f}")
+    title=$(parse_title "${f}")
+    url=$(parse_url "${f}")
+    start_time=$(parse_start_time "${f}")
+    end_time=$(parse_end_time "${f}")
+    echo "{ 'artist': '${artist}', 'title': '${title}', 'url': '${url}', 'start_time': '${start_time}', 'end_time': '${end_time}' },"
+}
+
+parse_title() {
+    local string="${1}"
+    string=$(echo "${string}" | sed -E 's/ \(.*\)//')
+    if [[ "${string}" =~ ^http* ]]; then
+        echo ""
+    else
+        echo "${string#*- }"
+    fi
+}
+
+parse_artist() {
+    local string="${1}"
+    string=$(echo "${string}" | sed -E 's/ \(.*\)//')
+    if [[ "${string}" =~ ^http* ]]; then
+        echo ""
+    elif [[ ! "${string}" =~ - ]]; then
+        echo ""
+    else
+        echo "${string/ -*/}"
+    fi
+}
+
+parse_url() {
+    local string="${1}"
+    if [[ ! "${string}" =~ ^http* ]]; then
+        string=""
+    fi
+    echo "${string}"
+}
+
+parse_start_time() {
+    local string="${1}"
+    if [[ "${string}" =~ \([0-9]+: ]]; then
+        string=$(echo "${string}" | sed -E 's/.*\(([0-9]{2}:[0-9]{2})-.*/\1/')
+    else
+        string=""
+    fi
+    echo "${string}"
+}
+
+parse_end_time() {
+    local string="${1}"
+    if [[ "${string}" =~ \([0-9]+: ]]; then
+        string=$(echo "${string}" | sed -E 's/.*\([0-9]{2}:[0-9]{2}-([0-9]{2}:[0-9]{2}).*/\1/')
+    else
+        string=""
+    fi
+    echo "${string}"
+}
+
+usage() {
+    cat <<MSG
+
+  Generate a JSON file for use with the downloader.
+
+  Usage: ./$(basename "${BASH_SOURCE[0]}") [playlist name] [url | (artist) song/album name]
+
+  Examples:
+     ./$(basename "${BASH_SOURCE[0]}") 'My First Playlist' < <('/path/to/song_list')
+     ./$(basename "${BASH_SOURCE[0]}") 'My First Playlist' http.youtu.be/abc 'Sunny Afternoon' 'Jimi Hendrix - Crosstown Traffic' 'Miles Davis - Kind of Blue (00:43-12:23)'
+
+  Output:
+    {
+      "name": "My First Playlist",
+      "playlist": [
+        {
+            "artist": "",
+            "title": "",
+            "url": "https://youtu.be/abc",
+            "start_time": "",
+            "end_time": "",
+        },
+        {
+            "artist": "Jimi Hendrix",
+            "title": "Crosstown Traffic",
+            "url": "",
+            "start_time": "",
+            "end_time": "",
+        },
+        {
+            "artist": "Miles Davis",
+            "title": "Kind of Blue",
+            "url": "",
+            "start_time": "00:43",
+            "end_time": "12:23",
+        }
+      ]
+  }
+
+MSG
+exit 1
+}
+
+check_dependencies() {
+    for dependency in "${dependencies[@]}"; do
+        command -v "${dependency}" \
+            || >&2 echo "Missing required dependency: '${dependency}'"; \
+            exit 1
+        done
+    }
+
+cleanup() {
+    trap - SIGINT SIGTERM ERR EXIT
+    log "Cleaning up..."
+}
+
+die() {
+    >&2 echo -e "Fatal: ${*}"; exit 1;
+}
+
+log() {
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')]: $*" >&2
+}
+
+detect_os() {
+    case "$OSTYPE" in
+        solaris*) log "OS: Solaris" ;;
+        darwin9)  log "OS: iOS" ;;
+        darwin*)  log "OS: OSX" ;;
+        linux-android)   log "OS: Android (termux)" ;;
+        linux*)   log "OS: Linux" ;;
+        bsd*)     log "OS: BSD" ;;
+        msys*)    log "OS: Windows" ;;
+        cygwin*)  log "OS: Windows cygwin" ;;
+        *)        log "OS: Unknown ($OSTYPE)" ;;
+    esac
+}
+
+if [[ ${VERBOSE-} =~ ^1|yes|true$ ]]; then
+    set -o verbose
+    log "Verbose mode enabled."
+fi
+
+if [[ ${DEBUG-} =~ ^1|yes|true$ ]]; then
+    set -o xtrace
+    log "Debug mode enabled."
+fi
+
+# Enable error detection if script is not being sourced.
+if ! (return 0 2> /dev/null); then
+    set -o errexit -o nounset -o pipefail
+fi
+
+set -o errtrace # Ensure the error trap handler is inherited
+
+trap cleanup SIGINT SIGTERM ERR EXIT # Run `cleanup` on exit
+
+check_dependencies
+main "${@}"
+
