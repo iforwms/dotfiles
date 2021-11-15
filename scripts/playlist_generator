@@ -4,12 +4,10 @@
 # Version 2021111500
 # Copyright 2021 Ifor Waldo Williams <ifor@cors.tech>
 
-# Optionally add default arguments here.
-
 dependencies=()
 
 main() {
-    if [[ "$#" -eq 0 ]]; then
+    if [[ "$#" -lt 2 ]]; then
         usage
     fi
 
@@ -22,7 +20,7 @@ main() {
     if [[ -r "${playlist_file}" ]]; then
         while read -r f; do
             json+=$(parse_line "${f}")
-        done < temp
+        done < "${playlist_file}"
     else
         for f in "${@}"; do
             json+=$(parse_line "${f}")
@@ -135,7 +133,7 @@ usage() {
   }
 
 MSG
-exit 1
+    exit 1
 }
 
 check_dependencies() {
@@ -156,7 +154,7 @@ die() {
 }
 
 log() {
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')]: $*" >&2
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] [$(basename "${BASH_SOURCE[0]}")] $*" >&2
 }
 
 detect_os() {
