@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+
+# Description of the Script
+# Version 2021110300
+# Copyright 2021 Ifor Waldo Williams <ifor@cors.tech>
+
+# Avoid temporary files, e.g. diff <(wget -O - url1) <(wget -O - url2)
+
+# Optionally add default arguments here.
+
+dependencies=(
+    youtube-dl
+    jq
+)
+
+main() {
+    curl \
+        'https://youtube.googleapis.com/youtube/v3/search?maxResults=1&q=the%20kinks%20sunny%20afternoon&key=1234' \
+        --header 'Accept: application/json' \
+        --compressed
+        # --header 'Authorization: Bearer [YOUR_ACCESS_TOKEN]' \
+    exit 0
+
+    log "Hi, I'm the downloader!"
+    while read -r line; do
+        log "Parsing JSON: ${line}"
+        echo "${line}" | jq -c '.playlist[]' \
+            | while read -r song; do
+                    youtube-dl \
+                        --extract-audio \
+                        --audio-quality 0 \
+                        --audio-format mp3 \
+                        $(echo "${song}" | jq -r '.url')
+                done
+            done < "${1:-/dev/stdin}"
+            exit 0
+        }
+
+usage() {
+    cat <<MSG
+
+  Download the latest file in an S3 folder.
+
+  Usage: ./$(basename "${BASH_SOURCE[0]}") [options]
+
+  Options:
+    -b, --bucket <name>         Name of your S3 bucket.
+    -r, --remote-folder <path>  The full path to your rbackup directory.
+    -l, --local-folder <path>   Full path to your local download directory.
+    -p, --profile <name>        S3 profile if not using your default profile.
+    -h, --help                  Display this usage information.
+
+  Environmental Options:
+    DEBUG=true                  Enable debug mode.
+    VERBOSE=true                Enable verbose mode.
+
+  Example:
+    ./$(basename "${BASH_SOURCE[0]}") -b bucket_name --profile prod
+
+MSG
+exit 1
+}
+
+check_dependencies() {
+    for dependency in "${dependencies[@]}"; do
+        command -v "${dependency}" \
+            || >&2 echo "Missing required dependency: '${dependency}'"; \
+            exit 1
+        done
+    }
+
+cleanup() {
+    trap - SIGINT SIGTERM ERR EXIT
+    log "Cleaning up..."
+}
+
+parse_args() {
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            # -b|--bucket)
+                #     bucket="${2%/}"
+                #     ;;
+            -h|--help)
+                usage
+                ;;
+        esac
+        shift
+    done
+}
+
+die() {
+    >&2 echo -e "Fatal: ${*}"; exit 1;
+}
+
+log() {
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] [$(basename "${BASH_SOURCE[0]}")] $*" >&2
+}
+
+detect_os() {
+    case "$OSTYPE" in
+        solaris*) log "OS: Solaris" ;;
+        darwin9)  log "OS: iOS" ;;
+        darwin*)  log "OS: OSX" ;;
+        linux-android)   log "OS: Android (termux)" ;;
+        linux*)   log "OS: Linux" ;;
+        bsd*)     log "OS: BSD" ;;
+        msys*)    log "OS: Windows" ;;
+        cygwin*)  log "OS: Windows cygwin" ;;
+        *)        log "OS: Unknown ($OSTYPE)" ;;
+    esac
+}
+
+if [[ ${VERBOSE-} =~ ^1|yes|true$ ]]; then
+    set -o verbose
+    log "Verbose mode enabled."
+fi
+
+if [[ ${DEBUG-} =~ ^1|yes|true$ ]]; then
+    set -o xtrace
+    log "Debug mode enabled."
+fi
+
+# Enable error detection if script is not being sourced.
+if ! (return 0 2> /dev/null); then
+    set -o errexit -o nounset -o pipefail
+fi
+
+set -o errtrace # Ensure the error trap handler is inherited
+
+trap cleanup SIGINT SIGTERM ERR EXIT # Run `cleanup` on exit
+
+# parse_args "$@"
+# check_dependencies
+main "$@"
+
