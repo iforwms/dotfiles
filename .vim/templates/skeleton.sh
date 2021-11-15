@@ -78,12 +78,14 @@ log() {
 
 detect_os() {
     case "$OSTYPE" in
-        solaris*) log "OS: SOLARIS" ;;
+        solaris*) log "OS: Solaris" ;;
+        darwin9)  log "OS: iOS" ;;
         darwin*)  log "OS: OSX" ;;
-        linux*)   log "OS: LINUX" ;;
+        linux-android)   log "OS: Android (termux)" ;;
+        linux*)   log "OS: Linux" ;;
         bsd*)     log "OS: BSD" ;;
-        msys*)    log "OS: WINDOWS" ;;
-        cygwin*)  log "OS: ALSO WINDOWS CYGWIN" ;;
+        msys*)    log "OS: Windows" ;;
+        cygwin*)  log "OS: Windows cygwin" ;;
         *)        log "OS: Unknown ($OSTYPE)" ;;
     esac
 }
