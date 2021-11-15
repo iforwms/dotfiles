@@ -73,7 +73,7 @@ die() {
 }
 
 log() {
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')]: $*" >&2
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] [$(basename "${BASH_SOURCE[0]}")] $*" >&2
 }
 
 detect_os() {
@@ -111,4 +111,4 @@ trap cleanup SIGINT SIGTERM ERR EXIT # Run `cleanup` on exit
 
 parse_args "$@"
 check_dependencies
-main
+main "$@"
