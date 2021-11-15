@@ -4,12 +4,15 @@
 # Version 2021110300
 # Copyright 2021 Ifor Waldo Williams <ifor@cors.tech>
 
+# Avoid temporary files, e.g. diff <(wget -O - url1) <(wget -O - url2)
+
 # Optionally add default arguments here.
 
 dependencies=()
 
 main() {
-    echo "Hi, I'm the main function!"
+    log "Hi, I'm the main function!"
+    detect_os
     exit 0
 }
 
@@ -48,7 +51,7 @@ check_dependencies() {
 
 cleanup() {
     trap - SIGINT SIGTERM ERR EXIT
-    echo "Cleaning up..."
+    log "Cleaning up..."
 }
 
 parse_args() {
@@ -65,14 +68,34 @@ parse_args() {
     done
 }
 
+die() {
+    >&2 echo -e "Fatal: ${*}"; exit 1;
+}
+
+log() {
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')]: $*" >&2
+}
+
+detect_os() {
+    case "$OSTYPE" in
+        solaris*) log "OS: SOLARIS" ;;
+        darwin*)  log "OS: OSX" ;;
+        linux*)   log "OS: LINUX" ;;
+        bsd*)     log "OS: BSD" ;;
+        msys*)    log "OS: WINDOWS" ;;
+        cygwin*)  log "OS: ALSO WINDOWS CYGWIN" ;;
+        *)        log "OS: Unknown ($OSTYPE)" ;;
+    esac
+}
+
 if [[ ${VERBOSE-} =~ ^1|yes|true$ ]]; then
     set -o verbose
-    echo "Verbose mode enabled."
+    log "Verbose mode enabled."
 fi
 
 if [[ ${DEBUG-} =~ ^1|yes|true$ ]]; then
     set -o xtrace
-    echo "Debug mode enabled."
+    log "Debug mode enabled."
 fi
 
 # Enable error detection if script is not being sourced.
