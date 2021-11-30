@@ -1,6 +1,6 @@
 #!/bin/bash
 
-RAW_GIT=https://raw.githubusercontent.com
+raw_git=https://raw.githubusercontent.com
 
 source $HOME/.dotfiles/scripts/logger.sh
 
@@ -63,10 +63,10 @@ tar -xzf $COC_INSTALL/release.tar.gz
 # rm $COC_INSTALL/release.tar.gz
 
 ppi "Installing onedark color scheme"
-rm -rf $RAW_GIT/joshdick/onedark.vim/master/colors/onedark.vim
-rm -rf $RAW_GIT/joshdick/onedark.vim/master/autoload/onedark.vim
-curl -fsSL -o $HOME/.dotfiles/.vim/colors/onedark.vim $RAW_GIT/joshdick/onedark.vim/master/colors/onedark.vim
-curl -fsSL -o $HOME/.dotfiles/.vim/autoload/onedark.vim $RAW_GIT/joshdick/onedark.vim/master/autoload/onedark.vim
+rm -rf $raw_git/joshdick/onedark.vim/master/colors/onedark.vim
+rm -rf $raw_git/joshdick/onedark.vim/master/autoload/onedark.vim
+curl -fsSL -o $HOME/.dotfiles/.vim/colors/onedark.vim $raw_git/joshdick/onedark.vim/master/colors/onedark.vim
+curl -fsSL -o $HOME/.dotfiles/.vim/autoload/onedark.vim $raw_git/joshdick/onedark.vim/master/autoload/onedark.vim
 
 ppi "Installing FZF plugin"
 rm -rf $HOME/.vim/pack/default/start/fzf
