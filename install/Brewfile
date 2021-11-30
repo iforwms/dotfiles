@@ -47,6 +47,7 @@ brew 'pngquant'
 brew 'proxychains-ng'
 brew 'stockfish'
 brew 'svgo'
+brew 'evince'
 
 # Apps
 cask 'alfred'
