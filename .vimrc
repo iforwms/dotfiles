@@ -347,6 +347,9 @@ nnoremap <leader>p :call Prettify()<cr>
 "Invoke FZF for current directory
 nnoremap <silent> <leader>f :GFiles<cr>
 
+"Toggle soft line wrap using F9
+nnoremap <leader>[ :set wrap!<cr>
+
 "Invoke FZF respecting .gitignore
 nnoremap <silent> <leader>gf :Files<cr>
 
