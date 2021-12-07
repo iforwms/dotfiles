@@ -117,6 +117,8 @@ alias mylip="ifconfig tun0 | awk '/inet / {print \$2}'"
 # alias localip="ifconfig -a | grep -o 'inet6\? \(addr:\)\?\s\?\(\(\([0-9]\+\.\)\{3\}[0-9]\+\)\|[a-fA-F0-9:]\+\)' | awk '{ sub(/inet6? (addr:)? ?/, \"\"); print }'"
 
 # Lilypond
+alias lilypond="/Applications/LilyPond.app/Contents/Resources/bin/lilypond"
+alias lilypond-book="/Applications/LilyPond.app/Contents/Resources/bin/lilypond-book"
 alias scores="cd ~/Documents/scores"
 alias lily="docker run --rm -v $(pwd):/app -w /app gpit2286/lilypond lilypond"
 function lilyw() {
