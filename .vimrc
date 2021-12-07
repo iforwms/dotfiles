@@ -333,19 +333,31 @@ function! Prettify()
     let curPos = getcurpos()
     let cmd = "%!prettier --stdin-filepath %"
     if (&ft=='sh')
-        let cmd = ":silent make! % | silent redraw!"
+        let cmd = ":silent make! %"
         set local errorformat+=%f:%l:%c\ %m
     endif
     if (&ft=='python')
         let cmd = "!black %"
     endif
     exe cmd
+    exe ":silent redraw!"
     call setpos('.', curPos)
 endfunction
 nnoremap <leader>p :call Prettify()<cr>
 
+function! PdfLatex()
+    let curPos = getcurpos()
+    exe ":silent !~/.dotfiles/scripts/latex_preview % %:r >/dev/null 2>&1"
+    exe ":silent redraw!"
+    call setpos('.', curPos)
+endfunction
+nnoremap <silent> <leader>l :call PdfLatex()<cr>
+
 "Invoke FZF for current directory
 nnoremap <silent> <leader>f :GFiles<cr>
+
+"Toggle soft line wrap using F9
+nnoremap <leader>[ :set wrap!<cr>
 
 "Invoke FZF respecting .gitignore
 nnoremap <silent> <leader>gf :Files<cr>
