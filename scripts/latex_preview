@@ -1,0 +1,5 @@
+#!/bin/bash
+
+pdflatex "${1}"
+open "${2}.pdf"
+osascript -e 'activate application "iTerm2"'
