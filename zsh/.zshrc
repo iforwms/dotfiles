@@ -187,3 +187,5 @@ export NVM_DIR="$HOME/.nvm"
 
 # !:0     the command
 # !!      repeat the previous line
+export PATH="/usr/local/opt/bison/bin:$PATH"
+export PATH="/usr/local/opt/texinfo/bin:$PATH"
