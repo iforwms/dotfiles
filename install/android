@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo 'Installing software...'
+# TODO
+
+echo 'Setting up git'
+git config --global user.email "ifor@cors.tech"
+git config --global user.name "Ifor Waldo Williams"
+git config --global init.defaultBranch "main"
