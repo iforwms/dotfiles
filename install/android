@@ -4,6 +4,9 @@
 # pkg install tmux python php git file jq fzf rg wget htop ncat nmap tree vim zsh
 
 echo 'Setting up symlinks...'
+ln -s $HOME/.dotfiles/termux/termux.properties $HOME
+ln -s $HOME/.dotfiles/zsh/.zshrc $HOME
+ln -s $HOME/.dotfiles/tmux/.tmux.conf $HOME
 
 echo 'Setting up git'
 git config --global user.email "ifor@cors.tech"
