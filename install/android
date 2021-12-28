@@ -1,7 +1,9 @@
 #!/bin/bash
 
 echo 'Installing software...'
-# TODO
+pkg install tmux python php git
+
+echo 'Setting up symlinks...'
 
 echo 'Setting up git'
 git config --global user.email "ifor@cors.tech"
