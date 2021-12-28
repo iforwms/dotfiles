@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo 'Installing software...'
-pkg install tmux python php git
+# echo 'Installing software...'
+# pkg install tmux python php git file jq fzf rg wget htop ncat nmap tree vim zsh
 
 echo 'Setting up symlinks...'
 
