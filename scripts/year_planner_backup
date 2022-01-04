@@ -1,0 +1,4 @@
+#!/bin/bash
+
+filename="year_planner_backup_$(date +%Y-%m-%d).json"
+scp clients:/home/ifor/code/year_planner/db/data.json "/Users/ifor/Documents/backup/${filename}"
