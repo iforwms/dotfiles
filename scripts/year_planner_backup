@@ -1,4 +1,8 @@
 #!/bin/bash
 
-filename="year_planner_backup_$(date +%Y-%m-%d).json"
-scp clients:/home/ifor/code/year_planner/db/data.json "/Users/ifor/Documents/backup/${filename}"
+filename="year_planner_backup_$(date +%Y-%m-%d)"
+destination="/Users/ifor/Documents/backup"
+
+scp clients:/home/ifor/code/year_planner/db/data.json "${destination}/${filename}.json"
+
+sed 's/:\[/,/g;s/{//;s/}//;s/\]//g;s/,"/\n"/g;i date,drink,ear_training,bass,exercise,chinese' "${destination}/${filename}.json" > "${destination}/${filename}.csv"
