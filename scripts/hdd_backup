@@ -10,7 +10,7 @@
 # delete - Delete file on the destination that don't exist on source; clean up deleted files in backup
 # stats - Give some file-transfer stats
 
-SOURCE=/Volumes/IFOR2T/
+SOURCE=/Volumes/IFOR2T
 DEST=/Volumes/IFOR2T_BACKUP
 
 if [ ! -d $SOURCE ]; then
@@ -25,7 +25,7 @@ fi
 
 echo "########### HDD backup starting at $(date) ###########"
 
-rsync -ahvAE --delete --stats $SOURCE $DEST 2>&1 | tee /Users/ifor/hdd-backup.log
+rsync -ahvAE --delete --stats --ignore-errors "${SOURCE}/" "${DEST}" 2>&1 | tee /Users/ifor/hdd-backup.log
 
 if [ "$?" -eq 0 ];
 then
