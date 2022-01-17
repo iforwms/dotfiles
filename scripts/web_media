@@ -7,6 +7,9 @@ resolution="$3"
 # Generate thumbnail
 ffmpeg -ss 3 -i "$input" -vframes 1 -vf scale=${resolution:-1280}:-2 -q:v 2 "${output}.jpg"
 
+# Generate audio
+ffmpeg -i "$input" -vn -acodec libmp3lame -b:a 192k "${output}.mp3"
+
 # crf 0 is lossless, 23 is default, and 51 is worst possible. 18-28 is a sane range
 # Android in particular doesn't support higher profiles.
 ffmpeg \
