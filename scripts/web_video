@@ -1,0 +1,25 @@
+#!/bin/bash
+
+input="$1"
+output="$2"
+resolution="$3"
+
+# Generate thumbnail
+ffmpeg -ss 3 -i "$input" -vframes 1 -vf scale=${resolution:-1280}:-2 -q:v 2 "${output}.jpg"
+
+# crf 0 is lossless, 23 is default, and 51 is worst possible. 18-28 is a sane range
+# Android in particular doesn't support higher profiles.
+ffmpeg \
+    -i "$input" \
+    -c:v libx264 \
+    -c:a aac \
+    -pix_fmt yuv420p \
+    -profile:v baseline \
+    -level 3.0 \
+    -crf 22 \
+    -preset veryslow \
+    -vf scale=${resolution:-1280}:-2:flags=lanczos \
+    -movflags \
+    +faststart \
+    -strict -2 \
+    "$output"
