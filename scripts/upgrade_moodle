@@ -1,0 +1,21 @@
+#!/bin/bash
+
+scripts_dir="admin/cli"
+maintenance_script="${scripts_dir}/maintenance.php"
+
+if [[ ! -f $maintenance ]]; then
+    echo "Scripts not found, are you in the main Moodle directory?"
+    exit 1
+fi
+
+echo "Enabling maintenance mode."
+sudo -u ${1:-www-data} /usr/bin/php $maintenance --enable
+
+echo "Fetching latest updates..."
+git pull
+
+echo "Performing upgrade..."
+sudo -u ${1:-www-data} /usr/bin/php "${scripts_dir}/upgrade.php"
+
+echo "Disabling maintenance mode."
+sudo -u ${1:-www-data} /usr/bin/php $maintenance --disable
