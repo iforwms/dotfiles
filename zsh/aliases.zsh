@@ -151,6 +151,7 @@ alias yrs='yarn start'
 alias gl='git log --oneline --all --graph --decorate --pretty=format:"%Cgreen%h %Cred%d %Creset%s  %Cblue(%ar) <%an>" $*'
 alias gs='git status'
 alias gc='git commit -m'
+alias gcl="${DOTFILES}/scripts/git_clone"
 alias gco='git checkout'
 alias gca='git commit -am'
 alias gcam='git commit --amend'
