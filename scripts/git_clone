@@ -1,0 +1,13 @@
+#!/bin/bash
+
+repo=$1
+dir=${2:-$repo}
+username=${3:-iforwms}
+
+echo "Cloning ${username}/${repo} into ${dir}..."
+
+git clone git@github.com:${username}/${repo} $dir
+
+echo "Done!"
+
+exit 0
