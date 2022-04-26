@@ -111,6 +111,9 @@ alias nfresh="rm -rf node_modules/ package-lock.json && yarn install"
 # gdb
 alias gdbinit="echo 'set disassembly-flavor intel' > $HOME/.gdbinit"
 
+# less
+alias less="less -N"
+
 # IP addresses
 alias myip="curl https://diagnostic.opendns.com/myip ; echo"
 alias mylip="ifconfig tun0 | awk '/inet / {print \$2}'"
