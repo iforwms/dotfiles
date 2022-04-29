@@ -6,7 +6,7 @@ username=${3:-iforwms}
 
 echo "Cloning ${username}/${repo} into ${dir}..."
 
-git clone git@github.com:${username}/${repo} $dir
+git clone "git@github.com:${username}/${repo}" "$dir"
 
 echo "Done!"
 

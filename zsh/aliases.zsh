@@ -76,7 +76,7 @@ alias knot=$DOTFILES/scripts/animated_knots
 alias dnsReset="sudo killall -HUP mDNSResponder"
 # Laravel
 function llog() {
-    less storage/logs/laravel-$(date '+%Y-%m-%d').log
+    less -N storage/logs/laravel-$(date '+%Y-%m-%d').log
 }
 alias a="php artisan"
 alias aw="sudo -u www-data php artisan"
@@ -155,6 +155,7 @@ alias gl='git log --oneline --all --graph --decorate --pretty=format:"%Cgreen%h 
 alias gs='git status'
 alias gc='git commit -m'
 alias gcl="${DOTFILES}/scripts/git_clone"
+alias gad='git add $(git diff --name-only --cached)'
 alias gco='git checkout'
 alias gca='git commit -am'
 alias gcam='git commit --amend'
