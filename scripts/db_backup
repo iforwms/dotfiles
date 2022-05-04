@@ -1,5 +1,30 @@
 #!/bin/bash
 
+backup_dir=/home/ifor/backups
+user=root
+hostname="127.0.0.1"
+now=$(date +"%F")
+password=$(cat /home/ifor/mysql_pass)
+password=secret
+
+databases=$(mysql -h $hostname -u $user -p$password -e "SHOW DATABASES;" | tr -d "| " | grep -v Database)
+
+[ ! -d $backup_dir ] && mkdir -p $backup_dir
+
 echo 'Backing up databases...'
+
+for db in $databases; do
+  file="${DEST}/$db.sql.gz"
+  filedate=
+
+  [ -f $file ] && filedate=$(date -r $file +"%F")
+  [ "$filedate" == "$now" ] && continue
+
+  [ -f $file ] && mv "$file" "${file}.old"
+
+  mysqldump --single-transaction --routines --quick -h $hostname -u $user -p$password -B $db | gzip > "$file"
+
+  rm -f "${file}.old"
+done
 
 echo 'Backup success!'
