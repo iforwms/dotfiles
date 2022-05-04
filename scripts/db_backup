@@ -6,7 +6,7 @@ hostname="127.0.0.1"
 now=$(date +"%F")
 password=$(cat /home/ifor/mysql_pass)
 
-databases=$(mysql -h $hostname -u $user -p$password -s -N -e "SHOW DATABASES;")
+databases=$(mysql -h $hostname -u $user -p$password -s -N -e "SHOW DATABASES;" | grep -v "information_schema.sql\|mysql\|performance_schema\|sys")
 
 [ ! -d $backup_dir ] && mkdir -p $backup_dir
 
