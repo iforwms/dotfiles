@@ -1,0 +1,24 @@
+#!/bin/bash
+
+echo "Analysing and normalising audio files..."
+
+for f in dictionary_audios/1223/1.mp3; do
+    echo "Analysing ${f}..."
+
+    ffmpeg -i $f -filter_complex "[0:a]loudnorm=I=-16:TP=-1.5:LRA=11:print_format=summary" -f null /dev/null 2> "${f}.txt"
+
+    ii=$(cat "${f}.txt" | awk '/Input Integrated/ {print $3}')
+    itp=$(cat "${f}.txt" | awk '/Input True Peak/ {print $4}')
+    ilra=$(cat "${f}.txt" | awk '/Input LRA/ {print $3}')
+    it=$(cat "${f}.txt" | awk '/Input Threshold/ {print $3}')
+    oi=$(cat "${f}.txt" | awk '/Output Integrated/ {print $3}')
+    otp=$(cat "${f}.txt" | awk '/Output True Peak/ {print $4}')
+    olra=$(cat "${f}.txt" | awk '/Output LRA/ {print $3}')
+    ot=$(cat "${f}.txt" | awk '/Output Threshold/ {print $3}')
+    to=$(cat "${f}.txt" | awk '/Target Offset/ {print $3}')
+
+    echo "Normalising ${f}..."
+    ffmpeg -i $f -af loudnorm=linear=true:i=-16:lra=11:tp=-1.5:measured_I=$ii:measured_LRA=$ilra:measured_tp=$itp:measured_thresh=$it:offset=$to:print_format=summary "${f}.loudnorm.mp3"
+done
+
+echo "Done!"
