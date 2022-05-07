@@ -17,7 +17,7 @@ for db in $databases; do
   filedate=
 
   [ -f "$file" ] && filedate=$(date -r "$file" +"%F")
-  [ "$filedate" == "$now" ] && [[ -n $1 ]] && continue
+  [ "$filedate" == "$now" ] && [[ -z $1 ]] && continue
 
   [ -f "$file" ] && mv "$file" "${file}.old"
 
