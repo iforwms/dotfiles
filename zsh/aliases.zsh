@@ -43,6 +43,7 @@ alias deploy='sudo -u www-data ./deploy'
 alias l='ls -lAh --color=auto --time-style="+%Y %b %d %H:%M"'
 alias ls='ls -A --color=auto --time-style="+%Y %b %d %H:%M"'
 alias sagi='sudo apt-get install'
+alias sagu='sudo apt-get update'
 
 if command -v ggrep &> /dev/null; then
   alias grep='ggrep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox}'
