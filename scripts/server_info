@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# if [[ $(uname -s) != 'Linux' ]]; then
+#     echo "This script should be run on a Linux machine. Aborting..."
+#     exit 1
+# fi
+
+# if [[ "$EUID" -ne 0 ]]; then
+#     echo "This script needs to be run as root, please try again using:"
+#     echo
+#     echo "    sudo ./server_info"
+#     echo
+#     exit 1
+# fi
+
+os=$(lsb_release -ds 2> /dev/null)
+linux_version=$(uname -r 2> /dev/null)
+total_ram=$(awk '/MemTotal/ {printf "%.1f GB\n", $2/1024/1024 }' /proc/meminfo 2> /dev/null)
+total_cores=$(nproc --all 2> /dev/null)
+cpu_speed=$(awk '/cpu MHz/ { printf "%.1f GHz\n", $4/1000; exit }' /proc/cpuinfo 2> /dev/null)
+free_disk_space=$(df -h | awk '/\/dev\/vda1/ { printf "%s total, %s free\n", $2, $4 }' 2> /dev/null)
+
+if [[ $(swapon -s 2> /dev/null) ]]; then
+    swap_status="swap enabled"
+else
+    swap_status="swap disabled"
+fi
+
+http=$(lsof -i -P -n | awk '/80 \(LISTEN/ { print $1; exit }' 2> /dev/null)
+if [[ "$http" ]]; then
+    http_port_open="no (used by ${http})"
+else
+    http_port_open="yes"
+fi
+
+https=$(lsof -i -P -n | awk '/443 \(LISTEN/ { print $1; exit }' 2> /dev/null)
+if [[ "$https" ]]; then
+    https_port_open="no (used by ${https})"
+else
+    https_port_open="yes"
+fi
+
+echo "========================================================"
+echo "Server Info"
+echo "========================================================"
+
+printf "OS\t\t\t: %s (Kernel %s)\n" "${os:-"Unknown"}" "${linux_version:-"Unknown"}"
+printf "CPU\t\t\t: %i cores @ %s\n" "${total_cores:-"Unknown"}" "${cpu_speed:-"Unknown"}"
+printf "Total RAM\t\t: %s (%s)\n" "${total_ram:-"Unknown"}" "${swap_status:-"Unknown"}"
+printf "Disk Space\t\t: %s\n" "${free_disk_space:-"Unknown"}"
+printf "Http port [80] open\t: %s\n" "${http_port_open:-"Unknown"}"
+printf "Https port [443] open\t: %s\n" "${https_port_open:-"Unknown"}"
+
+exit 0
