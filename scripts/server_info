@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# if [[ $(uname -s) != 'Linux' ]]; then
-#     echo "This script should be run on a Linux machine. Aborting..."
-#     exit 1
-# fi
+if [[ $(uname -s) != 'Linux' ]]; then
+    echo
+    echo "Warning: this script should be run on a Linux machine. Some details may be unknown."
+fi
 
 if [[ "$EUID" -ne 0 ]]; then
     echo "This script needs to be run as root, please try again using:"
@@ -23,17 +23,21 @@ free_disk_space=$(df -h | awk '/\/dev\/vda1/ { printf "%s total, %s free\n", $2,
 if [[ $(swapon -s 2> /dev/null) ]]; then
     swap_status="swap enabled"
 else
-    swap_status="swap disabled"
+    if [[ -z $(command -v swapon) ]]; then
+        swap_status="swap unknown"
+    else
+        swap_status="swap disabled"
+    fi
 fi
 
-http=$(lsof -i -P -n | awk '/80 \(LISTEN/ { print $1; exit }' 2> /dev/null)
+http=$(lsof -i -P -n | awk '/:80 \(LISTEN/ { print $1; exit }' 2> /dev/null)
 if [[ "$http" ]]; then
     http_port_open="no (used by ${http})"
 else
     http_port_open="yes"
 fi
 
-https=$(lsof -i -P -n | awk '/443 \(LISTEN/ { print $1; exit }' 2> /dev/null)
+https=$(lsof -i -P -n | awk '/:443 \(LISTEN/ { print $1; exit }' 2> /dev/null)
 if [[ "$https" ]]; then
     https_port_open="no (used by ${https})"
 else
