@@ -5,7 +5,7 @@ if [[ $(uname -s) != 'Linux' ]]; then
 fi
 
 if [[ "$EUID" -ne 0 ]]; then
-    printf "\033[0;33mWarning: For most detailed results, this script needs to be run as root:\n\033[0;32msudo ./server_info\n\n\033[0m"
+    printf "\033[0;33mWarning: For most detailed results, this script should be run as super-user:\n\033[0;32msudo ./server_info\n\n\033[0m"
 fi
 
 os=$(lsb_release -ds 2> /dev/null)
@@ -13,7 +13,7 @@ linux_version=$(uname -r 2> /dev/null)
 total_ram=$(awk '/MemTotal/ {printf "%.1f GB\n", $2/1024/1024 }' /proc/meminfo 2> /dev/null)
 total_cores=$(nproc --all 2> /dev/null)
 cpu_speed=$(awk '/cpu MHz/ { printf "%.1f GHz\n", $4/1000; exit }' /proc/cpuinfo 2> /dev/null)
-free_disk_space=$(df -h | awk '/\/dev\/vda1/ { printf "%s total, %s free\n", $2, $4 }' 2> /dev/null)
+free_disk_space=$(df -h | awk '/ \/$/ { printf "%s total, %s free\n", $2, $4 }' 2> /dev/null)
 
 if [[ $(swapon -s 2> /dev/null) ]]; then
     swap_status="swap enabled"
