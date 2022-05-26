@@ -29,14 +29,22 @@ http=$(lsof -i -P -n | awk '/:80 \(LISTEN/ { print $1; exit }' 2> /dev/null)
 if [[ "$http" ]]; then
     http_port_open="no (used by ${http})"
 else
-    http_port_open="yes"
+    if [[ "$EUID" -ne 0 ]]; then
+        http_port_open="unknown"
+    else
+        http_port_open="yes"
+    fi
 fi
 
 https=$(lsof -i -P -n | awk '/:443 \(LISTEN/ { print $1; exit }' 2> /dev/null)
 if [[ "$https" ]]; then
     https_port_open="no (used by ${https})"
 else
-    https_port_open="yes"
+    if [[ "$EUID" -ne 0 ]]; then
+        https_port_open="unknown"
+    else
+        https_port_open="yes"
+    fi
 fi
 
 echo
