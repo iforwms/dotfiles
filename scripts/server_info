@@ -1,16 +1,11 @@
 #!/bin/bash
 
 if [[ $(uname -s) != 'Linux' ]]; then
-    echo
-    echo "Warning: this script should be run on a Linux machine. Some details may be unknown."
+    printf "\033[0;33mWarning: This script should be run on a Linux machine. Some details\nmay be unknown.\n\n\033[0m"
 fi
 
 if [[ "$EUID" -ne 0 ]]; then
-    echo "This script needs to be run as root, please try again using:"
-    echo
-    echo "    sudo ./server_info"
-    echo
-    exit 1
+    printf "\033[0;33mWarning: For most detailed results, this script needs to be run as root:\n\033[0;32msudo ./server_info\n\n\033[0m"
 fi
 
 os=$(lsb_release -ds 2> /dev/null)
