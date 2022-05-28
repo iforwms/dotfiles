@@ -33,8 +33,9 @@ rsync \
     --recursive \
     --compress \
     --times \
-    --fake-super \
+    --omit-dir-times \
     --perms \
+    --fake-super \
     --owner \
     --group \
     --usermap="\*:${owner}" \
