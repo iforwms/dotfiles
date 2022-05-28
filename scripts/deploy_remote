@@ -1,0 +1,46 @@
+#!/bin/bash
+# set -x
+
+local="$1"
+remote="$2"
+owner="${3:-www-data}"
+group="${4:-www-data}"
+perms="${5:-D2775,F664}"
+include=()
+exclude=(
+    .env
+    .git
+    .gitignore
+    .DS_Store
+    deploy_remote
+    tags
+    vendor
+    node_modules
+)
+
+include_opts=()
+for item in "${include[@]}"; do
+    include_opts+=( --include="$item" )
+done
+exclude_opts=()
+for item in "${exclude[@]}"; do
+    exclude_opts+=( --exclude="$item" )
+done
+
+rsync \
+    ${DRYRUNARG:+"$DRYRUNARG"} \
+    --verbose \
+    --recursive \
+    --compress \
+    --times \
+    --fake-super \
+    --perms \
+    --owner \
+    --group \
+    --usermap="\*:${owner}" \
+    --groupmap="\*:${group}" \
+    --chmod="${perms}" \
+    "${include_opts[@]}" \
+    "${exclude_opts[@]}" \
+    --delete \
+    "${local}" "${remote}"
