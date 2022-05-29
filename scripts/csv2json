@@ -1,0 +1,12 @@
+#!/bin/bash
+
+csv=$1
+
+if [[ $# -lt 1 ]]; then
+    echo "Please enter the path to the CSV file."
+    exit 1
+fi
+
+cat "${csv}" | python -c 'import csv, json, sys; print(json.dumps([dict(r) for r in csv.DictReader(sys.stdin)]))'
+
+exit 0
