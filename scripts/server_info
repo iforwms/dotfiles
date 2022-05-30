@@ -52,7 +52,7 @@ echo "==========================================================================
 echo "Server Info"
 echo "================================================================================"
 echo
-printf "OS\t\t\t: %s (Kernel %s)\n" "${os:-"Unknown"}" "${linux_version:-"Unknown"}"
+printf "OS\t\t\t: %s (%s kernel)\n" "${os:-"Unknown"}" "${linux_version:-"Unknown"}"
 printf "CPU\t\t\t: %i cores @ %s\n" "${total_cores:-"Unknown"}" "${cpu_speed:-"Unknown"}"
 printf "Total RAM\t\t: %s (%s)\n" "${total_ram:-"Unknown"}" "${swap_status:-"Unknown"}"
 printf "Disk Space\t\t: %s\n" "${free_disk_space:-"Unknown"}"
