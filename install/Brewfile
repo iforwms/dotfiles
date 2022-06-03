@@ -8,6 +8,7 @@ tap 'homebrew/cask-versions'
 # Binaries
 brew 'awscli'
 brew 'arduino-cli'
+brew 'binwalk'
 brew 'cash-cli' # currency rates
 brew 'cmus' # terminal player
 brew 'colordiff'

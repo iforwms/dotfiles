@@ -91,7 +91,7 @@ alias pu="vendor/bin/phpunit"
 alias pf="vendor/bin/phpunit --filter"
 
 # Composer
-alias cu="composer update"
+# alias cu="composer update"
 alias cr="composer require"
 alias ci="composer install"
 alias cda="composer dump-autoload -o"
@@ -115,6 +115,8 @@ alias gdbinit="echo 'set disassembly-flavor intel' > $HOME/.gdbinit"
 
 # less
 alias less="less -N"
+
+alias acl="arduino-cli"
 
 # IP addresses
 alias myip="curl https://diagnostic.opendns.com/myip ; echo"
