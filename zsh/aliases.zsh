@@ -155,7 +155,11 @@ alias yrs='yarn start'
 # alias sv="source venv/bin/activate"
 
 function inv() {
-    curl --silent "https://pedals.iforwms.com/api/inventory?q=${1}" | jq
+    (
+        echo "Name\tType\tQuantity"
+        curl --silent "https://pedals.iforwms.com/api/inventory?q=${1}" \
+        | jq -r '.data[] | "\(.name)\t\(.type)\t\(.quantity)"'
+    ) | column -t -s $'\t'
 }
 
 # Git
