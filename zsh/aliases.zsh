@@ -154,6 +154,10 @@ alias yrs='yarn start'
 # alias p="python"
 # alias sv="source venv/bin/activate"
 
+function inv() {
+    curl --silent "https://pedals.iforwms.com/api/inventory?q=${1}" | jq
+}
+
 # Git
 # alias gl='git log --oneline --all --graph --decorate --pretty=format:"%Cgreen%h %Cred%d %Creset%s  %Cblue(%ar) <%an>" $*'
 alias gl="git log --oneline --all --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
