@@ -155,7 +155,10 @@ alias yrs='yarn start'
 # alias sv="source venv/bin/activate"
 
 # Git
-alias gl='git log --oneline --all --graph --decorate --pretty=format:"%Cgreen%h %Cred%d %Creset%s  %Cblue(%ar) <%an>" $*'
+# alias gl='git log --oneline --all --graph --decorate --pretty=format:"%Cgreen%h %Cred%d %Creset%s  %Cblue(%ar) <%an>" $*'
+alias gl="git log --oneline --all --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+alias glb="git log --simplify-by-decoration --all --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --all"
+# alias glb='git log --graph --simplify-by-decoration --pretty=format:'%d' --all'
 alias gs='git status'
 alias gc='git commit -m'
 alias gcl="${DOTFILES}/scripts/git_clone"
