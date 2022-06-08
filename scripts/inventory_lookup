@@ -1,0 +1,18 @@
+#!/bin/bash
+
+
+response=$(
+curl --silent "https://pedals.iforwms.com/api/inventory?q=${1}" \
+    | jq -r '.data[] | "\(.name)\t\(.type)\t\(.quantity)"'
+)
+
+if [[ -z "$response" ]]; then
+    echo "Part not found."
+    exit 0
+fi
+
+(
+    printf "Name\tType\tQuantity\n"
+    echo "$response"
+) | column -t -s $'\t'
+exit 0
