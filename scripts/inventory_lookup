@@ -1,13 +1,20 @@
 #!/bin/bash
 
+query="$(echo $@ | sed 's/ /,/g')"
+url="https://pedals.iforwms.com/api/inventory"
+
+if [[ $DEBUG -eq 1 ]]; then
+    url=$(echo $url | sed 's/com/test/')
+    echo "[DEBUG] ${url}?q=${query}"
+fi
 
 response=$(
-curl --silent "https://pedals.iforwms.com/api/inventory?q=${1}" \
+curl --silent --insecure "${url}?q=${query}" \
     | jq -r '.data[] | "\(.name)\t\(.type)\t\(.quantity)"'
 )
 
 if [[ -z "$response" ]]; then
-    echo "Part not found."
+    echo "Part(s) not found."
     exit 0
 fi
 
