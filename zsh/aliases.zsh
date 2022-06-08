@@ -154,13 +154,7 @@ alias yrs='yarn start'
 # alias p="python"
 # alias sv="source venv/bin/activate"
 
-function inv() {
-    (
-        echo "Name\tType\tQuantity"
-        curl --silent "https://pedals.iforwms.com/api/inventory?q=${1}" \
-        | jq -r '.data[] | "\(.name)\t\(.type)\t\(.quantity)"'
-    ) | column -t -s $'\t'
-}
+alias inv="${DOTFILES}/scripts/inventory_lookup"
 
 # Git
 # alias gl='git log --oneline --all --graph --decorate --pretty=format:"%Cgreen%h %Cred%d %Creset%s  %Cblue(%ar) <%an>" $*'
