@@ -1,0 +1,11 @@
+#!/bin/bash
+
+folder="${1:-/Users/ifor/Downloads}"
+
+function clean() {
+    src="${1}"
+    dest="$(echo $src | sed -E 's/(.*[0-9]{4}).*/\1/;s:^\./:\./_:')"
+    mv $src $dest
+}
+export -f clean
+find . -maxdepth 1 -regextype sed -regex ".*[0-9]\{4\}.*" -print0 | xargs -0 -I {} bash -c "clean {}"
