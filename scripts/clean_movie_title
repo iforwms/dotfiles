@@ -3,13 +3,15 @@
 folder="${1:-/Users/ifor/Downloads}"
 
 function clean() {
-    src="${1}"
-    dest="$(echo "$src" | sed -E 's/(.*[0-9]{4}).*/\1/;s:^\./:\./_:;s/ /\./g;s/\(//g;s/__/_/g')"
+    src="$1"
+    folder="$2"
+    dest="$(echo "$src" | sed -E "s/(.*[0-9]{4}).*/\1/;s:^${folder}/:${folder}/_:;s/ /\./g;s/\(//g;s/__/_/g")"
     if [[ -n $DEBUG ]]; then
-        echo "$src" "$dest"
+        echo "DRY RUN - No files modified."
     else
         mv "$src" "$dest"
     fi
+    echo "$src" "--->" "$dest"
 }
 export -f clean
-find . -maxdepth 1 -regextype sed -regex ".*[0-9]\{4\}.*" -print0 | xargs -0 -I {} bash -c "clean '{}'"
+find "${folder}" -maxdepth 1 -regextype sed -regex ".*[0-9]\{4\}.*" -print0 | xargs -0 -I {} bash -c "clean '{}' '${folder}'"
