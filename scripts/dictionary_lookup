@@ -1,0 +1,15 @@
+#!/bin/bash
+
+word="$1"
+lang="${2:-en}"
+url="https://api.dictionaryapi.dev/api/v2/entries/${lang}/${word}"
+
+if [[ $# -lt 1 ]]; then
+    echo "Missing word, exiting."
+    exit 1
+fi
+
+curl --silent "${url}" \
+    | tee ~/Downloads/dict_test.json | jq '.[].meanings[].definitions[].definition'
+exit 0
+
