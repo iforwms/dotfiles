@@ -155,6 +155,7 @@ alias yrs='yarn start'
 # alias sv="source venv/bin/activate"
 
 alias inv="${DOTFILES}/scripts/inventory_lookup"
+alias dict="${DOTFILES}/scripts/dictionary_lookup"
 
 # Git
 # alias gl='git log --oneline --all --graph --decorate --pretty=format:"%Cgreen%h %Cred%d %Creset%s  %Cblue(%ar) <%an>" $*'
