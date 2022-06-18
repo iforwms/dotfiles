@@ -1,6 +1,7 @@
 #!/bin/bash
 
-folder="${1:-/Users/ifor/Downloads}"
+input_folder="${1:-/Users/ifor/Downloads}"
+output_folder="${1:-/Users/ifor/Movies}"
 
 function clean() {
     src="$1"
@@ -14,4 +15,4 @@ function clean() {
     echo "$src" "--->" "$dest"
 }
 export -f clean
-find "${folder}" -maxdepth 1 -regextype sed -regex ".*[0-9]\{4\}.*" -print0 | xargs -0 -I {} bash -c "clean '{}' '${folder}'"
+find "${input_folder}" -maxdepth 1 -regextype sed -regex ".*[0-9]\{4\}.*" -print0 | xargs -0 -I {} bash -c "clean '{}' '${output_folder}'"
