@@ -87,7 +87,7 @@ nnoremap n nzzzv
 nnoremap N Nzzzv
 
 " Keep join string in same cursor position
-nnoremap J mzJ`z
+" nnoremap J mzJ`z
 
 " Add additional undo points
 " inoremap , ,<c-g>u
