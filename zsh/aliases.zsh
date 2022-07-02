@@ -158,6 +158,7 @@ alias inv="${DOTFILES}/scripts/inventory_lookup"
 alias dict="${DOTFILES}/scripts/dictionary_lookup"
 
 # Git
+alias gau='echo - "a\n*\nq\n" | git add -i > /dev/null'
 # alias gl='git log --oneline --all --graph --decorate --pretty=format:"%Cgreen%h %Cred%d %Creset%s  %Cblue(%ar) <%an>" $*'
 alias gl="git log --oneline --all --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 alias glb="git log --simplify-by-decoration --all --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --all"
