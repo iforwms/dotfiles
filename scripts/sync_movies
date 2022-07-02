@@ -1,7 +1,7 @@
 #!/bin/bash
 
-local_path="/Users/ifor/Movies"
-remote_path="/Volumes/IFOR2T/videos"
+local_path="${1:-/Users/ifor/Movies}"
+remote_path="${2:-/Volumes/IFOR2T/videos}"
 
 for f in kids movies tv; do
     local_filelist="/tmp/sync_movies_local_filelist_${f}"
