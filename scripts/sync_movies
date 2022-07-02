@@ -7,10 +7,10 @@ for f in kids movies tv; do
     local_filelist="/tmp/sync_movies_local_filelist_${f}"
     remote_filelist="/tmp/sync_movies_remote_filelist_${f}"
 
-    find "${local_path}/${f}/" -mindepth 1 -maxdepth 1 -type d -printf '%P\n' | sed 's/^_//' > "${local_filelist}"
-    find "${remote_path}/${f}/" -mindepth 1 -maxdepth 1 -type d -printf '%P\n' | sed 's/^_//' > "${remote_filelist}"
+    find "${local_path}/${f}/" -mindepth 1 -maxdepth 1 -type d -printf '%P\n' | sed 's/^_//' | sort > "${local_filelist}"
+    find "${remote_path}/${f}/" -mindepth 1 -maxdepth 1 -type d -printf '%P\n' | sed 's/^_//' | sort > "${remote_filelist}"
 
-    diff $local_filelist $remote_filelist
+    comm -23 $local_filelist $remote_filelist
 done
 
 exit 0
