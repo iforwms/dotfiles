@@ -22,7 +22,7 @@ function clean() {
 export -f clean
 
 find "${src_dir}" -maxdepth 1 -regextype sed -regex ".*[0-9]\{4\}.*" -print0 | \
-    xargs -0 -I {} bash -c "clean '${movie_regex}' '{}' '${src_dir}' '${dest_dir}'"
+    xargs -0 -I {} bash -c "clean '${movie_regex}' '{}' '${src_dir}' '${dest_dir}/movies'"
 
 find "${src_dir}" -maxdepth 1 -regextype sed -iregex ".*S[0-9]\{2\}\.complete.*" -print0 | \
-    xargs -0 -I {} bash -c "clean '${tv_regex}' '{}' '${src_dir}' '${dest_dir}'"
+    xargs -0 -I {} bash -c "clean '${tv_regex}' '{}' '${src_dir}' '${dest_dir}/tv'"
