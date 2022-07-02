@@ -10,7 +10,9 @@ for f in kids movies tv; do
     find "${local_path}/${f}/" -mindepth 1 -maxdepth 1 -type d -printf '%P\n' | sed 's/^_//' | sort > "${local_filelist}"
     find "${remote_path}/${f}/" -mindepth 1 -maxdepth 1 -type d -printf '%P\n' | sed 's/^_//' | sort > "${remote_filelist}"
 
+    echo "The following directories are not present in the ${f} remote directory."
     comm -23 $local_filelist $remote_filelist
+    echo
 done
 
 exit 0
