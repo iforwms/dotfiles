@@ -1,0 +1,3 @@
+#!/bin/bash
+
+scp -r "clients:/home/ifor/backups/*" "$HOME/Documents/backup/db"
