@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# Usage: vpn <?on|off|re> <?server>
+
+action="${1:-on}"
+server="${2:-clients}"
+air="/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/"
+home_network="CMCC-123456"
+password="iforifor"
+
+if [[ $(uname -n) == 'Macbook-Ifor' ]]; then
+    service="Wi-Fi"
+else
+    service="Ethernet"
+fi
+
+function close_ssh {
+    echo "Closing SSH connection..."
+}
+
+function on {
+    if [[ "${service}" == "Wi-Fi" ]]; then
+        if networksetup -getinfo 'Wi-Fi' | grep -q 'IP address'; then
+            echo "Already online..."
+        else
+            echo "Enabling Wi-Fi card..."
+            networksetup -setairportpower en0 on
+            sleep 1
+
+            if "${air}/airport" -s | grep -q "${home_network}"; then
+                echo "Connecting to home network..."
+                networksetup -setairportnetwork en0 "${home_network}" "${password}"
+
+                while ! networksetup -getinfo "Wi-Fi" | grep -q 'IP address'; do
+                    echo "No IP address found, sleeping..."
+                    sleep 1
+                done
+            fi
+        fi
+    fi
+
+    echo "Enabling proxy..."
+    networksetup -setsocksfirewallproxy "${service}" localhost 2080
+
+    echo "Enabling SSH tunnel..."
+    ssh -D 2080 "${server}"
+}
+
+function off {
+    echo "Disabling proxy..."
+    networksetup -setsocksfirewallproxystate "${service}" off
+    close_ssh
+}
+
+function restart {
+    off
+    on
+}
+
+if [[ "${action}" == 'on' ]]; then
+    on
+elif [[ "${action}" == 'off' ]]; then
+    off
+elif [[ "${action}" == 're' ]]; then
+    restart
+fi
+
+exit 0
