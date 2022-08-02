@@ -6,7 +6,7 @@
 # sudo apt -y install php7.4
 # sudo apt-get install -y php7.4-{bcmath,curl,bz2,intl,xml,gd,mbstring,mysql,zip}
 
-alias vi='vi -c "let g:tty='\''$(tty)'\''"'
+alias vi='/usr/local/bin/vi -c "let g:tty='\''$(tty)'\''"'
 
 # Shortcuts
 alias -- -='cd -'
