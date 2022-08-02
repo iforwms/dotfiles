@@ -30,9 +30,9 @@ alias bi="brew install"
 alias killPhotoA="launchctl disable user/$(id -u)/com.apple.photoanalysisd"
 # alias reloaddns="dscacheutil -flushcache && sudo killall -HUP mDNSResponder"
 # alias ll="/usr/local/opt/coreutils/libexec/gnubin/ls -ahlF --color --group-directories-first"
-weather() { curl -4 wttr.in/${1:-yangshuo} }
+# weather() { curl -4 "wttr.in/${1:-yangshuo}" }
 # alias phpstorm='open -a /Applications/PhpStorm.app "`pwd`"'
-alias subl='open -a "/Applications/Sublime Text.app" "`pwd`"'
+alias subl='open -a "/Applications/Sublime Text.app" "$(pwd)"'
 alias c="clear"
 # alias ping='ping -c 5'  # Pings with 5 packets, not unlimited
 # alias df='df -h'        # Disk free, in gigabytes, not bytes
@@ -130,7 +130,7 @@ function lilyw() {
 
 # Vagrant
 function hs() {
-  (cd ~/Homestead && vagrant $*)
+  (cd ~/Homestead && vagrant "$@")
 }
 # alias v="vagrant global-status"
 # alias vup="vagrant up"

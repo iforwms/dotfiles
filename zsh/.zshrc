@@ -91,7 +91,7 @@ ZSH_THEME="minimal"
 HIST_STAMPS="yyyy/mm/dd"
 
 # Would you like to use another custom folder than $ZSH/custom?
-ZSH_CUSTOM=$DOTFILES/zsh
+ZSH_CUSTOM="$DOTFILES/zsh"
 
 # Which plugins would you like to load?
 # Standard plugins can be found in ~/.oh-my-zsh/plugins/*
@@ -122,34 +122,8 @@ else
   export EDITOR='vim'
 fi
 
-export PATH="/usr/local/opt/curl/bin:$PATH"
-export PATH="${DOTFILES}/scripts:$PATH"
-
 # ImageMagick setup
 export DISPLAY=:0
-
-export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-export PATH="$HOME/.cargo/bin:$PATH"
-
-# Add all GNU paths
-for i in "/usr/local/opt/gnu-getopt/bin" \
-    "/usr/local/opt/coreutils/libexec/gnubin" \
-    "/usr/local/opt/findutils/libexec/gnubin" \
-    "/usr/local/opt/gnu-tar/libexec/gnubin" \
-    "/usr/local/opt/readline/lib/pkgconfig" \
-    "/usr/local/opt/gnu-sed/libexec/gnubin" \
-    "/usr/local/opt/openssl@1.1/bin" \
-    "/usr/local/opt/openldap/bin" \
-    "/usr/local/opt/openldap/sbin" \
-    "/usr/local/opt/curl/bin" \
-    "/usr/local/opt/sqlite/bin" \
-    "/usr/local/opt/gnu-tar/libexec/gnubin" \
-    "/usr/local/opt/gnu-indent/libexec/gnubin"
-do
-    if [ -d "$i" ]; then
-        export PATH="$i:$PATH"
-    fi
-done
 
 man() {
     LESS_TERMCAP_md=$'\e[01;31m' \
@@ -187,5 +161,5 @@ export NVM_DIR="$HOME/.nvm"
 
 # !:0     the command
 # !!      repeat the previous line
-export PATH="/usr/local/opt/bison/bin:$PATH"
-export PATH="/usr/local/opt/texinfo/bin:$PATH"
+
+source $DOTFILES/zsh/path.zsh
