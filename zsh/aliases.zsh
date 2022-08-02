@@ -76,10 +76,6 @@ alias kim="cd $HOME/code/kim"
 alias knot=$DOTFILES/scripts/animated_knots
 
 alias dnsReset="sudo killall -HUP mDNSResponder"
-# Laravel
-function llog() {
-    less -N storage/logs/laravel-$(date '+%Y-%m-%d').log
-}
 alias a="php artisan"
 alias aw="sudo -u www-data php artisan"
 alias ams="php artisan migrate:fresh --seed"
