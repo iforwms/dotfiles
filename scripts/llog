@@ -1,0 +1,11 @@
+#!/bin/bash
+
+filename="laravel-$(date '+%Y-%m-%d').log"
+path="storage/logs"
+
+if [[ ! -e "${path}/${filename}" ]]; then
+    filename="laravel.log"
+fi
+
+less -N "${path}/${filename}"
+
