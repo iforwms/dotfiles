@@ -16,7 +16,7 @@ fi
 
 function close_ssh {
     echo "Closing SSH connection..."
-    kill -9 $(ps aux | grep 'ssh -D' | grep -v grep | awk '{print $2}') >/dev/null
+    kill -9 $(ps aux | grep 'ssh -D' | grep -v grep | awk '{print $2}')
 }
 
 function on {
