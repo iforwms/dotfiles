@@ -1,6 +1,6 @@
 export DOTFILES=$HOME/.dotfiles
 
-export PATH="/bin:/usr/bin:/usr/local/bin:/usr/local/sbin:$PATH"
+export PATH="/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:$PATH"
 
 # Load Composer tools
 export PATH="$HOME/.composer/vendor/bin:$PATH"
