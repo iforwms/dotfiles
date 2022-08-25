@@ -1,0 +1,26 @@
+#!/bin/bash
+
+username='iforwms'
+email='ifor@cors.tech'
+email='iforwms'
+password='@Pa55D0M1N0'
+login_url='https://auth.dominochinese.com'
+login_url='https://scottsbasslessons.com/academy-login'
+url='https://my.dominochinese.com/feedback'
+url='https://scottsbasslessons.com/courses/a-bass-players-guide-to-electronic-music-with-john-davis/lesson-02-string-muting'
+cookie='/tmp/login_cookies'
+
+echo "Username: ${username}"
+echo "Email: ${email}"
+echo "Password: ${password}"
+echo "Login URL: ${login_url}"
+echo "URL: ${url}"
+
+curl -v --data "loginName=${email}&password=${password}" \
+    --cookie-jar $cookie \
+    $login_url
+
+curl -v --cookie $cookie \
+    $url
+
+exit 0
