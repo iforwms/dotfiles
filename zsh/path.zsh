@@ -15,6 +15,7 @@ export PATH="$HOME/.cargo/bin:$PATH"
 export PATH="$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 
 export PATH="/usr/local/opt/php@8.1/bin:$PATH"
+# export PATH="/usr/local/opt/php@7.4/bin:$PATH"
 
 # Add all GNU paths
 for i in "/usr/local/opt/gnu-getopt/bin" \
