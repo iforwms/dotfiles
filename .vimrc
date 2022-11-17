@@ -46,6 +46,9 @@ set updatetime=300
 " Don't pass messages to |ins-completion-menu|.
 set shortmess+=c
 
+nnoremap coc#float#has_scroll() ? coc#float#scroll(1, 1) : "<C-j>"
+nnoremap coc#float#has_scroll() ? coc#float#scroll(0, 1) : "<C-k>"
+
 " Always show the sign column, otherwise it would shift the text each time
 " diagnostics appear/become resolved.
 if has("patch-8.1.1564")
