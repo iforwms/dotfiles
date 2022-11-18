@@ -45,7 +45,7 @@ function on {
 
     close_ssh
 
-    echo "Enabling SSH tunnel..."
+    echo "Creating SSH tunnel..."
     ssh -D 2080 "${server}"
 }
 
