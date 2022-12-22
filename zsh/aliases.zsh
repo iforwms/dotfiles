@@ -82,6 +82,9 @@ alias ams="php artisan migrate:fresh --seed"
 alias amm="php artisan make:model"
 
 # PHP
+alias php72="/usr/local/Cellar/php@7.2/7.2.34_1/bin/php"
+alias php73="/usr/local/Cellar/php@7.3/7.3.25_1/bin/php"
+alias php74="/usr/local/Cellar/php@7.4/7.4.13_1/bin/php"
 alias cfresh="rm -rf vendor/ composer.lock && composer i"
 alias pu="vendor/bin/phpunit"
 alias pf="vendor/bin/phpunit --filter"
