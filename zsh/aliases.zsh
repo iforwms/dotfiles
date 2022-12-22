@@ -50,6 +50,11 @@ if command -v ggrep &> /dev/null; then
 fi
 
 alias randpw="$DOTFILES/scripts/random_password"
+
+# Git commit short cuts
+alias gcobs="$DOTFILES/scripts/git_commit ~/obsidian"
+alias gcdot="$DOTFILES/scripts/git_commit ~/.dotfiles"
+
 # Docker
 alias doc="docker-compose"
 # alias dstop="docker stop $(docker ps -a -q)"
