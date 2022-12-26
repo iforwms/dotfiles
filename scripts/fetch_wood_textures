@@ -1,0 +1,39 @@
+#!/bin/bash
+
+username='ifor@cors.tech'
+password="$WT_PASSWORD"
+
+# if [ -z "$password" ]; then
+#     echo "Missing password"
+#     exit 1
+# fi
+
+base_url='https://www.sketchuptextureclub.com'
+
+echo 'Attempting to log in...'
+
+echo curl "${base_url}/login.asp" -X POST \
+    -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:105.0) Gecko/20100101 Firefox/105.0' \
+    -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8' \
+    -H 'Accept-Language: en-GB,en;q=0.5' \
+    -H 'Accept-Encoding: gzip, deflate, br' \
+    -H 'Content-Type: application/x-www-form-urlencoded' \
+    -H "Origin: ${base_url}" \
+    -H 'Connection: keep-alive' \
+    -H "Referer: ${base_url}/login.asp?perc=S" \
+    -H 'Cookie: ASPSESSIONIDQURTQQBA=OIBFNHIDONHMCDGGODKFLGCA; hasConsent=true' \
+    -H 'Upgrade-Insecure-Requests: 1' \
+    -H 'Sec-Fetch-Dest: document' \
+    -H 'Sec-Fetch-Mode: navigate' \
+    -H 'Sec-Fetch-Site: same-origin' \
+    -H 'Sec-Fetch-User: ?1' \
+    -H 'DNT: 1' \
+    -H 'Sec-GPC: 1' \
+    -H 'Pragma: no-cache' \
+    -H 'Cache-Control: no-cache' \
+    --data-raw 'mail=ifor%40cors.tech&password=J%2CJ%23orzGtu%26%21%27UxUf4D%2C%7DFks%28'
+    --cookie-jar /tmp/wood_textures
+
+id="92793"
+
+curl --cookie /tmp/wood_textures "${base_url}/download.asp?m=S&t=${id}" > "/Users/ifor/Downloads/${id}"
