@@ -55,6 +55,9 @@ alias randpw="$DOTFILES/scripts/random_password"
 alias gcobs="$DOTFILES/scripts/git_commit ~/obsidian"
 alias gcdot="$DOTFILES/scripts/git_commit ~/.dotfiles"
 
+alias npmzh="npm config set registry https://registry.npm.taobao.org/"
+alias npmus="npm config set registry https://registry.npmjs.org/"
+
 # Docker
 alias doc="docker-compose"
 # alias dstop="docker stop $(docker ps -a -q)"
