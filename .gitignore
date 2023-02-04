@@ -20,3 +20,4 @@ beets/*.pickle
 .vim/spell/*.spl
 coc.nvim-release
 wireshark/80211_keys
+__pycache__
