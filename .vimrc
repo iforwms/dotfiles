@@ -318,6 +318,7 @@ nnoremap <leader>t :!ctags -R .<CR>
 
 "Alias :W to :w
 cnoreabbrev <expr> W ((getcmdtype() is# ':' && getcmdline() is# 'W')?('w'):('W'))
+cnoreabbrev <expr> Wa ((getcmdtype() is# ':' && getcmdline() is# 'Wa')?('wa'):('Wa'))
 
 "Shortcut to turn off search highlighting.
 nnoremap <leader><space> :nohlsearch<CR>
