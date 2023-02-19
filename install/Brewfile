@@ -103,7 +103,7 @@ mas 'Bandwidth+', id: 490461369
 mas 'Clocker', id: 1056643111
 mas 'Microsoft Excel', id: 462058435
 mas 'Microsoft PowerPoint', id: 462062816
-mas 'Microsoft Word', id: 462054704
+# mas 'Microsoft Word', id: 462054704
 mas 'Trello', id: 1278508951
 mas 'WeChat', id: 836500024
 mas 'Wunderlist', id: 410628904
