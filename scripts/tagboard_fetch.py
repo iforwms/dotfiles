@@ -21,11 +21,13 @@ else:
     soup = BeautifulSoup(r.content, "html.parser")
 
 body = soup.find(class_ = 'post-body')
+name = soup.find(class_ = 'post-title').text
 intro = body.find_all('p')
 images = body.find_all('img')
 image_anchors = [img.parent.attrs['href'] for img in images]
 effect_type = soup.find(class_ = 'post-labels').find('a').text
 
+print("Name:", name)
 print("Intro text:", intro)
 print("Images:", image_anchors)
 print("Effect type:", effect_type)
