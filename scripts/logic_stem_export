@@ -126,3 +126,4 @@ for f in "${directory_path}/output"/*.wav; do
         "${f%.wav}.mp3"
 done
 
+echo "[SUCCESS] All done!"
