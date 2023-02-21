@@ -125,3 +125,6 @@ CONCAT
 text
 continue
 kerf
+Cmd
+Ctrl
+globbing
