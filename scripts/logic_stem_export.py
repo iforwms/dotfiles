@@ -4,7 +4,7 @@ import re
 import glob
 from mutagen.wave import WAVE
 
-t0= time.time()
+t0 = time.time()
 
 if len(sys.argv) < 2:
     raise Exception("Missing directory path.")
