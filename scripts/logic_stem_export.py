@@ -145,12 +145,11 @@ for directory in os.listdir(f"{output_directory}"):
         os.system(command)
 
         # Create Main mix
+        command = "ffmpeg "
         track_count = 0
         for file in files:
             command += f"-i {file} "
-            debug.append(file.split("/")[-1])
             track_count += 1
-
         command += f"-filter_complex amix=inputs={track_count}:duration=first {song_directory_path}/{recording_date}_{directory}_MIX.{output_filetype}"
         os.system(command)
 
