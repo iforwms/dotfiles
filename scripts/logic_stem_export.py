@@ -33,7 +33,6 @@ for file in original_files:
     audio = WAVE(filepath)
     duration = audio.info.length
 
-    # print(f"{filepath} - {duration}")
     file_durations.append(duration)
 
 if not all(i == file_durations[0] for i in file_durations):
@@ -65,49 +64,67 @@ for recording in original_files:
 
         command = f"ffmpeg -y -nostdin -i '{directory_path}/{recording}' -ss '{start_time}' -t '{duration}' -c copy '{new_directory_path}/{new_filename}'" # 2>./error.log #-loglevel quiet
 
-        # os.system(command)
+        os.system(command)
+
+all_wavs = glob.glob(f"{output_directory}/**/*.wav")
 
 print("[INFO] Deleting empty WAVs...")
-exit()
+for file in all_wavs:
+    command = f"ffmpeg -i {file} -af silencedetect=noise=0.001 -f null - 2>&1 | awk '/silence_duration/{{print $8}}'"
+    # continue
+    # print(command)
+
+    silence_duration = subprocess.check_output(command, shell=True, encoding="UTF-8")
+    if silence_duration == '':
+        silence_duration = "0"
+    if silence_duration.__contains__("\n"):
+        silence_duration = silence_duration.split("\n")[-2]
+    silence_duration = int(float(silence_duration))
+
+    if silence_duration > 0:
+        audio = WAVE(file)
+        duration = int(audio.info.length)
+
+        if duration == silence_duration:
+            print(f'[INFO] [{file}] WAV is silent, deleting...')
+            os.remove(file)
 
 print("[INFO] Converting WAV files to MP3...")
-files = glob.glob(f"{output_directory}/**/*.wav")
-for file in files:
-    # continue
+all_wavs = glob.glob(f"{output_directory}/**/*.wav")
+for file in all_wavs:
     command = f"ffmpeg -y -i '{file}' -write_id3v1 1 -id3v2_version 3 -dither_method triangular -b:a 192k '{file.replace('.wav', '')}.mp3'"
-    # os.system(command)
+    os.system(command)
 
 section_names = [*set(section_names)]
 
 print("[INFO] Creating play-along tracks...")
+output_filetype="wav"
 for directory in os.listdir(f"{output_directory}"):
     song_directory_path = os.path.join(output_directory, directory)
     if os.path.isfile(song_directory_path):
         continue
 
     used_tracks = []
-    files = glob.glob(f"{song_directory_path}/*.mp3")
+    files = glob.glob(f"{song_directory_path}/*.{output_filetype}")
     for file in files:
-        used_tracks.append(file.split("/")[-1].split("_")[-1].replace(".mp3", ""))
+        used_tracks.append(file.split("/")[-1].split("_")[-1].replace(f".{output_filetype}", ""))
 
     for track in used_tracks:
         command = "ffmpeg "
         debug = []
         track_count = 0
         for file in files:
-            if file.endswith(f"{track}.mp3"):
+            if file.endswith(f"{track}.{output_filetype}"):
                 continue
 
             command += f"-i {file} "
             debug.append(file.split("/")[-1])
             track_count += 1
-        command += f"-filter_complex amix=inputs={track_count}:duration=first {recording_date}_{directory}_NO_{track}.mp3"
+        command += f"-filter_complex amix=inputs={track_count}:duration=first {recording_date}_{directory}_NO_{track}.{output_filetype}"
         debug.append(f"NO_{track}")
-
-        print(debug)
+        # print(debug)
         # print(command)
-    # os.system(command)
-    # exit()
+        os.system(command)
 
 print("All done!")
 exit()
