@@ -4,6 +4,20 @@ import re
 import glob
 from mutagen.wave import WAVE
 
+# In Logic Pro
+# 1. Split all tracks into individual regions
+# 2. Create markers for each song
+# 3. Set all stem outputs to a common bus
+# 4. Add the common bus to the track list (Ctrl + T)
+# 5. File > Export > All Tracks as Audio Files... (Shift + Cmd + E)
+# 6. Enable "Include Volume/Pan Automation"
+# 7. Set the "Range" to Extend File Length to Project Length
+# 8. Set exported file name to: "DATE,$Track Name"
+# 9. List Editors (D) > Markers
+# 10. View > Check both "Show Event Time Position and
+#     Length as Time" and "Length as Absolute Position"
+# 11. Copy all marker info and paste into a file called markers
+
 t0 = time.time()
 
 if len(sys.argv) < 2:
@@ -123,10 +137,21 @@ for directory in os.listdir(f"{output_directory}"):
             command += f"-i {file} "
             debug.append(file.split("/")[-1])
             track_count += 1
+
         command += f"-filter_complex amix=inputs={track_count}:duration=first {song_directory_path}/{recording_date}_{directory}_NO_{track}.{output_filetype}"
         debug.append(f"NO_{track}")
         # print(debug)
         # print(command)
+        os.system(command)
+
+        # Create Main mix
+        track_count = 0
+        for file in files:
+            command += f"-i {file} "
+            debug.append(file.split("/")[-1])
+            track_count += 1
+
+        command += f"-filter_complex amix=inputs={track_count}:duration=first {song_directory_path}/{recording_date}_{directory}_MIX.{output_filetype}"
         os.system(command)
 
 t1 = time.time() - t0
