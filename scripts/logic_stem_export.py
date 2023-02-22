@@ -1,7 +1,10 @@
 import os, sys, subprocess, mutagen
+import time
 import re
 import glob
 from mutagen.wave import WAVE
+
+t0= time.time()
 
 if len(sys.argv) < 2:
     raise Exception("Missing directory path.")
@@ -14,6 +17,7 @@ track_names = []
 file_durations = []
 section_names = []
 recording_date = None
+output_filetype="mp3"
 
 if not os.path.isdir(directory_path):
     raise Exception("The specified directory does not exist.")
@@ -98,7 +102,6 @@ for file in all_wavs:
 section_names = [*set(section_names)]
 
 print("[INFO] Creating play-along tracks...")
-output_filetype="wav"
 for directory in os.listdir(f"{output_directory}"):
     song_directory_path = os.path.join(output_directory, directory)
     if os.path.isfile(song_directory_path):
@@ -120,12 +123,14 @@ for directory in os.listdir(f"{output_directory}"):
             command += f"-i {file} "
             debug.append(file.split("/")[-1])
             track_count += 1
-        command += f"-filter_complex amix=inputs={track_count}:duration=first {recording_date}_{directory}_NO_{track}.{output_filetype}"
+        command += f"-filter_complex amix=inputs={track_count}:duration=first {song_directory_path}/{recording_date}_{directory}_NO_{track}.{output_filetype}"
         debug.append(f"NO_{track}")
         # print(debug)
         # print(command)
         os.system(command)
 
-print("All done!")
+t1 = time.time() - t0
+
+print("All done, time elapsed (secs): ", t1)
 exit()
 
