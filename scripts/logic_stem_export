@@ -122,8 +122,12 @@ for f in "${directory_path}/output"/*.wav; do
         -write_id3v1 1 \
         -id3v2_version 3 \
         -dither_method triangular \
-        -qscale:a 1 \
+        -b:a 192k \
         "${f%.wav}.mp3"
 done
 
+# TODO: Create tracks missing an instrument
+# ffmpeg -i INPUT_1 -i INPUT_2 -filter_complex amix=inputs=NUMBER_OF_INPUTS:duration=first OUTPUT
+
 echo "[SUCCESS] All done!"
+
