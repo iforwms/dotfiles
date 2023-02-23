@@ -118,7 +118,7 @@ for file in all_wavs:
         duration = int(audio.info.length)
 
         if duration == silence_duration:
-            print(f'[INFO] [{file}] WAV is silent, deleting...')
+            print(f'[INFO] [{file.split('/')[-1]}] WAV is silent, deleting...')
             os.remove(file)
 
 if output_filetype is not "wav":
@@ -130,7 +130,7 @@ if output_filetype is not "wav":
         print(f"[INFO] [{current_file_count}/{files_to_convert_count}] Converting {file.split('/')[-1]} to {output_filetype.upper()}")
         command = f"ffmpeg -y -i '{file}' -write_id3v1 1 -id3v2_version 3 -dither_method triangular -b:a 192k '{file.replace('.wav', '')}.{output_filetype}'"
 
-        if debug is True:
+        if debug is False:
             command += " -loglevel quiet"
 
         os.system(command)
