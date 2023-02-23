@@ -4,6 +4,8 @@ import re
 import glob
 from mutagen.wave import WAVE
 
+debug = False
+
 # In Logic Pro
 # 1. Split all tracks into individual regions
 # 2. Create markers for each song
@@ -26,18 +28,23 @@ if len(sys.argv) < 2:
 directory_path = sys.argv[1]
 output_directory = f"{directory_path}/output"
 markers_path = directory_path + "/markers"
+backup_path = None
+recording_date = None
+output_filetype = "mp3"
+
 original_files = []
 track_names = []
 file_durations = []
 section_names = []
-recording_date = None
-output_filetype="mp3"
 
 if not os.path.isdir(directory_path):
     raise Exception("The specified directory does not exist.")
 
 if not os.path.isfile(markers_path):
     raise Exception("Missing 'markers' file.")
+
+if len(sys.argv) > 2:
+    backup_path = sys.argv[2]
 
 for file in os.listdir(directory_path):
     if not file.endswith(".wav"):
@@ -62,8 +69,10 @@ markers_regex = r"(\d{1,2}:\d{2}:\d{2}):(\d{2}).(\d{2})"
 markers_subst = "\\1.\\2\\3"
 
 recording_date=original_files[0].split("_")[0]
+instrument_track_count = len(original_files) * len(markers)
 
 print("[INFO] Splitting WAV files by section markers...")
+split_track_count = 1
 for recording in original_files:
     track_name = recording.split("_")[1].replace(".wav", "")
     track_names.append(track_name)
@@ -80,11 +89,16 @@ for recording in original_files:
 
         os.makedirs(new_directory_path, exist_ok=True)
 
-        command = f"ffmpeg -y -nostdin -i '{directory_path}/{recording}' -ss '{start_time}' -t '{duration}' -c copy '{new_directory_path}/{new_filename}'" # 2>./error.log #-loglevel quiet
+        print(f"[INFO] [{split_track_count}/{instrument_track_count}] Creating file {new_filename}")
+        command = f"ffmpeg -y -nostdin -i '{directory_path}/{recording}' -ss '{start_time}' -t '{duration}' -c copy '{new_directory_path}/{new_filename}'" # 2>./error.log
+        if debug is False:
+            command += " -loglevel quiet"
 
         os.system(command)
+        split_track_count += 1
 
 all_wavs = glob.glob(f"{output_directory}/**/*.wav")
+section_names = [*set(section_names)] # Make section names unique
 
 print("[INFO] Deleting empty WAVs...")
 for file in all_wavs:
@@ -107,15 +121,25 @@ for file in all_wavs:
             print(f'[INFO] [{file}] WAV is silent, deleting...')
             os.remove(file)
 
-print("[INFO] Converting WAV files to MP3...")
-all_wavs = glob.glob(f"{output_directory}/**/*.wav")
-for file in all_wavs:
-    command = f"ffmpeg -y -i '{file}' -write_id3v1 1 -id3v2_version 3 -dither_method triangular -b:a 192k '{file.replace('.wav', '')}.mp3'"
-    os.system(command)
+if output_filetype is not "wav":
+    print(f"[INFO] Converting WAV files to {output_filetype.upper()}...")
+    all_wavs = glob.glob(f"{output_directory}/**/*.wav")
+    files_to_convert_count = len(all_wavs)
+    current_file_count = 1
+    for file in all_wavs:
+        print(f"[INFO] [{current_file_count}/{files_to_convert_count}] Converting {file.split('/')[-1]} to {output_filetype.upper()}")
+        command = f"ffmpeg -y -i '{file}' -write_id3v1 1 -id3v2_version 3 -dither_method triangular -b:a 192k '{file.replace('.wav', '')}.{output_filetype}'"
 
-section_names = [*set(section_names)]
+        if debug is True:
+            command += " -loglevel quiet"
+
+        os.system(command)
+        current_file_count += 1
+
 
 print("[INFO] Creating play-along tracks...")
+total_mix_count = len(markers)
+current_mix_count = 1
 for directory in os.listdir(f"{output_directory}"):
     song_directory_path = os.path.join(output_directory, directory)
     if os.path.isfile(song_directory_path):
@@ -128,20 +152,25 @@ for directory in os.listdir(f"{output_directory}"):
 
     for track in used_tracks:
         command = "ffmpeg "
-        debug = []
+        debug_log = []
         track_count = 0
         for file in files:
             if file.endswith(f"{track}.{output_filetype}"):
                 continue
 
             command += f"-i {file} "
-            debug.append(file.split("/")[-1])
+            debug_log.append(file.split("/")[-1])
             track_count += 1
 
+        print(f"[INFO] [XX/XX] Creating {track} play-along track for {directory}.")
         command += f"-filter_complex amix=inputs={track_count}:duration=first {song_directory_path}/{recording_date}_{directory}_NO_{track}.{output_filetype}"
-        debug.append(f"NO_{track}")
-        # print(debug)
-        # print(command)
+
+        if debug is False:
+            command += " -loglevel quiet"
+        else:
+            debug_log.append(f"NO_{track}")
+            print(debug)
+
         os.system(command)
 
     # Create Main mix
@@ -150,17 +179,25 @@ for directory in os.listdir(f"{output_directory}"):
     for file in files:
         command += f"-i {file} "
         track_count += 1
+
+    print(f"[INFO] [{current_mix_count}/{total_mix_count}] Creating mix for {directory}.")
     command += f"-filter_complex amix=inputs={track_count}:duration=first {song_directory_path}/{recording_date}_{directory}_MIX.{output_filetype}"
+
+    if debug is False:
+        command += " -loglevel quiet"
+
     os.system(command)
+    current_mix_count += 1
 
 t1 = time.time() - t0
 
-print("Audio file generation complete, time elapsed (secs): ", t1)
+print("[INFO] Audio file generation complete, time elapsed (secs): ", t1)
 
-print("Uploading files to remove server...")
-command = "rsync --archive --recursive --verbose --include='*.mp3' --exclude='*.*' output/ cors:/home/cors/code/cors/frontend/public/music/20230218_jam/"
-print(command)
-# os.system(command)
+if backup_path:
+    print("[INFO] Uploading files to remove server...")
+    command = f"rsync --archive --recursive --verbose --include='*.{output_filetype}' --exclude='*.*' {output_directory}/ {backup_path}"
+    print(command)
+    os.system(command)
 
 print("All done!")
 
