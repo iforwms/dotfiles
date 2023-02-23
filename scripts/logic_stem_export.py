@@ -6,19 +6,17 @@ from mutagen.wave import WAVE
 
 debug = False
 
-# In Logic Pro
+# Exporting files from Logic Pro
 # 1. Split all tracks into individual regions
 # 2. Create markers for each song
-# 3. Set all stem outputs to a common bus
-# 4. Add the common bus to the track list (Ctrl + T)
 # 5. File > Export > All Tracks as Audio Files... (Shift + Cmd + E)
 # 6. Enable "Include Volume/Pan Automation"
 # 7. Set the "Range" to Extend File Length to Project Length
-# 8. Set exported file name to: "DATE,$Track Name"
+# 8. Set exported file name to: "DATE_,$TrackName"
 # 9. List Editors (D) > Markers
 # 10. View > Check both "Show Event Time Position and
 #     Length as Time" and "Length as Absolute Position"
-# 11. Copy all marker info and paste into a file called markers
+# 11. Copy all marker info (Cmd + a, Cmd + c) and paste (Cmd + v) into a file called markers
 
 t0 = time.time()
 
@@ -30,6 +28,7 @@ output_directory = f"{directory_path}/output"
 markers_path = directory_path + "/markers"
 backup_path = None
 recording_date = None
+input_filetype = "wav"
 output_filetype = "mp3"
 
 original_files = []
@@ -47,11 +46,11 @@ if len(sys.argv) > 2:
     backup_path = sys.argv[2]
 
 for file in os.listdir(directory_path):
-    if not file.endswith(".wav"):
+    if not file.endswith(f".{input_filetype}"):
         continue
     original_files.append(file)
 
-print("[INFO] Validating WAV files...")
+print(f"[INFO] Validating {input_filetype.upper()} files...")
 for file in original_files:
     filepath = f"{directory_path}/{file}"
 
@@ -71,10 +70,10 @@ markers_subst = "\\1.\\2\\3"
 recording_date=original_files[0].split("_")[0]
 instrument_track_count = len(original_files) * len(markers)
 
-print("[INFO] Splitting WAV files by section markers...")
+print(f"[INFO] Splitting {input_filetype.upper()} files by section markers...")
 split_track_count = 1
 for recording in original_files:
-    track_name = recording.split("_")[1].replace(".wav", "")
+    track_name = recording.split("_")[1].replace(f".{input_filetype}", "")
     track_names.append(track_name)
 
     for line in markers:
@@ -85,7 +84,7 @@ for recording in original_files:
         section_names.append(section_name)
 
         new_directory_path = f"{output_directory}/{section_name}"
-        new_filename = f"{recording_date}_{section_name}_{track_name}.wav"
+        new_filename = f"{recording_date}_{section_name}_{track_name}.{input_filetype}"
 
         os.makedirs(new_directory_path, exist_ok=True)
 
@@ -97,11 +96,11 @@ for recording in original_files:
         os.system(command)
         split_track_count += 1
 
-all_wavs = glob.glob(f"{output_directory}/**/*.wav")
+all_input_files = glob.glob(f"{output_directory}/**/*.{input_filetype}")
 section_names = [*set(section_names)] # Make section names unique
 
-print("[INFO] Deleting empty WAVs...")
-for file in all_wavs:
+print(f"[INFO] Deleting empty {input_filetype.upper()}s...")
+for file in all_input_files:
     command = f"ffmpeg -i {file} -af silencedetect=noise=0.001 -f null - 2>&1 | awk '/silence_duration/{{print $8}}'"
     # continue
     # print(command)
@@ -118,17 +117,17 @@ for file in all_wavs:
         duration = int(audio.info.length)
 
         if duration == silence_duration:
-            print(f'[INFO] [{file.split('/')[-1]}] WAV is silent, deleting...')
+            print(f"[INFO] [{file.split('/')[-1]}] {input_filetype.upper()} is silent, deleting...")
             os.remove(file)
 
-if output_filetype is not "wav":
-    print(f"[INFO] Converting WAV files to {output_filetype.upper()}...")
-    all_wavs = glob.glob(f"{output_directory}/**/*.wav")
-    files_to_convert_count = len(all_wavs)
+if output_filetype is not input_filetype:
+    print(f"[INFO] Converting {input_filetype.upper()} files to {output_filetype.upper()}...")
+    all_input_files = glob.glob(f"{output_directory}/**/*.{input_filetype}")
+    files_to_convert_count = len(all_input_files)
     current_file_count = 1
-    for file in all_wavs:
+    for file in all_input_files:
         print(f"[INFO] [{current_file_count}/{files_to_convert_count}] Converting {file.split('/')[-1]} to {output_filetype.upper()}")
-        command = f"ffmpeg -y -i '{file}' -write_id3v1 1 -id3v2_version 3 -dither_method triangular -b:a 192k '{file.replace('.wav', '')}.{output_filetype}'"
+        command = f"ffmpeg -y -i '{file}' -write_id3v1 1 -id3v2_version 3 -dither_method triangular -b:a 192k '{file.replace('.' + input_filetype, '')}.{output_filetype}'"
 
         if debug is False:
             command += " -loglevel quiet"
