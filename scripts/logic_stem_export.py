@@ -4,7 +4,7 @@ import re
 import glob
 from mutagen.wave import WAVE
 
-debug = False
+debug = True
 
 # Exporting files from Logic Pro
 # 1. Split all tracks into individual regions
@@ -50,7 +50,7 @@ for file in os.listdir(directory_path):
         continue
     original_files.append(file)
 
-print(f"\n[INFO] Validating {input_filetype.upper()} files...\n")
+print(f"\n[STAGE] Validating {input_filetype.upper()} files...")
 for file in original_files:
     filepath = f"{directory_path}/{file}"
 
@@ -70,7 +70,7 @@ markers_subst = "\\1.\\2\\3"
 recording_date=original_files[0].split("_")[0]
 instrument_track_count = len(original_files) * len(markers)
 
-print(f"\n[INFO] Splitting {input_filetype.upper()} files by section markers...\n")
+print(f"\n[STAGE] Splitting {input_filetype.upper()} files by section markers...")
 split_track_count = 1
 for recording in original_files:
     track_name = recording.split("_")[1].replace(f".{input_filetype}", "")
@@ -83,7 +83,7 @@ for recording in original_files:
         section_name = section_data[1]
         section_names.append(section_name)
 
-        new_directory_path = f"{output_directory}/{section_name}"
+        new_directory_path = f"{output_directory}/{section_name}/{input_filetype}s/{recording_date}"
         new_filename = f"{recording_date}_{section_name}_{track_name}.{input_filetype}"
 
         os.makedirs(new_directory_path, exist_ok=True)
@@ -93,17 +93,19 @@ for recording in original_files:
         if debug is False:
             command += " -loglevel quiet"
 
-        os.system(command)
+        # os.system(command)
         split_track_count += 1
 
-all_input_files = glob.glob(f"{output_directory}/**/*.{input_filetype}")
+all_files_glob = f"{output_directory}/**/{input_filetype}s/*.{input_filetype}"
+all_input_files = glob.glob(all_files_glob)
 section_names = [*set(section_names)] # Make section names unique
 
-print(f"\n[INFO] Deleting empty {input_filetype.upper()}s...\n")
+print(f"\n[STAGE] Deleting empty {input_filetype.upper()}s...")
 for file in all_input_files:
+    # print(file)
+    # exit()
     command = f"ffmpeg -i {file} -af silencedetect=noise=0.001 -f null - 2>&1 | awk '/silence_duration/{{print $8}}'"
-    # continue
-    # print(command)
+    continue
 
     silence_duration = subprocess.check_output(command, shell=True, encoding="UTF-8")
     if silence_duration == '':
@@ -120,27 +122,31 @@ for file in all_input_files:
             print(f"[INFO] [{file.split('/')[-1]}] {input_filetype.upper()} is silent, deleting.")
             os.remove(file)
 
+# Covert files
 if output_filetype is not input_filetype:
-    print(f"\n[INFO] Converting {input_filetype.upper()} files to {output_filetype.upper()}...\n")
-    all_input_files = glob.glob(f"{output_directory}/**/*.{input_filetype}")
+    print(f"\n[STAGE] Converting {input_filetype.upper()} files to {output_filetype.upper()}...")
     files_to_convert_count = len(all_input_files)
     current_file_count = 1
     for file in all_input_files:
+        stem_dir = "/".join(file.split('/')[0:-1]) + "/../stems/" + recording_date
+        os.makedirs(stem_dir, exist_ok=True)
         print(f"[INFO] [{current_file_count}/{files_to_convert_count}] Converting {file.split('/')[-1]} to {output_filetype.upper()}")
-        command = f"ffmpeg -y -i '{file}' -write_id3v1 1 -id3v2_version 3 -dither_method triangular -b:a 192k '{file.replace('.' + input_filetype, '')}.{output_filetype}'"
+        command = f"ffmpeg -y -i '{file}' -write_id3v1 1 -id3v2_version 3 -dither_method triangular -b:a 192k '{stem_dir}/{file.split('/')[-1].replace('.' + input_filetype, '')}.{output_filetype}'"
 
         if debug is False:
             command += " -loglevel quiet"
 
-        os.system(command)
+        # os.system(command)
         current_file_count += 1
 
 
-print("\n[INFO] Creating play-along tracks...\n")
+print("\n[STAGE] Creating play-along tracks...")
 total_mix_count = len(markers)
 current_mix_count = 1
 for directory in os.listdir(f"{output_directory}"):
-    song_directory_path = os.path.join(output_directory, directory)
+    song_directory_path = os.path.join(output_directory, directory) + "/stems"
+    # print(output_directory, song_directory_path)
+    # exit()
     if os.path.isfile(song_directory_path):
         continue
 
@@ -163,7 +169,9 @@ for directory in os.listdir(f"{output_directory}"):
 
         # TODO: Fix counts
         print(f"[INFO] [XX/XX] Creating {track} play-along track for {directory}.")
-        command += f"-filter_complex amix=inputs={track_count}:duration=first {song_directory_path}/{recording_date}_{directory}_NO_{track}.{output_filetype}"
+        playalong_dir = f"{song_directory_path}/../playalongs/{recording_date}"
+        os.makedirs(playalong_dir, exist_ok=True)
+        command += f"-filter_complex amix=inputs={track_count}:duration=first {playalong_dir}/{recording_date}_{directory}_NO_{track}.{output_filetype}"
 
         if debug is False:
             command += " -loglevel quiet"
@@ -180,8 +188,10 @@ for directory in os.listdir(f"{output_directory}"):
         command += f"-i {file} "
         track_count += 1
 
+    mix_dir = f"{song_directory_path}/../mixes/{recording_date}"
+    os.makedirs(mix_dir, exist_ok=True)
     print(f"[INFO] [{current_mix_count}/{total_mix_count}] Creating mix for {directory}.")
-    command += f"-filter_complex amix=inputs={track_count}:duration=first {song_directory_path}/{recording_date}_{directory}_MIX.{output_filetype}"
+    command += f"-filter_complex amix=inputs={track_count}:duration=first {mix_dir}/{recording_date}_{directory}_MIX.{output_filetype}"
 
     if debug is False:
         command += " -loglevel quiet"
@@ -194,7 +204,7 @@ t1 = time.time() - t0
 print("[SUCCESS] Audio file generation complete, time elapsed (secs): ", t1)
 
 if backup_path:
-    print("\n[INFO] Uploading files to remove server...\n")
+    print("\n[STAGE] Uploading files to remove server...")
     # TODO: Improve rsync config
     command = f"rsync --archive --recursive --verbose --include='*.{output_filetype}' --exclude='*.*' {output_directory}/ {backup_path}"
     print(command)
