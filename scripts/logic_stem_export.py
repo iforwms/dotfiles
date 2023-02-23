@@ -144,17 +144,25 @@ for directory in os.listdir(f"{output_directory}"):
         # print(command)
         os.system(command)
 
-        # Create Main mix
-        command = "ffmpeg "
-        track_count = 0
-        for file in files:
-            command += f"-i {file} "
-            track_count += 1
-        command += f"-filter_complex amix=inputs={track_count}:duration=first {song_directory_path}/{recording_date}_{directory}_MIX.{output_filetype}"
-        os.system(command)
+    # Create Main mix
+    command = "ffmpeg "
+    track_count = 0
+    for file in files:
+        command += f"-i {file} "
+        track_count += 1
+    command += f"-filter_complex amix=inputs={track_count}:duration=first {song_directory_path}/{recording_date}_{directory}_MIX.{output_filetype}"
+    os.system(command)
 
 t1 = time.time() - t0
 
-print("All done, time elapsed (secs): ", t1)
+print("Audio file generation complete, time elapsed (secs): ", t1)
+
+print("Uploading files to remove server...")
+command = "rsync --archive --recursive --verbose --include='*.mp3' --exclude='*.*' output/ cors:/home/cors/code/cors/frontend/public/music/20230218_jam/"
+print(command)
+# os.system(command)
+
+print("All done!")
+
 exit()
 
