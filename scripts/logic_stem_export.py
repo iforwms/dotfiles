@@ -195,6 +195,7 @@ print("[SUCCESS] Audio file generation complete, time elapsed (secs): ", t1)
 
 if backup_path:
     print("\n[INFO] Uploading files to remove server...\n")
+    # TODO: Improve rsync config
     command = f"rsync --archive --recursive --verbose --include='*.{output_filetype}' --exclude='*.*' {output_directory}/ {backup_path}"
     print(command)
     os.system(command)
