@@ -134,7 +134,7 @@ if [[ -n "$skip_mp3" ]]; then
     echo "Skipping MP3 generation..."
 else
     echo "[INFO] Converting WAV files to MP3..."
-    for f in "${directory_path}/output"/**/*.wav; do
+    for f in "${directory_path}/output"/**/{input_filetype*.wav; do
         ffmpeg \
             -y \
             -i "$f" \
