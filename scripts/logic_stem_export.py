@@ -50,7 +50,7 @@ for file in os.listdir(directory_path):
         continue
     original_files.append(file)
 
-print(f"[INFO] Validating {input_filetype.upper()} files...")
+print(f"\n[INFO] Validating {input_filetype.upper()} files...\n")
 for file in original_files:
     filepath = f"{directory_path}/{file}"
 
@@ -70,7 +70,7 @@ markers_subst = "\\1.\\2\\3"
 recording_date=original_files[0].split("_")[0]
 instrument_track_count = len(original_files) * len(markers)
 
-print(f"[INFO] Splitting {input_filetype.upper()} files by section markers...")
+print(f"\n[INFO] Splitting {input_filetype.upper()} files by section markers...\n")
 split_track_count = 1
 for recording in original_files:
     track_name = recording.split("_")[1].replace(f".{input_filetype}", "")
@@ -99,7 +99,7 @@ for recording in original_files:
 all_input_files = glob.glob(f"{output_directory}/**/*.{input_filetype}")
 section_names = [*set(section_names)] # Make section names unique
 
-print(f"[INFO] Deleting empty {input_filetype.upper()}s...")
+print(f"\n[INFO] Deleting empty {input_filetype.upper()}s...\n")
 for file in all_input_files:
     command = f"ffmpeg -i {file} -af silencedetect=noise=0.001 -f null - 2>&1 | awk '/silence_duration/{{print $8}}'"
     # continue
@@ -117,11 +117,11 @@ for file in all_input_files:
         duration = int(audio.info.length)
 
         if duration == silence_duration:
-            print(f"[INFO] [{file.split('/')[-1]}] {input_filetype.upper()} is silent, deleting...")
+            print(f"[INFO] [{file.split('/')[-1]}] {input_filetype.upper()} is silent, deleting.")
             os.remove(file)
 
 if output_filetype is not input_filetype:
-    print(f"[INFO] Converting {input_filetype.upper()} files to {output_filetype.upper()}...")
+    print(f"\n[INFO] Converting {input_filetype.upper()} files to {output_filetype.upper()}...\n")
     all_input_files = glob.glob(f"{output_directory}/**/*.{input_filetype}")
     files_to_convert_count = len(all_input_files)
     current_file_count = 1
@@ -136,7 +136,7 @@ if output_filetype is not input_filetype:
         current_file_count += 1
 
 
-print("[INFO] Creating play-along tracks...")
+print("\n[INFO] Creating play-along tracks...\n")
 total_mix_count = len(markers)
 current_mix_count = 1
 for directory in os.listdir(f"{output_directory}"):
@@ -161,6 +161,7 @@ for directory in os.listdir(f"{output_directory}"):
             debug_log.append(file.split("/")[-1])
             track_count += 1
 
+        # TODO: Fix counts
         print(f"[INFO] [XX/XX] Creating {track} play-along track for {directory}.")
         command += f"-filter_complex amix=inputs={track_count}:duration=first {song_directory_path}/{recording_date}_{directory}_NO_{track}.{output_filetype}"
 
@@ -190,15 +191,15 @@ for directory in os.listdir(f"{output_directory}"):
 
 t1 = time.time() - t0
 
-print("[INFO] Audio file generation complete, time elapsed (secs): ", t1)
+print("[SUCCESS] Audio file generation complete, time elapsed (secs): ", t1)
 
 if backup_path:
-    print("[INFO] Uploading files to remove server...")
+    print("\n[INFO] Uploading files to remove server...\n")
     command = f"rsync --archive --recursive --verbose --include='*.{output_filetype}' --exclude='*.*' {output_directory}/ {backup_path}"
     print(command)
     os.system(command)
 
-print("All done!")
+print("\n[SUCCESS] All done!\n")
 
 exit()
 
