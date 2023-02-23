@@ -93,10 +93,10 @@ for recording in original_files:
         if debug is False:
             command += " -loglevel quiet"
 
-        # os.system(command)
+        os.system(command)
         split_track_count += 1
 
-all_files_glob = f"{output_directory}/**/{input_filetype}s/*.{input_filetype}"
+all_files_glob = f"{output_directory}/**/{input_filetype}s/{recording_date}/*.{input_filetype}"
 all_input_files = glob.glob(all_files_glob)
 section_names = [*set(section_names)] # Make section names unique
 
@@ -105,7 +105,7 @@ for file in all_input_files:
     # print(file)
     # exit()
     command = f"ffmpeg -i {file} -af silencedetect=noise=0.001 -f null - 2>&1 | awk '/silence_duration/{{print $8}}'"
-    continue
+    # continue
 
     silence_duration = subprocess.check_output(command, shell=True, encoding="UTF-8")
     if silence_duration == '':
@@ -123,12 +123,13 @@ for file in all_input_files:
             os.remove(file)
 
 # Covert files
+all_input_files = glob.glob(all_files_glob)
 if output_filetype is not input_filetype:
     print(f"\n[STAGE] Converting {input_filetype.upper()} files to {output_filetype.upper()}...")
     files_to_convert_count = len(all_input_files)
     current_file_count = 1
     for file in all_input_files:
-        stem_dir = "/".join(file.split('/')[0:-1]) + "/../stems/" + recording_date
+        stem_dir = "/".join(file.split('/')[0:-1]) + "/../../stems/" + recording_date
         os.makedirs(stem_dir, exist_ok=True)
         print(f"[INFO] [{current_file_count}/{files_to_convert_count}] Converting {file.split('/')[-1]} to {output_filetype.upper()}")
         command = f"ffmpeg -y -i '{file}' -write_id3v1 1 -id3v2_version 3 -dither_method triangular -b:a 192k '{stem_dir}/{file.split('/')[-1].replace('.' + input_filetype, '')}.{output_filetype}'"
@@ -136,7 +137,7 @@ if output_filetype is not input_filetype:
         if debug is False:
             command += " -loglevel quiet"
 
-        # os.system(command)
+        os.system(command)
         current_file_count += 1
 
 
@@ -144,12 +145,12 @@ print("\n[STAGE] Creating play-along tracks...")
 total_mix_count = len(markers)
 current_mix_count = 1
 for directory in os.listdir(f"{output_directory}"):
-    song_directory_path = os.path.join(output_directory, directory) + "/stems"
-    # print(output_directory, song_directory_path)
-    # exit()
-    if os.path.isfile(song_directory_path):
+    if os.path.isfile(os.path.join(output_directory, directory)):
         continue
 
+    song_directory_path = os.path.join(output_directory, directory) + f"/stems/{recording_date}"
+    # print(output_directory, song_directory_path)
+    # exit()
     used_tracks = []
     files = glob.glob(f"{song_directory_path}/*.{output_filetype}")
     for file in files:
@@ -168,8 +169,8 @@ for directory in os.listdir(f"{output_directory}"):
             track_count += 1
 
         # TODO: Fix counts
-        print(f"[INFO] [XX/XX] Creating {track} play-along track for {directory}.")
-        playalong_dir = f"{song_directory_path}/../playalongs/{recording_date}"
+        print(f"[INFO] [{current_mix_count}/{total_mix_count}] Creating {track} play-along track for {directory}.")
+        playalong_dir = f"{song_directory_path}/../../playalongs/{recording_date}"
         os.makedirs(playalong_dir, exist_ok=True)
         command += f"-filter_complex amix=inputs={track_count}:duration=first {playalong_dir}/{recording_date}_{directory}_NO_{track}.{output_filetype}"
 
@@ -188,7 +189,7 @@ for directory in os.listdir(f"{output_directory}"):
         command += f"-i {file} "
         track_count += 1
 
-    mix_dir = f"{song_directory_path}/../mixes/{recording_date}"
+    mix_dir = f"{song_directory_path}/../../mixes/{recording_date}"
     os.makedirs(mix_dir, exist_ok=True)
     print(f"[INFO] [{current_mix_count}/{total_mix_count}] Creating mix for {directory}.")
     command += f"-filter_complex amix=inputs={track_count}:duration=first {mix_dir}/{recording_date}_{directory}_MIX.{output_filetype}"
