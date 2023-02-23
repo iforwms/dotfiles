@@ -8,7 +8,7 @@ debug = True
 
 # Exporting files from Logic Pro
 # 1. Split all tracks into individual regions
-# 2. Create markers for each song
+# 2. Create markers for each song (for multiple takes: NAME_TAKE#
 # 5. File > Export > All Tracks as Audio Files... (Shift + Cmd + E)
 # 6. Enable "Include Volume/Pan Automation"
 # 7. Set the "Range" to Extend File Length to Project Length
@@ -81,9 +81,10 @@ for recording in original_files:
         start_time = re.sub(markers_regex, markers_subst, section_data[0])
         duration = re.sub(markers_regex, markers_subst, section_data[2])
         section_name = section_data[1]
+        section_dir_name = section_name.split("_")[0]
         section_names.append(section_name)
 
-        new_directory_path = f"{output_directory}/{section_name}/{input_filetype}s/{recording_date}"
+        new_directory_path = f"{output_directory}/{section_dir_name}/{input_filetype}s/{recording_date}"
         new_filename = f"{recording_date}_{section_name}_{track_name}.{input_filetype}"
 
         os.makedirs(new_directory_path, exist_ok=True)
@@ -154,6 +155,7 @@ for directory in os.listdir(f"{output_directory}"):
     used_tracks = []
     files = glob.glob(f"{song_directory_path}/*.{output_filetype}")
     for file in files:
+        # TODO: Make into dictionary - folder name, file name (including take)
         used_tracks.append(file.split("/")[-1].split("_")[-1].replace(f".{output_filetype}", ""))
 
     for track in used_tracks:
@@ -168,7 +170,6 @@ for directory in os.listdir(f"{output_directory}"):
             debug_log.append(file.split("/")[-1])
             track_count += 1
 
-        # TODO: Fix counts
         print(f"[INFO] [{current_mix_count}/{total_mix_count}] Creating {track} play-along track for {directory}.")
         playalong_dir = f"{song_directory_path}/../../playalongs/{recording_date}"
         os.makedirs(playalong_dir, exist_ok=True)
@@ -206,7 +207,6 @@ print("[SUCCESS] Audio file generation complete, time elapsed (secs): ", t1)
 
 if backup_path:
     print("\n[STAGE] Uploading files to remove server...")
-    # TODO: Improve rsync config
     command = f"rsync --archive --recursive --verbose --include='*.{output_filetype}' --exclude='*.*' {output_directory}/ {backup_path}"
     print(command)
     os.system(command)
