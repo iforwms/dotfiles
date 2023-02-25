@@ -2,6 +2,7 @@ import os, sys, subprocess, mutagen
 import time
 import re
 import glob
+import shutil
 from mutagen.wave import WAVE
 
 debug = True
@@ -97,12 +98,17 @@ def read_markers_file():
         sections.append(section)
 
 def change_gain(filepath, gain = 10):
-    command = f"ffmeg -i {filepath} -af 'volume=volume={gain}dB' {filepath}"
+    print(f"[INFO] Changing audio gain by {gain}dB.")
+    temp_file = filepath.split("/")
+    temp_file[-1] = "temp_" + temp_file[-1]
+    temp_file = "/".join(temp_file)
+    command = f"ffmpeg -i {filepath} -af 'volume=volume={gain}dB' {temp_file}"
 
     if debug is False:
         command += " -loglevel quiet"
 
     os.system(command)
+    shutil.move(temp_file, filepath)
 
 def split_raw_files_by_marker():
     global sections, stems, input_filetype, output_directory, recording_date, debug
@@ -125,7 +131,6 @@ def split_raw_files_by_marker():
 
             os.system(command)
 
-            change_gain(f"{new_directory_path}/{new_filename}", 30)
             split_track_count += 1
 
 def delete_empty_files():
@@ -166,12 +171,16 @@ def convert_files():
         stem_dir = "/".join(file.split('/')[0:-1]) + "/../../stems/" + recording_date
         os.makedirs(stem_dir, exist_ok=True)
         print(f"[INFO] [{current_file_count}/{files_to_convert_count}] Converting {file.split('/')[-1]} to {output_filetype.upper()}")
-        command = f"ffmpeg -y -i '{file}' -write_id3v1 1 -id3v2_version 3 -dither_method triangular -b:a 192k '{stem_dir}/{file.split('/')[-1].replace('.' + input_filetype, '')}.{output_filetype}'"
+        output_file = f"{stem_dir}/{file.split('/')[-1].replace('.' + input_filetype, '')}.{output_filetype}"
+        command = f"ffmpeg -y -i '{file}' -write_id3v1 1 -id3v2_version 3 -dither_method triangular -b:a 192k '{output_file}'"
 
         if debug is False:
             command += " -loglevel quiet"
 
         os.system(command)
+
+        change_gain(output_file, 10)
+
         current_file_count += 1
 
 def merge_audio(output_file, files_to_merge):
@@ -180,6 +189,7 @@ def merge_audio(output_file, files_to_merge):
 
 def create_playalongs():
     global sections, output_directory, recording_date, output_filetype
+    gain_adjustment = 12
     print("[STAGE] Creating play-along tracks.")
     for directory in os.listdir(f"{output_directory}"):
         if os.path.isfile(os.path.join(output_directory, directory)):
@@ -213,13 +223,15 @@ def create_playalongs():
                 print(f"[INFO] [{current_playalong_tracks}/{total_playalong_tracks}] Creating {track_to_create['playalong_name']} play-along track for {directory}.")
                 playalong_dir = f"{input_directory_path}/../../playalongs/{recording_date}"
                 os.makedirs(playalong_dir, exist_ok=True)
-                command += f"-filter_complex amix=inputs={total_playalong_tracks - 1}:duration=first {playalong_dir}/{track_to_create['playalong_name']}"
+                output_file = f"{playalong_dir}/{track_to_create['playalong_name']}"
+                command += f"-filter_complex amix=inputs={total_playalong_tracks - 1}:duration=first {output_file}"
 
                 if debug is False:
                     command += " -loglevel quiet"
 
                 current_playalong_tracks += 1
                 os.system(command)
+                change_gain(output_file, gain_adjustment)
 
             # Create Mixes - TODO: Refactor
             command = "ffmpeg "
@@ -229,13 +241,15 @@ def create_playalongs():
             print(f"[INFO] Creating mix for {directory}.")
             mix_dir = f"{input_directory_path}/../../mixes"
             os.makedirs(mix_dir, exist_ok=True)
-            command += f"-filter_complex amix=inputs={total_playalong_tracks}:duration=first {mix_dir}/{track['mix_name']}"
+            output_file = f"{mix_dir}/{track['mix_name']}"
+            command += f"-filter_complex amix=inputs={total_playalong_tracks}:duration=first {output_file}"
 
             if debug is False:
                 command += " -loglevel quiet"
 
             current_playalong_tracks += 1
             os.system(command)
+            change_gain(output_file, gain_adjustment)
 
 def backup_files():
     global output_filetype, output_directory, backup_path
