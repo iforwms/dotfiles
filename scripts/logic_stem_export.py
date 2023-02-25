@@ -96,6 +96,14 @@ def read_markers_file():
         }
         sections.append(section)
 
+def change_gain(filepath, gain = 10):
+    command = f"ffmeg -i {filepath} -af 'volume=volume={gain}dB' {filepath}"
+
+    if debug is False:
+        command += " -loglevel quiet"
+
+    os.system(command)
+
 def split_raw_files_by_marker():
     global sections, stems, input_filetype, output_directory, recording_date, debug
     print(f"[STAGE] Splitting {input_filetype.upper()} files by section markers.")
@@ -116,6 +124,8 @@ def split_raw_files_by_marker():
                 command += " -loglevel quiet"
 
             os.system(command)
+
+            change_gain(f"{new_directory_path}/{new_filename}", 30)
             split_track_count += 1
 
 def delete_empty_files():
@@ -163,6 +173,10 @@ def convert_files():
 
         os.system(command)
         current_file_count += 1
+
+def merge_audio(output_file, files_to_merge):
+    print(output_file, files_to_merge)
+    exit()
 
 def create_playalongs():
     global sections, output_directory, recording_date, output_filetype
@@ -213,7 +227,7 @@ def create_playalongs():
                 command += f"-i {track['filepath']} "
 
             print(f"[INFO] Creating mix for {directory}.")
-            mix_dir = f"{input_directory_path}/../../mixes/{recording_date}"
+            mix_dir = f"{input_directory_path}/../../mixes"
             os.makedirs(mix_dir, exist_ok=True)
             command += f"-filter_complex amix=inputs={total_playalong_tracks}:duration=first {mix_dir}/{track['mix_name']}"
 
