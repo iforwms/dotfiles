@@ -82,6 +82,8 @@ alias obs="cd $HOME/obsidian"
 alias kim="cd $HOME/code/kim"
 alias dl="cd $HOME/Downloads"
 
+alias le="python3 $DOTFILES/scripts/logic_stem_export.py"
+
 alias knot=$DOTFILES/scripts/animated_knots
 
 alias dnsReset="sudo killall -HUP mDNSResponder"
