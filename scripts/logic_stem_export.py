@@ -6,7 +6,7 @@ import shutil
 from mutagen.wave import WAVE
 
 debug = True
-# debug = False
+debug = False
 
 # Exporting files from Logic Pro
 # 1. Split all tracks into individual regions
@@ -98,10 +98,9 @@ def read_markers_file():
         sections.append(section)
 
 def change_gain(filepath, gain = 10):
+    global output_filetype
     print(f"[INFO] Changing audio gain by {gain}dB.")
-    temp_file = filepath.split("/")
-    temp_file[-1] = "temp_" + temp_file[-1]
-    temp_file = "/".join(temp_file)
+    temp_file = f"{filepath}.{output_filetype}"
     command = f"ffmpeg -i {filepath} -af 'volume=volume={gain}dB' {temp_file}"
 
     if debug is False:
