@@ -74,6 +74,7 @@ cask 'midi-monitor'
 cask 'moom'
 cask 'ngrok'
 cask 'obsidian'
+cask 'pinta' # Paint.NET copy
 cask 'postman'
 cask 'sublime-text'
 cask 'tableplus'
