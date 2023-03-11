@@ -1,0 +1,32 @@
+#!/bin/bash
+
+output_dir="$1"
+region="$2"
+delay="${3:-5}"
+
+if [[ -z "$region" ]]; then
+    echo "Invalid capture region."
+    exit 1
+fi
+
+if ! [[ -d "$output_dir" ]]; then
+    echo "Invalid output directory."
+    exit 1
+fi
+
+if [[ "$region" -eq "create" ]]; then
+    echo "Merging screenshots."
+    output_file="${output_dir}/${output_dir##*/}.png"
+    convert "{$output_dir}/*.png" -append "$output_file"
+    open "$output_file"
+    exit 0
+fi
+
+frame=1
+echo "Beginning capture in ${delay} seconds. Press Ctrl+c to exit."
+while true
+do
+    sleep "$delay"
+    flameshot gui --region "$region" --accept-on-select --raw > "${output_dir}/$(printf "%02d" $frame).png"
+    frame=$((frame+1))
+done
