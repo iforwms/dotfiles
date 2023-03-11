@@ -10,14 +10,14 @@ if [[ -z "$region" ]]; then
 fi
 
 if ! [[ -d "$output_dir" ]]; then
-    echo "Invalid output directory."
-    exit 1
+    echo "Directory does not exist, attempting to create."
+    mkdir -p "$output_dir"
 fi
 
-if [[ "$region" -eq "create" ]]; then
+if [[ "$region" == "create" ]]; then
     echo "Merging screenshots."
     output_file="${output_dir}/${output_dir##*/}.png"
-    convert "{$output_dir}/*.png" -append "$output_file"
+    convert "${output_dir}/*.png" -append "$output_file"
     open "$output_file"
     exit 0
 fi
