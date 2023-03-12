@@ -3,9 +3,14 @@
 output_dir="$1"
 region="$2"
 delay="${3:-5}"
+scroll_speed="${3:-60}"
+
+help_text="Usage\n- Capture screenshots: flameshot_region [output_directory] [screenshot_region] [screenshot_delay (seconds)]\n- Merge screenshots: flameshot_region [output_directory] create [scroll_speed (default 60)]"
 
 if [[ -z "$region" ]]; then
     echo "Invalid capture region."
+    echo
+    printf "$help_text"
     exit 1
 fi
 
@@ -16,9 +21,27 @@ fi
 
 if [[ "$region" == "create" ]]; then
     echo "Merging screenshots."
-    output_file="${output_dir}/${output_dir##*/}.png"
-    convert "${output_dir}/*.png" -append "$output_file"
-    open "$output_file"
+    output_filename="${output_dir}/${output_dir##*/}"
+    # convert "${output_dir}/*.png" -append "${output_filename}.png"
+
+    width=$(identify "${output_dir}/*.png" | awk '{print $3}' | awk -Fx '{print $1}')
+    # TODO: Test width ratios
+    height=$(echo "${width} / 0.8 "| bc)
+    height="${height%.*}"
+
+    # TODO: Merge audio file
+
+    echo "Generating scrolling video."
+    ffmpeg \
+        -r 1 \
+        -loop 1 \
+        -t 61 \
+        -i "${output_filename}.png" \
+        -filter_complex "color=white:s=${width}x${height}, fps=fps=60[bg];[bg][0]overlay=y=-'t*${scroll_speed}':shortest=1[video]" \
+        -preset ultrafast \
+        -map '[video]' "${output_filename}.mp4"
+
+    open "${output_filename}.mp4"
     exit 0
 fi
 
