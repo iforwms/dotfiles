@@ -22,9 +22,9 @@ fi
 if [[ "$region" == "create" ]]; then
     echo "Merging screenshots."
     output_filename="${output_dir}/${output_dir##*/}"
-    # convert "${output_dir}/*.png" -append "${output_filename}.png"
+    convert "${output_dir}/*.png" -append "${output_filename}.png"
 
-    width=$(identify "${output_dir}/*.png" | awk '{print $3}' | awk -Fx '{print $1}')
+    width=$(identify "${output_filename}.png" | awk '{print $3}' | awk -Fx '{print $1}')
     # TODO: Test width ratios
     height=$(echo "${width} / 0.8 "| bc)
     height="${height%.*}"
