@@ -10,7 +10,7 @@ help_text="Usage\n- Capture screenshots: flameshot_region <output_directory> <sc
 
 if [[ -z "$region" ]]; then
     printf "ERROR: Invalid capture region.\n\n"
-    printf "$help_text"
+    echo -e "$help_text"
     exit 1
 fi
 
@@ -22,7 +22,7 @@ fi
 if [[ "$region" == "create" ]]; then
     if [[ -z "$duration" ]]; then
         printf "ERROR: Invalid duration.\n\n"
-        printf "$help_text"
+        echo -e "$help_text"
         exit 1
     fi
 
@@ -33,7 +33,7 @@ if [[ "$region" == "create" ]]; then
     if ! [[ -f "${output_filename}.png" ]]; then
         if ! [[ -f "${output_dir}/01.png" ]]; then
             printf "ERROR: Missing 01.png, make sure the file exists, and try again.\n\n"
-            printf "$help_text"
+            echo -e "$help_text"
             exit 1
         fi
 
@@ -59,8 +59,9 @@ if [[ "$region" == "create" ]]; then
     scroll_rate=$(echo "${image_height} / ${duration}" | bc)
     scroll_rate="${scroll_rate%.*}"
 
-    echo "INFO: Generating scrolling video."
+    echo "INFO: Generating scrolling video without sound."
     ffmpeg \
+        -v quiet \
         -r 1 \
         -loop 1 \
         -t "$duration" \
@@ -72,8 +73,9 @@ if [[ "$region" == "create" ]]; then
     # -t [val] record or transcode "duration" seconds of audio/video
 
     if [[ -n "$audio_file" && -f "$audio_file" ]]; then
-        echo "INFO: Attempting to merge audio."
+        echo "INFO: Attempting to merge audio with silent video."
         ffmpeg \
+            -v quiet \
             -i "${output_filename}_no_audio.mp4" \
             -i "$audio_file" \
             -c:v copy \
@@ -90,9 +92,12 @@ fi
 
 frame=1
 echo "INFO: Beginning capture in ${delay} seconds. Press Ctrl+c to exit."
+echo
+echo "INFO: After capture is complete, please manually check '${output_dir}' for any duplicate images before creating the video."
 while true
 do
     sleep "$delay"
     flameshot gui --region "$region" --accept-on-select --raw > "${output_dir}/$(printf "%02d" $frame).png"
     frame=$((frame+1))
 done
+
