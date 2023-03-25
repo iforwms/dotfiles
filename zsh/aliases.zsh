@@ -303,7 +303,7 @@ alias tcs=$DOTFILES/scripts/tmux_sessions
 # Create PDF from markdown
 alias md2pdf=$DOTFILES/scripts/markdown2pdf
 # alias ytd=$DOTFILES/scripts/youtube-dl
-alias yt='youtube-dl'
+alias yt='yt-dlp'
 
 # Given a tmux session name, add suffixes until it is unique
 function _tmux_get_unique_id() {
