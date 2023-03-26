@@ -12,7 +12,7 @@ fi
 local_dir="$1"
 remote_dir="$2"
 include="$3"
-exclude="${4:-.env;.log;.git;.gitignore;.DS_Store;deploy_remote;tags;vendor;node_modules}"
+exclude="${4:-.env;*.log;.git;.gitignore;.DS_Store;deploy_remote;tags;vendor;node_modules}"
 owner="${5:-www-data}"
 group="${6:-www-data}"
 # perms="${7:-D2775,F664}"
