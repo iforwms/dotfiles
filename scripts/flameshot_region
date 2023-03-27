@@ -96,6 +96,14 @@ if [[ "$region" == "create" ]]; then
     exit 0
 fi
 
+function show_folder() {
+    open "$output_dir"
+    exit 0
+}
+
+# Trap ctrl-c and open output dir.
+trap 'open "$output_dir"; exit 0;' INT
+
 frame=1
 echo "INFO: Beginning capture in ${delay} seconds. Press Ctrl+c to exit."
 echo
