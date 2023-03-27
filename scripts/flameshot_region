@@ -3,7 +3,7 @@
 output_dir="$1"
 region="$2"
 delay="${3:-5}"
-duration="$3"
+input_duration="$3"
 audio_file="$4"
 
 help_text="Usage\n- Capture screenshots: flameshot_region <output_directory> <screenshot_region> [screenshot_delay (seconds) {5}]\n- Merge screenshots: flameshot_region <output_directory> create <duration (minutes:seconds)> [audio_file]"
@@ -20,13 +20,11 @@ if ! [[ -d "$output_dir" ]]; then
 fi
 
 if [[ "$region" == "create" ]]; then
-    if [[ -z "$duration" ]]; then
-        printf "ERROR: Invalid duration.\n\n"
-        echo -e "$help_text"
-        exit 1
+    if [[ -z "$input_duration" ]]; then
+        echo "WARN: Invalid duration, no video will be created."
     fi
 
-    duration=$(echo "$duration" | awk -F: '{print $1 * 60 + $2}')
+    duration=$(echo "$input_duration" | awk -F: '{print $1 * 60 + $2}')
     output_filename="${output_dir}/${output_dir##*/}"
     video_aspect_ratio="0.8"
 
@@ -37,56 +35,64 @@ if [[ "$region" == "create" ]]; then
             exit 1
         fi
 
-        echo "INFO: Generating white space to insert before score."
-        first_image_dimensions=$(identify "${output_dir}/01.png" | awk '{print $3}')
-        first_image_width=$(echo "$first_image_dimensions" | awk -Fx '{print $1}')
-        first_image_height=$(echo "$first_image_dimensions" | awk -Fx '{print $2}')
-        first_image_height=$(echo "${first_image_height} * 5" | bc)
-        convert -size "${first_image_width}x${first_image_height}" canvas:white "${output_dir}/00.png"
-
         echo "INFO: Merging screenshots."
         convert "${output_dir}/*.png" -append "${output_filename}.png"
+
+        if [[ -n "$input_duration" ]]; then
+            echo "INFO: Generating white space to insert before score."
+            first_image_dimensions=$(identify "${output_dir}/01.png" | awk '{print $3}')
+            first_image_width=$(echo "$first_image_dimensions" | awk -Fx '{print $1}')
+            first_image_height=$(echo "$first_image_dimensions" | awk -Fx '{print $2}')
+            first_image_height=$(echo "${first_image_height} * 5" | bc)
+            convert -size "${first_image_width}x${first_image_height}" canvas:white "${output_dir}/00.png"
+            convert "${output_dir}/*.png" -append "${output_filename}_for_video.png"
+        fi
     fi
 
-    # TODO: Test width ratios
-    image_dimensions=$(identify "${output_filename}.png" | awk '{print $3}')
-    image_width=$(echo "$image_dimensions" | awk -Fx '{print $1}')
-    image_height=$(echo "$image_dimensions" | awk -Fx '{print $2}')
+    if [[ -n "$input_duration" ]]; then
+        # TODO: Test width ratios
+        image_dimensions=$(identify "${output_filename}_for_video.png" | awk '{print $3}')
+        image_width=$(echo "$image_dimensions" | awk -Fx '{print $1}')
+        image_height=$(echo "$image_dimensions" | awk -Fx '{print $2}')
 
-    video_height=$(echo "${image_width} / ${video_aspect_ratio}" | bc)
-    video_height="${video_height%.*}"
+        video_height=$(echo "${image_width} / ${video_aspect_ratio}" | bc)
+        video_height="${video_height%.*}"
 
-    scroll_rate=$(echo "${image_height} / ${duration}" | bc)
-    scroll_rate="${scroll_rate%.*}"
+        scroll_rate=$(echo "${image_height} / ${duration}" | bc)
+        scroll_rate="${scroll_rate%.*}"
 
-    echo "INFO: Generating scrolling video without sound."
-    ffmpeg \
-        -v quiet \
-        -r 1 \
-        -loop 1 \
-        -t "$duration" \
-        -i "${output_filename}.png" \
-        -filter_complex "color=white:s=${image_width}x${video_height}, fps=fps=60[bg];[bg][0]overlay=y=-'t*${scroll_rate}':shortest=1[video]" \
-        -preset ultrafast \
-        -map '[video]' "${output_filename}_no_audio.mp4"
-    # -r [val] set frame rate (Hz value, fraction or abbreviation)
-    # -t [val] record or transcode "duration" seconds of audio/video
-
-    if [[ -n "$audio_file" && -f "$audio_file" ]]; then
-        echo "INFO: Attempting to merge audio with silent video."
+        echo "INFO: Generating scrolling video without sound."
         ffmpeg \
             -v quiet \
-            -i "${output_filename}_no_audio.mp4" \
-            -i "$audio_file" \
-            -c:v copy \
-            -c:a aac \
-            "${output_filename}.mp4"
+            -r 1 \
+            -loop 1 \
+            -t "$duration" \
+            -i "${output_filename}_for_video.png" \
+            -filter_complex "color=white:s=${image_width}x${video_height}, fps=fps=60[bg];[bg][0]overlay=y=-'t*${scroll_rate}':shortest=1[video]" \
+            -preset ultrafast \
+            -map '[video]' "${output_filename}_no_audio.mp4"
+                    # -r [val] set frame rate (Hz value, fraction or abbreviation)
+                    # -t [val] record or transcode "duration" seconds of audio/video
 
-        open "${output_filename}.mp4"
-        exit 0
+        if [[ -n "$audio_file" && -f "$audio_file" ]]; then
+            echo "INFO: Attempting to merge audio with silent video."
+            ffmpeg \
+                -v quiet \
+                -i "${output_filename}_no_audio.mp4" \
+                -i "$audio_file" \
+                -c:v copy \
+                -c:a aac \
+                "${output_filename}.mp4"
+
+            open "${output_filename}.mp4"
+            exit 0
+        fi
+
+        open "${output_filename}_no_audio.mp4"
+    else
+        open "${output_filename}.png"
     fi
 
-    open "${output_filename}_no_audio.mp4"
     exit 0
 fi
 
