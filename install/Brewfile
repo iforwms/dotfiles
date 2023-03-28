@@ -76,6 +76,7 @@ cask 'ngrok'
 cask 'obsidian'
 cask 'pinta' # Paint.NET copy
 cask 'postman'
+cask 'qlvideo'
 cask 'sublime-text'
 cask 'tableplus'
 cask 'the-unarchiver'
