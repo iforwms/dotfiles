@@ -4,6 +4,8 @@ src_dir="${1:-/Users/ifor/Downloads}"
 dest_dir="${2:-/Users/ifor/Movies}"
 movie_regex="s/(.*\.?(19|20)[0-9]{2}).*/\1/;"
 tv_regex="s/(.*S[0-9]{2}).*/\1/;"
+DEBUG=1
+declare -x DEBUG
 
 function clean() {
     src="$2"
@@ -11,11 +13,12 @@ function clean() {
     output_dir="$4"
     regex="${1}s:^${input_dir}/:${output_dir}/_:;s/ /\./g;s/\(//g;s/__/_/g"
     dest="$(echo "${src}" | sed -E "${regex}")"
-    if [[ -n $DEBUG ]]; then
-        echo "DRY RUN - No files modified."
+    if [[ $DEBUG == 1 ]]; then
+        echo "Files to be moved:"
     else
         mv "${src}" "${dest}"
     fi
+
     echo "${src}" "--->" "${dest}"
 }
 
@@ -26,3 +29,15 @@ find "${src_dir}" -maxdepth 1 -type d -regextype sed -iregex ".*S[0-9]\{2\}\.com
 
 find "${src_dir}" -maxdepth 1 -type d -regextype sed -regex ".*[0-9]\{4\}.*" -print0 | \
     xargs -0 -I {} bash -c "clean '${movie_regex}' '{}' '${src_dir}' '${dest_dir}/movies'"
+
+echo
+read -p "Do you want to move these files? (Y/y) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    DEBUG=0
+    find "${src_dir}" -maxdepth 1 -type d -regextype sed -iregex ".*S[0-9]\{2\}\.complete.*" -print0 | \
+        xargs -0 -I {} bash -c "clean '${tv_regex}' '{}' '${src_dir}' '${dest_dir}/tv'"
+
+    find "${src_dir}" -maxdepth 1 -type d -regextype sed -regex ".*[0-9]\{4\}.*" -print0 | \
+        xargs -0 -I {} bash -c "clean '${movie_regex}' '{}' '${src_dir}' '${dest_dir}/movies'"
+fi
