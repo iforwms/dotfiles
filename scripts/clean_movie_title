@@ -13,9 +13,7 @@ function clean() {
     output_dir="$4"
     regex="${1}s:^${input_dir}/:${output_dir}/_:;s/ /\./g;s/\(//g;s/__/_/g"
     dest="$(echo "${src}" | sed -E "${regex}")"
-    if [[ $DEBUG == 1 ]]; then
-        echo "Files to be moved:"
-    else
+    if [[ $DEBUG != 1 ]]; then
         mv "${src}" "${dest}"
     fi
 
