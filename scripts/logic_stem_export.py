@@ -8,16 +8,21 @@ from mutagen.wave import WAVE
 debug = True
 debug = False
 
+mp3_gain = 0
+playaong_gain = 0
+
+if not debug:
+    sys.tracebacklimit = 0
+
 # Exporting files from Logic Pro
 # 1. Split all tracks into individual regions
-# 2. Create markers for each song (for multiple takes: NAME_TAKE#
+# 2. Create markers for each song (for multiple takes: NAME-TAKE#
 # 5. File > Export > All Tracks as Audio Files... (Shift + Cmd + E)
 # 6. Enable "Include Volume/Pan Automation"
 # 7. Set the "Range" to Extend File Length to Project Length
 # 8. Set exported file name to: "DATE_,$TrackName"
 # 9. List Editors (D) > Markers
-# 10. View > Check both "Show Event Time Position and
-#     Length as Time" and "Length as Absolute Position"
+# 10. View > Check "Show Event Time Position and Length as Time" (Ctrl+Opt+R) and deselect "Length as Absolute Position" (Ctrl+Shift+A)
 # 11. Copy all marker info (Cmd + a, Cmd + c) and paste (Cmd + v) into a file called markers
 
 # Marker file example
@@ -37,22 +42,23 @@ input_filetype = "wav"
 output_filetype = "mp3"
 sections = []
 stems = []
+help_text = "./logic_stem_export.py <directory_path> [remote_upload_path]"
 
 def preflight_checks():
     global working_directory, output_directory, markers_path, backup_path
     print("[STAGE] Checking arguments are valid.")
     if len(sys.argv) < 2:
-        raise Exception("Missing directory path.")
+        raise Exception("Missing directory path. Usage:\n" + help_text)
 
     working_directory = sys.argv[1]
     output_directory = f"{working_directory}/output"
     markers_path = working_directory + "/markers"
 
     if not os.path.isdir(working_directory):
-        raise Exception("The specified directory does not exist.")
+        raise Exception("The specified directory does not exist. Usage:\n" + help_text)
 
     if not os.path.isfile(markers_path):
-        raise Exception("Missing 'markers' file.")
+        raise Exception("Missing 'markers' file. Usage:\n" + help_text)
 
     if len(sys.argv) > 2:
         backup_path = sys.argv[2]
@@ -88,6 +94,9 @@ def read_markers_file():
     markers = markers_file.readlines()
     for marker in markers:
         section_data = re.findall(r'\S+', marker)
+        if not len(section_data):
+            continue
+
         section_name = section_data[1]
         section = {
             'name': section_name,
@@ -98,6 +107,9 @@ def read_markers_file():
         sections.append(section)
 
 def change_gain(filepath, gain = 10):
+    if gain == 0:
+        return
+
     global output_filetype
     print(f"[INFO] Changing audio gain by {gain}dB.")
     temp_file = f"{filepath}.{output_filetype}"
@@ -156,7 +168,7 @@ def delete_empty_files():
                 os.remove(file)
 
 def convert_files():
-    global input_filetype, output_filetype, debug, recording_date
+    global input_filetype, output_filetype, debug, recording_date, mp3_gain
     if output_filetype is input_filetype:
         print(f"[WARN] Input and output files are the same, skipping conversion.")
         return
@@ -178,7 +190,7 @@ def convert_files():
 
         os.system(command)
 
-        change_gain(output_file, 10)
+        change_gain(output_file, mp3_gain)
 
         current_file_count += 1
 
@@ -187,8 +199,8 @@ def merge_audio(output_file, files_to_merge):
     exit()
 
 def create_playalongs():
-    global sections, output_directory, recording_date, output_filetype
-    gain_adjustment = 12
+    global sections, output_directory, recording_date, output_filetype, playaong_gain
+    gain_adjustment = playaong_gain
     print("[STAGE] Creating play-along tracks.")
     for directory in os.listdir(f"{output_directory}"):
         if os.path.isfile(os.path.join(output_directory, directory)):
@@ -269,8 +281,7 @@ delete_empty_files()
 convert_files()
 create_playalongs()
 
-t1 = time.time() - t0
-
+t1 = round(time.time() - t0, 2)
 print("[SUCCESS] Audio file generation complete, time elapsed (secs): ", t1)
 
 backup_files()
