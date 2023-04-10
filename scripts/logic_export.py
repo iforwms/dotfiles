@@ -1,4 +1,7 @@
+#!/usr/bin/env python3
+
 import os, sys, subprocess, mutagen
+import argparse
 import time
 import re
 import glob
@@ -9,7 +12,7 @@ debug = True
 debug = False
 
 mp3_gain = 0
-playaong_gain = 0
+playalong_gain = 0
 
 if not debug:
     sys.tracebacklimit = 0
@@ -36,32 +39,33 @@ t0 = time.time()
 working_directory = None
 output_directory = None
 markers_path = None
-backup_path = None
+remote_path = None
 recording_date = None
 input_filetype = "wav"
 output_filetype = "mp3"
 sections = []
 stems = []
-help_text = "./logic_stem_export.py <directory_path> [remote_upload_path]"
+help_text = "usage: logic_export.py [-h] [-r REMOTE_PATH] [-o] directory_path"
+
+parser = argparse.ArgumentParser()
+parser.add_argument("directory_path", help="full path to individual instrument stems", type=str)
+parser.add_argument("-r", "--remote-path", help="full path to remote server directory", required=False, type=str)
+parser.add_argument("-o", "--only-remote", help="only copy existing files to remote path", action="store_true")
+args = parser.parse_args()
 
 def preflight_checks():
-    global working_directory, output_directory, markers_path, backup_path
-    print("[STAGE] Checking arguments are valid.")
-    if len(sys.argv) < 2:
-        raise Exception("Missing directory path. Usage:\n" + help_text)
+    global args, working_directory, output_directory, markers_path, remote_path
 
-    working_directory = sys.argv[1]
+    working_directory = args.directory_path
     output_directory = f"{working_directory}/output"
     markers_path = working_directory + "/markers"
+    remote_path = args.remote_path
 
     if not os.path.isdir(working_directory):
-        raise Exception("The specified directory does not exist. Usage:\n" + help_text)
+        raise Exception("The specified directory does not exist. \n" + help_text)
 
     if not os.path.isfile(markers_path):
-        raise Exception("Missing 'markers' file. Usage:\n" + help_text)
-
-    if len(sys.argv) > 2:
-        backup_path = sys.argv[2]
+        raise Exception("Missing 'markers' file. \n" + help_text)
 
 def check_raw_files():
     global working_directory, input_filetype, recording_date, raw_files, stems
@@ -199,8 +203,8 @@ def merge_audio(output_file, files_to_merge):
     exit()
 
 def create_playalongs():
-    global sections, output_directory, recording_date, output_filetype, playaong_gain
-    gain_adjustment = playaong_gain
+    global sections, output_directory, recording_date, output_filetype, playalong_gain
+    gain_adjustment = playalong_gain
     print("[STAGE] Creating play-along tracks.")
     for directory in os.listdir(f"{output_directory}"):
         if os.path.isfile(os.path.join(output_directory, directory)):
@@ -262,18 +266,23 @@ def create_playalongs():
             os.system(command)
             change_gain(output_file, gain_adjustment)
 
-def backup_files():
-    global output_filetype, output_directory, backup_path
-    if not backup_path:
-        print("[WARN] No backup path specified, skipping backup.")
+def copy_to_remote():
+    global output_filetype, output_directory, remote_path
+    if not remote_path:
+        print("[WARN] No remote path specified, skipping remote copy.")
         return
 
     print("[STAGE] Uploading files to remove server.")
-    command = f"rsync --archive --recursive --verbose --include='*.{output_filetype}' --exclude='*.*' {output_directory}/ {backup_path}"
+    command = f"rsync --archive --recursive --verbose --include='*.{output_filetype}' --exclude='wavs' --exclude='*.*' {output_directory}/ {remote_path}"
     os.system(command)
-    print("[SUCCESS] Backup complete.")
+    print("[SUCCESS] Remote copy complete.")
 
 preflight_checks()
+
+if args.only_remote:
+    copy_to_remote()
+    exit()
+
 check_raw_files()
 read_markers_file()
 split_raw_files_by_marker()
@@ -284,7 +293,7 @@ create_playalongs()
 t1 = round(time.time() - t0, 2)
 print("[SUCCESS] Audio file generation complete, time elapsed (secs): ", t1)
 
-backup_files()
+copy_to_remote()
 
 exit()
 
