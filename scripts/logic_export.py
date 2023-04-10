@@ -50,6 +50,7 @@ help_text = "usage: logic_export.py [-h] [-r REMOTE_PATH] [-o] directory_path"
 parser = argparse.ArgumentParser()
 parser.add_argument("directory_path", help="full path to individual instrument stems", type=str)
 parser.add_argument("-r", "--remote-path", help="full path to remote server directory", required=False, type=str)
+parser.add_argument("-p", "--playalongs", help="generate playalong tracks", required=False, action="store_true")
 parser.add_argument("-o", "--only-remote", help="only copy existing files to remote path", action="store_true")
 args = parser.parse_args()
 
@@ -203,7 +204,7 @@ def merge_audio(output_file, files_to_merge):
     exit()
 
 def create_playalongs():
-    global sections, output_directory, recording_date, output_filetype, playalong_gain
+    global args, sections, output_directory, recording_date, output_filetype, playalong_gain
     gain_adjustment = playalong_gain
     print("[STAGE] Creating play-along tracks.")
     for directory in os.listdir(f"{output_directory}"):
@@ -224,29 +225,31 @@ def create_playalongs():
                 mix_name = f"{recording_date}_{section['name']}_MIX.{output_filetype}"
                 section_tracks.append({ 'filepath': f"{input_directory_path}/{input_filename}", 'filename': input_filename, 'playalong_name': output_filename, 'mix_name': mix_name })
 
-            # Create Playalongs
-            current_playalong_tracks = 1
             total_playalong_tracks = len(section_tracks)
-            for track_to_create in section_tracks:
-                command = "ffmpeg "
-                for track in section_tracks:
-                    if track['filename'] == track_to_create['filename']:
-                        continue
+            current_playalong_tracks = 1
 
-                    command += f"-i {track['filepath']} "
+            # Create Playalongs
+            if args.playalongs:
+                for track_to_create in section_tracks:
+                    command = "ffmpeg "
+                    for track in section_tracks:
+                        if track['filename'] == track_to_create['filename']:
+                            continue
 
-                print(f"[INFO] [{current_playalong_tracks}/{total_playalong_tracks}] Creating {track_to_create['playalong_name']} play-along track for {directory}.")
-                playalong_dir = f"{input_directory_path}/../../playalongs/{recording_date}"
-                os.makedirs(playalong_dir, exist_ok=True)
-                output_file = f"{playalong_dir}/{track_to_create['playalong_name']}"
-                command += f"-filter_complex amix=inputs={total_playalong_tracks - 1}:duration=first {output_file}"
+                        command += f"-i {track['filepath']} "
 
-                if debug is False:
-                    command += " -loglevel quiet"
+                    print(f"[INFO] [{current_playalong_tracks}/{total_playalong_tracks}] Creating {track_to_create['playalong_name']} play-along track for {directory}.")
+                    playalong_dir = f"{input_directory_path}/../../playalongs/{recording_date}"
+                    os.makedirs(playalong_dir, exist_ok=True)
+                    output_file = f"{playalong_dir}/{track_to_create['playalong_name']}"
+                    command += f"-filter_complex amix=inputs={total_playalong_tracks - 1}:duration=first {output_file}"
 
-                current_playalong_tracks += 1
-                os.system(command)
-                change_gain(output_file, gain_adjustment)
+                    if debug is False:
+                        command += " -loglevel quiet"
+
+                    current_playalong_tracks += 1
+                    os.system(command)
+                    change_gain(output_file, gain_adjustment)
 
             # Create Mixes - TODO: Refactor
             command = "ffmpeg "
@@ -280,6 +283,9 @@ def copy_to_remote():
 preflight_checks()
 
 if args.only_remote:
+    if not args.remote_path:
+        print("[ERROR] No remote path specified, aborting.")
+        exit()
     copy_to_remote()
     exit()
 
@@ -293,7 +299,8 @@ create_playalongs()
 t1 = round(time.time() - t0, 2)
 print("[SUCCESS] Audio file generation complete, time elapsed (secs): ", t1)
 
-copy_to_remote()
+if args.remote_path:
+    copy_to_remote()
 
 exit()
 
