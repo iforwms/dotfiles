@@ -22,7 +22,7 @@ if not debug:
 # 2. Create markers for each song (for multiple takes: NAME-TAKE#
 # 5. File > Export > All Tracks as Audio Files... (Shift + Cmd + E)
 # 6. Enable "Include Volume/Pan Automation"
-# 7. Set the "Range" to Extend File Length to Project Length
+# 7. Set the "Range" to "Extend File Length to Project End"
 # 8. Set exported file name to: "DATE_,$TrackName"
 # 9. List Editors (D) > Markers
 # 10. View > Check "Show Event Time Position and Length as Time" (Ctrl+Opt+R) and deselect "Length as Absolute Position" (Ctrl+Shift+A)
