@@ -29,7 +29,7 @@ find "${src_dir}" -maxdepth 1 -type d -regextype sed -regex ".*[0-9]\{4\}.*" -pr
     xargs -0 -I {} bash -c "clean '${movie_regex}' '{}' '${src_dir}' '${dest_dir}/movies'"
 
 echo
-read -p "Do you want to move these files? (Y/y) " -n 1 -r
+read -p "Do you want to move these files? (y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     DEBUG=0
