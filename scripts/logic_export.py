@@ -17,22 +17,6 @@ playalong_gain = 0
 if not debug:
     sys.tracebacklimit = 0
 
-# Exporting files from Logic Pro
-# 1. Split all tracks into individual regions
-# 2. Create markers for each song (for multiple takes: NAME-TAKE#
-# 5. File > Export > All Tracks as Audio Files... (Shift + Cmd + E)
-# 6. Enable "Include Volume/Pan Automation"
-# 7. Set the "Range" to "Extend File Length to Project End"
-# 8. Set exported file name to: "DATE_,$TrackName"
-# 9. List Editors (D) > Markers
-# 10. View > Check "Show Event Time Position and Length as Time" (Ctrl+Opt+R) and deselect "Length as Absolute Position" (Ctrl+Shift+A)
-# 11. Copy all marker info (Cmd + a, Cmd + c) and paste (Cmd + v) into a file called markers
-
-# Marker file example
-# 00:35:05:12.40  Song-1  00:03:30:12.40
-# 00:38:36:00.00  Song-2  00:02:32:16.53
-# 00:41:10:03.21  Song-3  00:04:15:05.05
-
 t0 = time.time()
 
 # Set global variables
@@ -45,7 +29,26 @@ input_filetype = "wav"
 output_filetype = "mp3"
 sections = []
 stems = []
-help_text = "usage: logic_export.py [-h] [-r REMOTE_PATH] [-o] directory_path"
+
+if len(sys.argv) == 1:
+    print("""# Usage: logic_export.py [-r REMOTE_PATH] [-p] [-o] [-h] directory_path
+
+# Exporting files from Logic Pro
+1. Split all tracks into individual regions
+2. Create markers (Opt+') for each song (for multiple takes use the following convention: NAME-TAKE)
+3. File > Export > All Tracks as Audio Files... (Shift+Cmd+E)
+4. Enable "Include Volume/Pan Automation"
+5. Set the "Range" to "Extend File Length to Project End"
+6. Set exported file name to: "DATE_,$TrackName"
+7. List Editors (D) > Markers
+8. View > Check "Show Event Time Position and Length as Time" (Ctrl+Opt+R) and deselect "Length as Absolute Position" (Ctrl+Shift+A)
+9. Copy all marker info (Cmd+A, Cmd+C) and paste (Cmd+V) into a file called markers
+
+# Marker file example
+00:35:05:12.40  Song-1  00:03:30:12.40
+00:38:36:00.00  Song-2  00:02:32:16.53
+00:41:10:03.21  Song-3  00:04:15:05.05""")
+    exit()
 
 parser = argparse.ArgumentParser()
 parser.add_argument("directory_path", help="full path to individual instrument stems", type=str)
