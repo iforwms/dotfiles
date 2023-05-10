@@ -35,7 +35,7 @@ if len(sys.argv) == 1:
 
 # Exporting files from Logic Pro
 1. Split all tracks into individual regions
-2. Create markers (Opt+') for each song (for multiple takes use the following convention: NAME-TAKE)
+2. Create markers (Opt+') for each song (for multiple takes use the following convention, with the take number being optional: SongName-TAKE)
 3. File > Export > All Tracks as Audio Files... (Shift+Cmd+E)
 4. Enable "Include Volume/Pan Automation"
 5. Set the "Range" to "Extend File Length to Project End"
