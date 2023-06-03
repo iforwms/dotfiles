@@ -30,24 +30,44 @@ output_filetype = "mp3"
 sections = []
 stems = []
 
+W  = '\033[0m'  # white (normal)
+R  = '\033[31m' # red
+G  = '\033[32m' # green
+O  = '\033[33m' # orange
+B  = '\033[34m' # blue
+P  = '\033[35m' # purple
+
 if len(sys.argv) == 1:
-    print("""# Usage: logic_export.py [-r REMOTE_PATH] [-p] [-o] [-h] directory_path
+    print("""
+# Usage: logic_export.py [-r REMOTE_PATH] [-p] [-o] [-h] directory_path
 
-# Exporting files from Logic Pro
-1. Split all tracks into individual regions
-2. Create markers (Opt+') for each song (for multiple takes use the following convention, with the take number being optional: SongName-TAKE)
-3. File > Export > All Tracks as Audio Files... (Shift+Cmd+E)
-4. Enable "Include Volume/Pan Automation"
-5. Set the "Range" to "Extend File Length to Project End"
-6. Set exported file name to: "DATE_,$TrackName"
-7. List Editors (D) > Markers
-8. View > Check "Show Event Time Position and Length as Time" (Ctrl+Opt+R) and deselect "Length as Absolute Position" (Ctrl+Shift+A)
-9. Copy all marker info (Cmd+A, Cmd+C) and paste (Cmd+V) into a file called markers
+{}# Preparing a Live Recording
+1. Line up audio files in the correct tracks
+2. Add markers for individual songs or song sections (Opt+')
+3. Compensate for any obvious gain variations
+4. Remove silence from vocals or any tracks that require it (Ctrl+x) or for a more subtle approach, ride faders very low in-between singing
+5. Add basic EQ to each track
+6. Use a de-esser on any mics to lower spillover from drums
+7. High-pass filter on mics to reduce bass build-up
+8. Low-pass filter on guitars and bass over 6kHz or so
+9. Optionally cut at ~200 Hz to reduce room boominess
+10. Make cuts at 1kHz and 2kHz to reduce any nasal sounds or honk from the vocals
+11. Automate fader levels
 
-# Marker file example
+{}# Exporting Files from Logic Pro
+1. Create markers (Opt+') for each song (for multiple takes use the following convention, with the take number being optional: SongName-TAKE)
+2. File > Export > All Tracks as Audio Files... (Shift+Cmd+E)
+3. Enable "Include Volume/Pan Automation"
+4. Set the "Range" to "Extend File Length to Project End"
+5. Set exported file name to: "DATE_,$TrackName"
+6. List Editors (D) > Markers
+7. View > Check "Show Event Time Position and Length as Time" (Ctrl+Opt+R) and deselect "Length as Absolute Position" (Ctrl+Shift+A)
+8. Copy all marker info (Cmd+A, Cmd+C) and paste (Cmd+V) into a file called markers
+
+{}# Marker file example
 00:35:05:12.40  Song-1  00:03:30:12.40
 00:38:36:00.00  Song-2  00:02:32:16.53
-00:41:10:03.21  Song-3  00:04:15:05.05""")
+00:41:10:03.21  Song-3  00:04:15:05.05""".format(B, P, O))
     exit()
 
 parser = argparse.ArgumentParser()
