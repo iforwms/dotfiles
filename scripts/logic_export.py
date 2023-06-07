@@ -37,22 +37,30 @@ O  = '\033[33m' # orange
 B  = '\033[34m' # blue
 P  = '\033[35m' # purple
 
-if len(sys.argv) == 1:
-    print("""
-# Usage: logic_export.py [-r REMOTE_PATH] [-p] [-o] [-h] directory_path
-
+"""
 {}# Preparing a Live Recording
 1. Line up audio files in the correct tracks
 2. Add markers for individual songs or song sections (Opt+')
-3. Compensate for any obvious gain variations
-4. Remove silence from vocals or any tracks that require it (Ctrl+x) or for a more subtle approach, ride faders very low in-between singing
-5. Add basic EQ to each track
-6. Use a de-esser on any mics to lower spillover from drums
-7. High-pass filter on mics to reduce bass build-up
-8. Low-pass filter on guitars and bass over 6kHz or so
-9. Optionally cut at ~200 Hz to reduce room boominess
-10. Make cuts at 1kHz and 2kHz to reduce any nasal sounds or honk from the vocals
-11. Automate fader levels
+3. Individual track edits
+    - Edit out silence (Ctrl+x) or for a more subtle approach, ride faders very low in-between singing
+    - Remove unwanted background noise
+    - Remove audio glitches/dodgy edits
+    - Add crossfades/remove any pops
+    - Highlight any interesting/funny/great moments in the performance
+    - Split the track into multiple tracks if required, e.g. finger-picking and strumming acoustic parts allowing for different FX/mixes for different sections, verse/chorus etc. (If it takes ten channels to get the vocals to sit right in each section, then so be it).
+    - Compensate for any obvious gain variations
+    - Add basic EQ to each track
+    - Use a de-esser on any mics to lower spillover from drums
+    - High-pass filter on mics to reduce bass build-up
+    - Low-pass filter on guitars and bass over 6kHz or so
+    - Optionally cut at ~200 Hz to reduce room boominess
+    - Make cuts at 1kHz and 2kHz to reduce any nasal sounds or honk from the vocals
+    - Automate fader levels
+"""
+
+if len(sys.argv) == 1:
+    print("""
+# Usage: logic_export.py [-r REMOTE_PATH] [-p] [-o] [-h] directory_path
 
 {}# Exporting Files from Logic Pro
 1. Create markers (Opt+') for each song (for multiple takes use the following convention, with the take number being optional: SongName-TAKE)
@@ -67,7 +75,7 @@ if len(sys.argv) == 1:
 {}# Marker file example
 00:35:05:12.40  Song-1  00:03:30:12.40
 00:38:36:00.00  Song-2  00:02:32:16.53
-00:41:10:03.21  Song-3  00:04:15:05.05""".format(B, P, O))
+00:41:10:03.21  Song-3  00:04:15:05.05""".format(B, O))
     exit()
 
 parser = argparse.ArgumentParser()
