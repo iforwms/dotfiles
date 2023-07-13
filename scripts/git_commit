@@ -5,3 +5,7 @@ repo_dir="$1"
 git -C "${repo_dir}" add . &&
     git -C "${repo_dir}" commit -m "Update repo ($(date '+%Y/%m/%d %H:%M'))." &&
     git -C "${repo_dir}" push
+
+if [[ -x "${repo_dir}/deploy_remote" ]]; then
+    "${repo_dir}/deploy_remote"
+fi
