@@ -8,24 +8,30 @@ shot_rounds = [
     "Name the Celebrity",
     "Name the Landmark",
     "Name the Animal",
+    "Name the Flag",
+    "Yangshuo landmarks with no names",
 ]
 
 categories = [
     "Animals",
     "Art",
     "Celebrities",
+    "Food & Drink",
     "General Knowledge",
     "Geography",
     "History",
+    "Language",
     "Literature",
     "Movies",
     "Music",
     "Mythology",
     "On This Day",
+    "Religion",
+    "Riddles",
     "Science",
     "Technology",
     "True or False",
-    "Religion",
+    "Yangshuo",
 ]
 
 random.shuffle(shot_rounds)

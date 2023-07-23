@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+
+import random
+
+notes = [
+"C","D","E","F","G","A","B",
+"Cb","Db","Eb","Fb","Gb","Ab","Bb",
+"C#","D#","E#","F#","G#","A#","B#",
+]
+
+chords = [
+    'minor triad', 'major triad', 'augumented triad', 'diminished triad',
+    'dominant 7', 'm7b5', 'minor 7', 'major 7',
+]
+
+scales = [
+    'ionian',
+    'dorian',
+    'phrygian',
+    'lydian',
+    'mixolydian',
+    'aeolian',
+    'locrian',
+]
+
+random.shuffle(notes)
+random.shuffle(chords)
+random.shuffle(scales)
+
+print(notes[0], chords[0])
+
+random.shuffle(notes)
+
+print(notes[0], scales[0])
+
