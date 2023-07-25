@@ -1,0 +1,35 @@
+#!/bin/bash
+
+DEBUG=1
+declare -x DEBUG
+
+function clean() {
+    src="$1"
+    dest="${src//  / }"
+    dest="${src// - /-}"
+    dest="${dest// /.}"
+    dest="${dest//../.}"
+    dest="${dest,,}"
+
+    if [[ $DEBUG != 1 ]]; then
+        mv "${src}" "${dest}"
+    fi
+
+    echo "${src}" "--->" "${dest}"
+}
+
+export -f clean
+
+find -type f \( -name '*.mp3' -o -name '*.pdf' -o -name '*.mp4' \) -print0 | \
+    xargs -0 -I {} bash -c "clean '{}'"
+
+echo
+read -p "Do you want to rename these files? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    DEBUG=0
+    echo
+    find -type f \( -name '*.mp3' -o -name '*.pdf' -o -name '*.mp4' \) -print0 | \
+        xargs -0 -I {} bash -c "clean '{}'"
+fi
+
