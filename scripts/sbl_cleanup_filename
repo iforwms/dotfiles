@@ -8,7 +8,9 @@ function clean() {
     dest="${src//  / }"
     dest="${src// - /-}"
     dest="${dest// /.}"
+    dest="${dest//+/.}"
     dest="${dest//../.}"
+    dest="${dest//.-./-}"
     dest="${dest,,}"
 
     if [[ $DEBUG != 1 ]]; then
