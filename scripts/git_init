@@ -1,0 +1,8 @@
+#!/bin/bash
+
+echo "Creating repo..."
+mkdir $1
+git -C "./$1" init
+gh repo create $1 --private --source=./$1 --remote=upstream
+
+exit 0
