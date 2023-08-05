@@ -1,0 +1,72 @@
+#!/usr/local/bin/python3
+from bs4 import BeautifulSoup
+from datetime import datetime
+import re, json, sys, os
+from googletrans import Translator
+
+if len(sys.argv) < 2:
+    exit("[ERROR] Missing genre.")
+
+translator = Translator()
+genre = sys.argv[1]
+base_path = "/Users/ifor/Downloads"
+html_path = f'{base_path}/{genre}.html'
+json_path = f'{base_path}/{genre}.json'
+
+if os.path.isfile(json_path):
+    timestamp = datetime.now().replace(microsecond=0)
+    exit(f'[{timestamp}] [WARN] {json_path} already exists, skipping.')
+
+with open(html_path) as fp:
+    soup = BeautifulSoup(fp, 'html.parser')
+    data = [];
+    questions = [];
+    answers = [];
+    intros = []
+
+    for entry in soup.find_all('div', {"class":"entry-content"}):
+        intro = None
+        paragraphs = entry.find_all('p')
+        for index, paragraph in enumerate(paragraphs):
+            is_question = paragraph.strong
+
+            if index == 0 and not is_question:
+                intro = re.sub("^.*?– ", "", paragraph.get_text())
+                continue
+
+            if is_question is not None:
+                try:
+                    answer = paragraphs[index+1].get_text()
+                except IndexError:
+                    continue
+
+                question = re.sub("^\d+\. ", "", paragraph.get_text())
+                intros.append(intro)
+                questions.append(question)
+                answers.append(answer)
+                data.append({"intro": intro, "intro_zh": None, "text": question, "text_zh": None, "answer": answer, "answer_zh": None, "category": genre.capitalize()})
+
+timestamp = datetime.now().replace(microsecond=0)
+print(f'[{timestamp}] [INFO] Translating {genre} intros...')
+intro_translations = translator.translate(intros, dest='zh-cn')
+for index, translation in enumerate(intro_translations):
+    data[index]['intro_zh'] = translation.text
+
+timestamp = datetime.now().replace(microsecond=0)
+print(f'[{timestamp}] [INFO] Translating {genre} questions...')
+question_translations = translator.translate(questions, dest='zh-cn')
+for index, translation in enumerate(question_translations):
+    data[index]['text_zh'] = translation.text
+
+timestamp = datetime.now().replace(microsecond=0)
+print(f'[{timestamp}] [INFO] Translating {genre} answers...')
+answer_translations = translator.translate(answers, dest='zh-cn')
+for index, translation in enumerate(answer_translations):
+    data[index]['answer_zh'] = translation.text
+
+timestamp = datetime.now().replace(microsecond=0)
+print(f'[{timestamp}] [INFO] Writing to {json_path}...')
+file1 = open(json_path, 'w')
+file1.write(json.dumps(data))
+file1.close()
+exit()
