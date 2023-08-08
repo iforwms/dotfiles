@@ -44,28 +44,28 @@ with open(html_path) as fp:
                 intros.append(intro)
                 questions.append(question)
                 answers.append(answer)
-                data.append({"intro": intro, "intro_zh": None, "text": question, "text_zh": None, "answer": answer, "answer_zh": None, "category": genre.capitalize()})
+                data.append({"intro": intro, "intro_zh": None, "text": question, "text_zh": None, "answer": answer, "answer_zh": None, "category": genre.replace('-', ' ').title()})
 
 timestamp = datetime.now().replace(microsecond=0)
-print(f'[{timestamp}] [INFO] Translating {genre} intros...')
+print(f'[{timestamp}] [INFO] [{genre}] Translating intros...')
 intro_translations = translator.translate(intros, dest='zh-cn')
 for index, translation in enumerate(intro_translations):
     data[index]['intro_zh'] = translation.text
 
 timestamp = datetime.now().replace(microsecond=0)
-print(f'[{timestamp}] [INFO] Translating {genre} questions...')
+print(f'[{timestamp}] [INFO] [{genre}] Translating questions...')
 question_translations = translator.translate(questions, dest='zh-cn')
 for index, translation in enumerate(question_translations):
     data[index]['text_zh'] = translation.text
 
 timestamp = datetime.now().replace(microsecond=0)
-print(f'[{timestamp}] [INFO] Translating {genre} answers...')
+print(f'[{timestamp}] [INFO] [{genre}] Translating answers...')
 answer_translations = translator.translate(answers, dest='zh-cn')
 for index, translation in enumerate(answer_translations):
     data[index]['answer_zh'] = translation.text
 
 timestamp = datetime.now().replace(microsecond=0)
-print(f'[{timestamp}] [INFO] Writing to {json_path}...')
+print(f'[{timestamp}] [INFO] [{genre}] Writing to file.')
 file1 = open(json_path, 'w')
 file1.write(json.dumps(data))
 file1.close()
