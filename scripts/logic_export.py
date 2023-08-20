@@ -187,9 +187,19 @@ def delete_empty_files():
     stem_files = glob.glob(glob_pattern)
 
     for file in stem_files:
-        command = f"ffmpeg -i {file} -af silencedetect=noise=0.001 -f null - 2>&1 | awk '/silence_duration/{{print $8}}'"
+        command = f"ffmpeg -i {file} -af silencedetect=noise=0.001 -f null - 2>&1 | awk '/silence_duration/{{print $0}}'"
 
         silence_duration = subprocess.check_output(command, shell=True, encoding="UTF-8")
+
+        regex = r"silence_duration: ([\d.]+)"
+        matches = re.findall(regex, silence_duration)
+        if len(matches):
+            silence_duration = matches[0]
+        else:
+            silence_duration = ''
+
+        # print(f"[DEBUG] [{file.split('/')[-1]}] {command}")
+        # print(f"[DEBUG] [{file.split('/')[-1]}] Silence duration: {silence_duration}")
         if silence_duration == '':
             silence_duration = "0"
         if silence_duration.__contains__("\n"):
