@@ -1,3 +1,4 @@
 #!/bin/bash
 
 scp -r "clients:/home/ifor/backups/*" "$HOME/Documents/backup/db"
+scp -r "me:/home/ifor/backups/*" "$HOME/Documents/backup/db"
