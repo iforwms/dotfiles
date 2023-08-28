@@ -1,0 +1,9 @@
+#!/bin/bash
+
+path=/usr/local/bin/vi
+
+if ! command -v "${path}" &> /dev/null; then
+    path=/bin/vim
+fi
+
+$path -c "let g:tty='\''$(tty)'\''"
