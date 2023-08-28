@@ -4,5 +4,6 @@ base_dir=/home/ifor/.dotfiles
 
 echo "Running git pull..."
 ssh clients "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/clients_server' && git -C ${base_dir} pull"
+ssh me "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/clients_server' && git -C ${base_dir} pull"
 
 echo "Deploy complete!"
