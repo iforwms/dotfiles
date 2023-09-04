@@ -9,4 +9,4 @@ if ! command -v "${path}" &> /dev/null; then
     fi
 fi
 
-$path -c "let g:tty='$(tty)'"
+$path -c "let g:tty='$(tty)'" "$1"
