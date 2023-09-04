@@ -4,6 +4,9 @@ path=/usr/local/bin/vi
 
 if ! command -v "${path}" &> /dev/null; then
     path=/bin/vim
+    if ! command -v "${path}" &> /dev/null; then
+        path=/usr/bin/vim
+    fi
 fi
 
 $path -c "let g:tty='$(tty)'"
