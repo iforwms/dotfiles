@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo "Killing mDNSResponder to force DNS refresh..."
+
+sudo killall -HUP mDNSResponder
