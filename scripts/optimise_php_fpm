@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+
+php_version=$(php -r 'echo PHP_VERSION;'|awk -F. '{print $1"."$2}')
+
+fpm_config=/Users/ifor/Downloads/www.conf
+fpm_config="/etc/php/${php_version}/fpm/pool.d/www.conf"
+
+avg_request_usage_in_mb=${1:-50}
+total_ram_in_mb=$(awk '/MemTotal/ {printf "%.1f\n", $2/1024 }' /proc/meminfo 2> /dev/null)
+ram_buffer_pc=0.8
+max_children=$(echo "${total_ram_in_mb} * ${ram_buffer_pc} / ${avg_request_usage_in_mb}"|bc)
+start_servers=10
+min_spare_servers=5
+max_spare_servers=10
+max_requests=500
+
+if [[ ! -r "${fpm_config}" ]]; then
+   echo "Unable to read config file at ${fpm_config}"
+   echo "Aborting..."
+   exit 1
+fi
+
+echo "Active config file: ${fpm_config}"
+echo
+echo "Current settings:"
+grep '^;\?pm.max_children\|^;\?pm.start_servers\|^;\?pm.min_spare_servers\|^;\?pm.max_spare_servers\|^;\?pm.max_requests' "${fpm_config}"|grep -v ";"|sed 's/pm\.//'
+echo
+echo "Proposed settings:"
+echo "max_children = ${max_children}"
+echo "start_servers = ${start_servers}"
+echo "min_spare_servers = ${min_spare_servers}"
+echo "max_spare_servers = ${max_spare_servers}"
+echo "max_requests = ${max_requests}"
+echo
+
+read -p "Do you want to update the FPM config file? (y/n) " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+   echo
+   echo "Aborting..."
+   exit 1
+fi
+
+echo
+echo "Updating config file..."
+sed -E "s/^;?pm.max_children.*/pm.max_children = ${max_children}/; s/^;?pm.start_servers.*/pm.start_servers = ${start_servers}/; s/^;?pm.min_spare_servers.*/pm.min_spare_servers = ${min_spare_servers}/; s/^;?pm.max_spare_servers.*/pm.max_spare_servers = ${max_spare_servers}/; s/^;?pm.max_requests.*/pm.max_requests = ${max_requests}/;" "${fpm_config}"|sudo tee "${fpm_config}" >/dev/null
+
+config_test=$(sudo php-fpm${php_version} -t 2>&1|grep 'test is successful')
+if [[ -z "${config_test}" ]]; then
+   echo "Config test failed, please manually check (php-fpm${php_version} -t) and try again."
+   exit 1
+fi
+
+echo
+echo "Optimised settings:"
+grep '^;\?pm.max_children\|^;\?pm.start_servers\|^;\?pm.min_spare_servers\|^;\?pm.max_spare_servers\|^;\?pm.max_requests' "${fpm_config}"|grep -v ";"|sed 's/pm\.//'
+
+echo
+read -p "Settings updated, you need to restart the FPM service for these changes to take effect, restart now? (y/n) " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+   echo
+   echo "Service not restarted."
+   exit 1
+else
+   echo
+   echo "Restarting FPM service"
+   sudo service php${php_version}-fpm restart
+   echo
+   echo "Service restarted."
+   exit 0
+fi
+
