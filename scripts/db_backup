@@ -1,7 +1,7 @@
 #!/bin/bash
 
 backup_dir=/home/ifor/backups
-user=root
+user=${1:-root}
 hostname="127.0.0.1"
 now=$(date +"%F")
 password=$(cat /home/ifor/mysql_pass)
