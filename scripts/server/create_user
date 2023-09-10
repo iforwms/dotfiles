@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+
+set -o errexit  # Exit the script if any command fails (add "|| true" to allow failing)
+# set -o nounset  # Exit the script if an undeclared variable is used
+set -o pipefail # Exit the script if an error occurs in a pipe
+# set -o xtrace # Enable bash debug output
+# set -o verbose # Enable verbose output
+
+username=$1
+server_ip=$2
+server_name=$3
+group=${4:-$1}
+ssh_keyname="${username}_${server_name}"
+
+ssh_config=/Users/ifor/Downloads/ssh_config
+ssh_config=/Users/ifor/.ssh/config
+usage="usage: ./create_user USERNAME SERVER_IP SERVER_NAME [GROUP]"
+
+# shellcheck source=/dev/null
+source "${DOTFILES}/scripts/logger.sh"
+
+if [[ -z "${username}" ]]; then
+    log_e "Please enter a username and optional group."
+    log "${usage}"
+    exit 1
+fi
+
+if [[ -z "${server_ip}" ]]; then
+    log_e "Please enter the server IP address."
+    log "${usage}"
+    exit 1
+fi
+
+if [[ -z "${server_name}" ]]; then
+    log_e "Please enter a name/alias for the server."
+    log "${usage}"
+    exit 1
+fi
+
+echo -n "Enter a password for ${username}: "
+read -rs pass
+echo
+read -rs -p "Confirm password: " PASS_CONFIRM
+echo
+echo
+if [ "${pass}" != "${PASS_CONFIRM}" ]; then
+    log_e "Passwords do not match."
+    exit 1
+fi
+
+log_n "Creating account for ${username}@${server_name} (${server_ip}) and adding to group ${group}."
+
+# log "Creating new SSH key pair for ${server_name}"
+# ssh-keygen -t rsa -N '' -b 4096 -f "${HOME}/.ssh/${ssh_keyname}" -C "${server_name}" <<<y >/dev/null 2>&1
+
+# log "Updating ${ssh_config} with server info."
+# cp "${HOME}/.ssh/config" "${HOME}/.ssh/config.bak"
+# cat << EOF > ${ssh_config}
+# Host ${server_name}
+#     User root
+#     HostName ${server_ip}
+#     IdentityFile ~/.ssh/${ssh_keyname}
+
+# $(cat $ssh_config)
+# EOF
+
+log_n "Use the newly created key pair when creating the server."
+
+echo
+read -p "Enter 'y' once the new server is live, or any other key to abort. " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    log_e "Aborting early..."
+    exit 1
+fi
+
+log "Creating account for ${username} on ${server_name}."
+ssh -t "${server_name}" "sudo adduser --disabled-password --gecos '' '${username}'"; add_user=$?
+if [[ $add_user ]]; then
+    log_e "Failed to create user."
+    exit 1
+fi
+
+ssh -t "${server_name}" "sudo usermod -a -G sudo '${username}'"
+ssh "${server_name}" "umask 077; test -d /home/${username}/.ssh || mkdir /home/${username}/.ssh"
+cat "${HOME}/.ssh/${ssh_keyname}.pub" | ssh "${server_name}" "cat >> /home/${username}/.ssh/authorized_keys"
+
+# Create ssh key for user on remote machine for use with Github
+# ssh-keygen -t rsa -b 4096 -f /home/USER/.ssh/id_rsa -C "SERVER_NAME"
+
+# sed -i "/Host ${server_name}/{n;s/User root/User ${username}/}" "${ssh_config}"
+
+exit 0

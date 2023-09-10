@@ -6,7 +6,8 @@ set -o pipefail # Exit the script if an error occurs in a pipe
 # set -o xtrace # Enable bash debug output
 # set -o verbose # Enable verbose output
 
-source "${HOME}/.dotfiles/scripts/logger.sh"
+# shellcheck source=/dev/null
+source "${DOTFILES}/scripts/logger.sh"
 
 readonly username="${1}"
 readonly group="${2:-}"

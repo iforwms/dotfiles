@@ -44,5 +44,5 @@ done
 # referenced in my aliases.zsh file directly.
 #export PATH="$(brew --prefix coreutils)/libexec/gnubin:$PATH"
 
-export PATH="$DOTFILES/scripts:$PATH"
+export PATH="$DOTFILES/scripts:$DOTFILES/scripts/server:$PATH"
 
