@@ -56,7 +56,6 @@ iptables -A INPUT -p tcp --dport 443 -m state --state NEW -j ACCEPT   # https
 # Allow pinging of your server
 iptables -A INPUT -p icmp --icmp-type 8 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 
-
 # Drop all other traffic
 iptables -A INPUT -j DROP
 
