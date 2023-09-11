@@ -3,7 +3,7 @@
 filename="pedalboard_backup" #_$(date +%Y-%m-%d)"
 destination="/Users/ifor/Documents/backup"
 
-scp -r clients:/home/ifor/code/pedal_board/db/* "$destination/pedbalboard/"
+scp -r me:/home/ifor/code/pedalboard/db/* "$destination/pedbalboard/"
 
 #echo "${destination}/${filename}.json"
 
