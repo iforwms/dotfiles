@@ -3,6 +3,19 @@
 # Create local and remote SSH credentials and a new user on a
 # remote server.
 
+# 1. Create local SSH keys for logging into new server
+# 2. Update ~/.ssh/config with new server settings (as root)
+# 3. Use new SSH config to:
+#     - Create new user
+#     - Set new user password
+#     - Add new user to sudo group
+#     - Add user to optionally supplied group
+#     - Create remote ~/.ssh directory
+#     - Create remote authorized_keys and add local SSH key
+#     - Fix new user home directory permissions
+# 4. Update ~/.ssh/config to use new user
+# 5. Create remote SSH keys for new user
+
 set -o errexit  # Exit the script if any command fails (add "|| true" to allow failing)
 # set -o nounset  # Exit the script if an undeclared variable is used
 set -o pipefail # Exit the script if an error occurs in a pipe
