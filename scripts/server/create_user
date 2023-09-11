@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Create local and remote SSH credentials and a new user on a
+# remote server.
+
 set -o errexit  # Exit the script if any command fails (add "|| true" to allow failing)
 # set -o nounset  # Exit the script if an undeclared variable is used
 set -o pipefail # Exit the script if an error occurs in a pipe
@@ -7,26 +10,24 @@ set -o pipefail # Exit the script if an error occurs in a pipe
 # set -o verbose # Enable verbose output
 
 username=$1
-server_ip=$2
-server_name=$3
-group=${4:-$1}
-ssh_keyname="${username}_${server_name}"
+server_name=$2
+group=${3:-$1}
 
-ssh_config=/Users/ifor/Downloads/ssh_config
+# ssh_config=/Users/ifor/Downloads/ssh_config
 ssh_config=/Users/ifor/.ssh/config
-usage="usage: ./create_user USERNAME SERVER_IP SERVER_NAME [GROUP]"
+usage="usage: ./create_user USERNAME SERVER_NAME [GROUP]"
 
 # shellcheck source=/dev/null
 source "${DOTFILES}/scripts/logger.sh"
 
-if [[ -z "${username}" ]]; then
-    log_e "Please enter a username and optional group."
+if [[ "$#" -lt 2 ]]; then
+    log_e "Please enter a username, server name and optional user group."
     log "${usage}"
     exit 1
 fi
 
-if [[ -z "${server_ip}" ]]; then
-    log_e "Please enter the server IP address."
+if [[ -z "${username}" ]]; then
+    log_e "Please enter a username."
     log "${usage}"
     exit 1
 fi
@@ -37,7 +38,10 @@ if [[ -z "${server_name}" ]]; then
     exit 1
 fi
 
-echo -n "Enter a password for ${username}: "
+ssh_keyname="${username}_${server_name}"
+remote_ssh_private_key=/home/${username}/.ssh/id_rsa
+
+echo -n "Enter sudo password for ${username}@${server_name}: "
 read -rs pass
 echo
 read -rs -p "Confirm password: " PASS_CONFIRM
@@ -48,23 +52,11 @@ if [ "${pass}" != "${PASS_CONFIRM}" ]; then
     exit 1
 fi
 
-log_n "Creating account for ${username}@${server_name} (${server_ip}) and adding to group ${group}."
+log "Creating new SSH key pair for ${server_name}"
+ssh-keygen -t rsa -N '' -b 4096 -f "${HOME}/.ssh/${ssh_keyname}" -C "${server_name}" <<<y >/dev/null 2>&1
 
-# log "Creating new SSH key pair for ${server_name}"
-# ssh-keygen -t rsa -N '' -b 4096 -f "${HOME}/.ssh/${ssh_keyname}" -C "${server_name}" <<<y >/dev/null 2>&1
-
-# log "Updating ${ssh_config} with server info."
-# cp "${HOME}/.ssh/config" "${HOME}/.ssh/config.bak"
-# cat << EOF > ${ssh_config}
-# Host ${server_name}
-#     User root
-#     HostName ${server_ip}
-#     IdentityFile ~/.ssh/${ssh_keyname}
-
-# $(cat $ssh_config)
-# EOF
-
-log_n "Use the newly created key pair when creating the server."
+cat "${HOME}/.ssh/${ssh_keyname}.pub" | pbcopy
+log_n "Newly created SSH key copied to clipboard. Use this when creating the server."
 
 echo
 read -p "Enter 'y' once the new server is live, or any other key to abort. " -n 1 -r
@@ -74,20 +66,43 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
-log "Creating account for ${username} on ${server_name}."
-ssh -t "${server_name}" "sudo adduser --disabled-password --gecos '' '${username}'"; add_user=$?
-if [[ $add_user ]]; then
-    log_e "Failed to create user."
-    exit 1
-fi
+echo
+read -r -p "Enter the new server IP address: " server_ip
+echo
 
+log "Updating ${ssh_config} with server info."
+cp "${HOME}/.ssh/config" "${HOME}/.ssh/config.bak"
+cat << EOF > ${ssh_config}
+Host ${server_name}
+    User root
+    HostName ${server_ip}
+    IdentityFile ~/.ssh/${ssh_keyname}
+
+$(cat $ssh_config)
+EOF
+
+log "Creating account for ${username} on ${server_name}."
+ssh -t "${server_name}" "sudo adduser --disabled-password --gecos '' '${username}'"
+
+log "Adding user to sudo group."
 ssh -t "${server_name}" "sudo usermod -a -G sudo '${username}'"
+
+log "Adding SSH key to authorized_keys."
 ssh "${server_name}" "umask 077; test -d /home/${username}/.ssh || mkdir /home/${username}/.ssh"
 cat "${HOME}/.ssh/${ssh_keyname}.pub" | ssh "${server_name}" "cat >> /home/${username}/.ssh/authorized_keys"
 
-# Create ssh key for user on remote machine for use with Github
-# ssh-keygen -t rsa -b 4096 -f /home/USER/.ssh/id_rsa -C "SERVER_NAME"
+log "Fixing SSH key permissions."
+ssh "${server_name}" "sudo chmod 600 /home/${username}/.ssh/authorized_keys"
+ssh "${server_name}" "sudo chown -R ${username}:${username} /home/${username}/"
 
-# sed -i "/Host ${server_name}/{n;s/User root/User ${username}/}" "${ssh_config}"
+log "Updating SSH config to use new user."
+sed -i "/Host ${server_name}/{n;s/User root/User ${username}/}" "${ssh_config}"
+
+log "Creating SSH key for ${username} on remote machine for use with GitHub."
+ssh "${server_name}" "ssh-keygen -t rsa -b 4096 -f '${remote_ssh_private_key}' -C '${server_name}'"
+
+log_n "New public key copied to clipboard, opening GitHub."
+</dev/null ssh "${server_name}" "cat ${remote_ssh_private_key}.pub" | pbcopy
+open https://github.com/settings/ssh/new
 
 exit 0
