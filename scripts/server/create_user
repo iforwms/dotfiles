@@ -94,17 +94,17 @@ log "Creating account for ${username} on ${server_name}."
 ssh "${server_name}" "adduser --disabled-password --gecos '' ${username}"
 
 log "Setting user password."
-ssh "${server_name}" "usermod -p $(echo ${pass}|openssl passwd -6 -stdin) ${username}"
+ssh "${server_name}" "usermod -p '$(echo ${pass}|openssl passwd -6 -stdin)' ${username}"
 
 log "User account for ${username} created successfully!"
+
+log "Adding user to sudo group."
+ssh "${server_name}" "usermod -a -G sudo ${username}"
 
 if [[ -n "${group}" && "${group}" != "${username}" ]]; then
     log "Found a group, adding ${username} to ${group} group."
     ssh "${server_name}" "usermod -a -G ${group} ${username}"
 fi
-
-log "Adding user to sudo group."
-ssh "${server_name}" "usermod -a -G sudo ${username}"
 
 log "Adding SSH key to authorized_keys."
 ssh "${server_name}" "umask 077; test -d /home/${username}/.ssh || mkdir /home/${username}/.ssh"
@@ -114,14 +114,17 @@ log "Fixing SSH key permissions."
 ssh "${server_name}" "chmod 600 /home/${username}/.ssh/authorized_keys"
 ssh "${server_name}" "chown -R ${username}:${username} /home/${username}/"
 
-log "Updating SSH config to use new user."
+log "Updating local SSH config to use ${username} instead of root."
 sed -i "/Host ${server_name}/{n;s/User root/User ${username}/}" "${ssh_config}"
 
-log "Creating SSH key for ${username} on remote machine for use with GitHub."
-ssh "${server_name}" "ssh-keygen -t rsa -b 4096 -f ${remote_ssh_private_key} -C ${server_name}"
+read -p "Do you wish to set up SSH keys for the new user? (y/n) " -n 1 -r
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    log "Creating SSH key for ${username} on remote machine."
+    ssh "${server_name}" "ssh-keygen -t rsa -b 4096 -f ${remote_ssh_private_key} -C ${server_name}"
 
-log_n "New public key copied to clipboard, opening GitHub."
-</dev/null ssh "${server_name}" "cat ${remote_ssh_private_key}.pub" | pbcopy
-open https://github.com/settings/ssh/new
+    </dev/null ssh "${server_name}" "cat ${remote_ssh_private_key}.pub" | pbcopy
+    log_n "New public key copied to clipboard."
+    log_n "To add to GitHub go here: https://github.com/settings/ssh/new"
+fi
 
 exit 0
