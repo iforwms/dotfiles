@@ -11,10 +11,9 @@ set -o pipefail # Exit the script if an error occurs in a pipe
 
 username=$1
 server_name=$2
-group=${3:-$1}
+group=${3:-''}
 
-# ssh_config=/Users/ifor/Downloads/ssh_config
-ssh_config=/Users/ifor/.ssh/config
+ssh_config="${HOME}/.ssh/config"
 usage="usage: ./create_user USERNAME SERVER_NAME [GROUP]"
 
 # shellcheck source=/dev/null
@@ -52,6 +51,7 @@ fi
 
 echo -n "Enter sudo password for ${username}@${server_name}: "
 read -rs pass
+echo
 read -rs -p "Confirm password: " PASS_CONFIRM
 if [ "${pass}" != "${PASS_CONFIRM}" ]; then
     log_e "Passwords do not match."
@@ -70,38 +70,55 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
+echo
 read -r -p "Enter the new server IP address: " server_ip
+if [[ ! "${server_ip}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    log_e "Invalid IP address, aborting."
+    exit 1
+fi
 
 log "Updating ${ssh_config} with server info."
-cp "${HOME}/.ssh/config" "${HOME}/.ssh/config.bak"
-cat << EOF > ${ssh_config}
+cp "${ssh_config}" "${ssh_config}.bak"
+cat << EOF > "${ssh_config}"
 Host ${server_name}
     User root
     HostName ${server_ip}
     IdentityFile ~/.ssh/${ssh_keyname}
 
-$(cat $ssh_config)
+$(cat "${ssh_config}")
 EOF
 
+# TODO: Test SSH can be accessed
+
 log "Creating account for ${username} on ${server_name}."
-ssh -t "${server_name}" "sudo adduser --disabled-password --gecos '' '${username}'"
+ssh "${server_name}" "adduser --disabled-password --gecos '' ${username}"
+
+log "Setting user password."
+ssh "${server_name}" "usermod -p $(echo ${pass}|openssl passwd -6 -stdin) ${username}"
+
+log "User account for ${username} created successfully!"
+
+if [[ -n "${group}" && "${group}" != "${username}" ]]; then
+    log "Found a group, adding ${username} to ${group} group."
+    ssh "${server_name}" "usermod -a -G ${group} ${username}"
+fi
 
 log "Adding user to sudo group."
-ssh -t "${server_name}" "sudo usermod -a -G sudo '${username}'"
+ssh "${server_name}" "usermod -a -G sudo ${username}"
 
 log "Adding SSH key to authorized_keys."
 ssh "${server_name}" "umask 077; test -d /home/${username}/.ssh || mkdir /home/${username}/.ssh"
 cat "${HOME}/.ssh/${ssh_keyname}.pub" | ssh "${server_name}" "cat >> /home/${username}/.ssh/authorized_keys"
 
 log "Fixing SSH key permissions."
-ssh "${server_name}" "sudo chmod 600 /home/${username}/.ssh/authorized_keys"
-ssh "${server_name}" "sudo chown -R ${username}:${username} /home/${username}/"
+ssh "${server_name}" "chmod 600 /home/${username}/.ssh/authorized_keys"
+ssh "${server_name}" "chown -R ${username}:${username} /home/${username}/"
 
 log "Updating SSH config to use new user."
 sed -i "/Host ${server_name}/{n;s/User root/User ${username}/}" "${ssh_config}"
 
 log "Creating SSH key for ${username} on remote machine for use with GitHub."
-ssh "${server_name}" "ssh-keygen -t rsa -b 4096 -f '${remote_ssh_private_key}' -C '${server_name}'"
+ssh "${server_name}" "ssh-keygen -t rsa -b 4096 -f ${remote_ssh_private_key} -C ${server_name}"
 
 log_n "New public key copied to clipboard, opening GitHub."
 </dev/null ssh "${server_name}" "cat ${remote_ssh_private_key}.pub" | pbcopy
