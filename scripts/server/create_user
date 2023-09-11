@@ -39,36 +39,38 @@ if [[ -z "${server_name}" ]]; then
 fi
 
 ssh_keyname="${username}_${server_name}"
-remote_ssh_private_key=/home/${username}/.ssh/id_rsa
+local_ssh_private_key="${HOME}/.ssh/${ssh_keyname}"
+remote_ssh_private_key="/home/${username}/.ssh/id_rsa"
+
+if [[ -e "${local_ssh_private_key}" ]]; then
+    log_w "A private key already exists at ${local_ssh_private_key}."
+    read -p "Do you wish to continue and overwrite this file? (y/n) " -n 1 -r
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        local_ssh_private_key="${local_ssh_private_key}_new"
+    fi
+fi
 
 echo -n "Enter sudo password for ${username}@${server_name}: "
 read -rs pass
-echo
 read -rs -p "Confirm password: " PASS_CONFIRM
-echo
-echo
 if [ "${pass}" != "${PASS_CONFIRM}" ]; then
     log_e "Passwords do not match."
     exit 1
 fi
 
 log "Creating new SSH key pair for ${server_name}"
-ssh-keygen -t rsa -N '' -b 4096 -f "${HOME}/.ssh/${ssh_keyname}" -C "${server_name}" <<<y >/dev/null 2>&1
+ssh-keygen -t rsa -N '' -b 4096 -f "${local_ssh_private_key}" -C "${server_name}" <<<y >/dev/null 2>&1
 
 cat "${HOME}/.ssh/${ssh_keyname}.pub" | pbcopy
 log_n "Newly created SSH key copied to clipboard. Use this when creating the server."
 
-echo
 read -p "Enter 'y' once the new server is live, or any other key to abort. " -n 1 -r
-echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     log_e "Aborting early..."
     exit 1
 fi
 
-echo
 read -r -p "Enter the new server IP address: " server_ip
-echo
 
 log "Updating ${ssh_config} with server info."
 cp "${HOME}/.ssh/config" "${HOME}/.ssh/config.bak"
