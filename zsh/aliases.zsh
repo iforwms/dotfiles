@@ -188,6 +188,7 @@ alias gd='git diff'
 alias gds='git diff --staged'
 alias grs='git restore --staged'
 alias nah='git reset --hard && git clean -df'
+alias gq="gaa; gc 'Quick commit - $(date "+%Y/%m/%d %H:%M")'; gpd"
 # alias apgi='git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached'
 # find ~/code -mindepth 1 -maxdepth 4 -type d -name .git -execdir git status -s \;
 function ggs() {

@@ -160,3 +160,4 @@ FPM
 bak
 shellcheck
 dev/!
+json
