@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+echo "Updating code directory permissions"
+sudo chmod -R g+w $HOME/code
+sudo chown -R :www-data $HOME/code
+
+echo "Permissions updated!"
