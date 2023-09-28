@@ -33,13 +33,13 @@ echo "max_spare_servers = ${max_spare_servers}"
 echo "max_requests = ${max_requests}"
 echo
 
-read -p "Do you want to update the FPM config file? (y/n) " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-   echo
-   echo "Aborting..."
-   exit 1
-fi
+# read -p "Do you want to update the FPM config file? (y/n) " -n 1 -r
+# echo
+# if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+#    echo
+#    echo "Aborting..."
+#    exit 1
+# fi
 
 echo
 echo "Updating config file..."
@@ -56,18 +56,18 @@ echo "Optimised settings:"
 grep '^;\?pm.max_children\|^;\?pm.start_servers\|^;\?pm.min_spare_servers\|^;\?pm.max_spare_servers\|^;\?pm.max_requests' "${fpm_config}"|grep -v ";"|sed 's/pm\.//'
 
 echo
-read -p "Settings updated, you need to restart the FPM service for these changes to take effect, restart now? (y/n) " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-   echo
-   echo "Service not restarted."
-   exit 1
-else
+# read -p "Settings updated, you need to restart the FPM service for these changes to take effect, restart now? (y/n) " -n 1 -r
+# echo
+# if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+#    echo
+#    echo "Service not restarted."
+#    exit 1
+# else
    echo
    echo "Restarting FPM service"
    sudo service php${php_version}-fpm restart
    echo
    echo "Service restarted."
    exit 0
-fi
+# fi
 
