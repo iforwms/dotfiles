@@ -1,1 +1,41 @@
-!#/usr/bin/env bash
+#!/usr/bin/env bash
+
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+    echo "This script must be run as root (or sudo). Exiting."
+    exit 1
+fi
+
+if [[ "$#" -lt 3 ]]; then
+    echo "Please enter a mysql root password, mysql new user name and new user password."
+    echo "Usage: ./install_mysql ROOT_PASS NEW_USER_NAME NEW_USER_PASS"
+    exit 1
+fi
+
+root_pass=$1
+new_user_name=$2
+new_user_pass=$3
+
+echo "Installing mysql."
+apt install -y mysql-server
+
+echo "Setting root password."
+mysql \
+    --user=root \
+    --execute="ALTER USER 'root'@'localhost' IDENTIFIED BY '${root_pass}'; FLUSH PRIVILEGES; EXIT;"
+
+echo "Creating new mysql user."
+mysql \
+    --user root \
+    --password $root_pass
+    --execute="CREATE USER '${new_user_name}'@'%' IDENTIFIED WITH mysql_native_password BY '${new_user_pass}'; GRANT ALL PRIVILEGES ON *.* TO '${new_user_name}'@'%'; EXIT;"
+
+echo "Mysql setup completed."
+echo
+echo "To create new databases: CREATE DATABASE database_name CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+echo "Update default timezone under the [mysqld] section of mysqld.conf."
+echo "sudo vi /etc/mysql/mysql.conf.d/mysqld.cnf"
+echo "All done!"
+
+exit 0
+
