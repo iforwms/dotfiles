@@ -1,1 +1,23 @@
-!#/usr/bin/env bash
+#!/usr/bin/env bash
+
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+    echo "This script must be run as root (or sudo). Exiting."
+    exit 1
+fi
+
+echo "Installing PDF related software."
+apt install -y fontconfig libxrender1 xfonts-75dpi xfonts-base xfonts-utils
+
+echo "See: https://wkhtmltopdf.org/downloads.html"
+wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb
+
+dpkg -i wkhtmltox_0.12.6.1-2.jammy_amd64.deb
+
+echo "Copying binary to /usr/bin."
+cp /usr/local/bin/wkhtmltopdf /usr/bin
+
+echo "Ensure \"'enable-local-file-access' => true\" is set when calling wkhtmltopdf."
+
+echo "All done!"
+
+exit 0

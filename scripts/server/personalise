@@ -1,1 +1,45 @@
-!#/usr/bin/env bash
+#!/usr/bin/env bash
+
+echo "Updating apt."
+sudo apt update
+
+echo "Installing zsh."
+sudo apt install -y zsh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+rm -rf $HOME/.dotfiles/zsh/plugins/zsh-autosuggestions;
+rm -rf $HOME/.dotfiles/zsh/plugins/zsh-syntax-highlighting;
+git clone --depth 1 https://github.com/zsh-users/zsh-autosuggestions $HOME/.dotfiles/zsh/plugins/zsh-autosuggestions;
+git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.dotfiles/zsh/plugins/zsh-syntax-highlighting
+
+echo "Replacing default .zshrc with custom one."
+rm -rf $HOME/.zshrc
+ln -s $HOME/.dotfiles/zsh/.zshrc $HOME
+
+echo "Personalising terminal..."
+
+echo "Creating config symlinks."
+ln -s $HOME/.dotfiles/tmux/.tmux.conf $HOME
+ln -s $HOME/.dotfiles/.vim $HOME
+ln -s $HOME/.dotfiles/.vimrc $HOME
+
+echo "Fetching vim colour scheme."
+wget https://raw.githubusercontent.com/joshdick/onedark.vim/master/colors/onedark.vim -O $HOME/.vim/colors/onedark.vim
+wget https://raw.githubusercontent.com/joshdick/onedark.vim/master/autoload/onedark.vim -O $HOME/.vim/autoload/onedark.vim
+
+echo "Securing ssh."
+$HOME/.dotfiles/scripts/server/secure_ssh
+
+echo "Installing compilers and utilities."
+sudo apt install -y libmaxminddb0 libmaxminddb-dev mmdb-bin build-essential libpcre3-dev zlib1g-dev libssl-dev libxml2-dev libxslt-dev libgd-dev tree wget htop tmux
+
+read -r -p "Enter the new server hostname" server_name
+if [[ -z $server_name ]]; then
+    echo "hostname cannot be empty."
+    exit 1
+fi
+
+sudo hostnamectl set-hostname $server_name
+
+echo "All done!"
+
+exit 0

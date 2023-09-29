@@ -1,1 +1,22 @@
-!#/usr/bin/env bash
+#!/usr/bin/env bash
+
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+    echo "This script must be run as root (or sudo). Exiting."
+    exit 1
+fi
+
+echo "Installing php."
+apt install -y php php-{fpm,mysql,xml,mbstring,curl}
+
+echo "Optimising PHP FPM."
+$HOME/.dotfiles/scripts/server/optimise_php_fpm
+
+echo "Installing composer."
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php composer-setup.php
+php -r "unlink('composer-setup.php');"
+mv composer.phar /usr/local/bin/composer
+
+echo "To set php-fpm timezone edit date.timezone in the config and restart php-fpm."
+echo "sudo vi /etc/php/<VERSION>/fpm/php.ini"
+
