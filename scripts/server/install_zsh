@@ -12,7 +12,7 @@ echo "[${name}] Installing zsh."
 apt install -y zsh
 
 echo "[${name}] Installing oh-my-zsh."
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+sudo -u $SUDO_USER sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 echo "[${name}] Installing zsh plugins."
 rm -rf $home/.dotfiles/zsh/plugins/zsh-autosuggestions;
