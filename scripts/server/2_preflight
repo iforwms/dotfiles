@@ -26,7 +26,7 @@ $home/.dotfiles/scripts/server/install_tmux
 $home/.dotfiles/scripts/server/install_vim
 $home/.dotfiles/scripts/server/install_utils
 $home/.dotfiles/scripts/server/secure_ssh
-$home/.dotfiles/scripts/server/install_firewall
 
-echo "[${name}] All done!"
-exit 0
+echo "[${name}] All done, changing shell to zsh."
+
+chsh -s $(which zsh)
