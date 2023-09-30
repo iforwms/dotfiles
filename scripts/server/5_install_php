@@ -6,18 +6,19 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     exit 1
 fi
 
+home=/home/${SUDO_USER}
 php_version=${1:''}
 
 echo "[${name}] Installing php, php extensions and openssl."
 apt install -y openssl php${php_version} php${php_version}-{fpm,mysql,xml,mbstring,curl,zip,json,bcmath,tokenizer}
 
 echo "[${name}] Optimising PHP FPM."
-$HOME/.dotfiles/scripts/server/optimise_php_fpm
+$home/.dotfiles/scripts/server/optimise_php_fpm
 
 read -p "[${name}] Do you want to install composer? (y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-   $HOME/.dotfiles/scripts/server/install_composer
+   $home/.dotfiles/scripts/server/install_composer
 fi
 
 echo "[${name}] All done!"

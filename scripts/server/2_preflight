@@ -6,7 +6,8 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     exit 1
 fi
 
-download_dir="${HOME}/downloads"
+home=/home/${SUDO_USER}
+download_dir="${home}/downloads"
 mkdir -p "${download_dir}"
 
 echo "[${name}] Updating apt and upgrading packages."
@@ -20,12 +21,12 @@ if [[ -z $server_name ]]; then
 fi
 hostnamectl set-hostname $server_name
 
-$HOME/.dotfiles/scripts/server/install_zsh
-$HOME/.dotfiles/scripts/server/install_tmux
-$HOME/.dotfiles/scripts/server/install_vim
-$HOME/.dotfiles/scripts/server/install_utils
-$HOME/.dotfiles/scripts/server/secure_ssh
-$HOME/.dotfiles/scripts/server/install_firewall
+$home/.dotfiles/scripts/server/install_zsh
+$home/.dotfiles/scripts/server/install_tmux
+$home/.dotfiles/scripts/server/install_vim
+$home/.dotfiles/scripts/server/install_utils
+$home/.dotfiles/scripts/server/secure_ssh
+$home/.dotfiles/scripts/server/install_firewall
 
 echo "[${name}] All done!"
 exit 0
