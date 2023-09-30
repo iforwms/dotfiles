@@ -23,7 +23,6 @@ git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting.git $ho
 echo "[${name}] Replacing default .zshrc with custom one."
 rm -rf $home/.zshrc
 ln -s $home/.dotfiles/zsh/.zshrc $home
-source $home/.zshrc
 
 echo "[${name}] All done!"
 exit 0
