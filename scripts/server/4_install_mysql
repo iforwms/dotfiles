@@ -6,52 +6,24 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     exit 1
 fi
 
-# root_pass=${1-:}
-# new_user_name=${2-:}
-# new_user_pass=${3-:}
-# new_databases="${@:4}"
+echo
+read -r -p "[${name}] Enter new username: " new_user_name
+if [[ -z $new_user_name ]]; then
+    echo "[${name}] Username cannot be empty."
+    exit 1
+fi
 
-# if [[ -z root_pass ]]; then
-    echo -n "[${name}] Enter mysql root password: "
-    read -rs root_pass
-    echo
-    read -rs -p "[${name}] Confirm password: " ROOT_PASS_CONFIRM
-    if [ "${root_pass}" != "${ROOT_PASS_CONFIRM}" ]; then
-        echo "[${name}] Passwords do not match."
-        exit 1
-    fi
-# fi
+echo -n "[${name}] Enter a password for ${new_user_name}: "
+read -rs new_user_pass
+echo
+read -rs -p "[${name}] Confirm password: " NEW_USER_PASS_CONFIRM
+if [ "${new_user_pass}" != "${NEW_USER_PASS_CONFIRM}" ]; then
+    echo "[${name}] Passwords do not match."
+    exit 1
+fi
 
-# if [[ -z new_user_name ]]; then
-    echo
-    read -r -p "[${name}] Enter a new server username: " new_user_name
-    if [[ -z $new_user_name ]]; then
-        echo "[${name}] Username cannot be empty."
-        exit 1
-    fi
-# fi
-
-# if [[ -z new_user_pass ]]; then
-    echo -n "[${name}] Enter a password for ${new_user_name}: "
-    read -rs new_user_pass
-    echo
-    read -rs -p "[${name}] Confirm password: " NEW_USER_PASS_CONFIRM
-    if [ "${new_user_pass}" != "${NEW_USER_PASS_CONFIRM}" ]; then
-        echo "[${name}] Passwords do not match."
-        exit 1
-    fi
-# fi
-
-# if [[ -z new_databases ]]; then
-    echo
-    read -r -p "[${name}] If you wish to create new databases, enter a space delimited list of their names: " new_databases
-# fi
-
-# if [[ "$#" -lt 3 ]]; then
-#     echo "[${name}] Please enter a mysql root password, mysql new user name and new user password."
-#     echo "[${name}] Usage: ./install_mysql ROOT_PASS NEW_USER_NAME NEW_USER_PASS"
-#     exit 1
-# fi
+echo
+read -r -p "[${name}] If you wish to create new databases, enter a space delimited list of their names: " new_databases
 
 echo "[${name}] Installing."
 apt install -y mysql-server
@@ -60,9 +32,6 @@ echo "[${name}] Imitating mysql_secure_installation"
 mysql \
     --user=root \
     --execute="DELETE FROM mysql.user WHERE User=''; DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1'); DROP DATABASE IF EXISTS test; FLUSH PRIVILEGES;"
-
-# echo "[${name}] Setting root password."
-# mysql --user=root --execute="ALTER USER 'root'@'localhost' IDENTIFIED BY '${root_pass}'; FLUSH PRIVILEGES;"
 
 echo "[${name}] Creating new mysql user."
 mysql \
