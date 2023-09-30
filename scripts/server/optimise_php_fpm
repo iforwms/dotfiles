@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+    echo "[${name}] This script must be run as root (or sudo). Exiting."
+    exit 1
+fi
+
 name=OPTIMISE_PHP_FPM
+
 php_version=$(php -r 'echo PHP_VERSION;' | awk -F. '{print $1"."$2}')
 
 fpm_config=/Users/ifor/Downloads/www.conf
@@ -44,9 +50,9 @@ fi
 
 echo
 echo "[${name}] Updating config file..."
-sed -E "s/^;?pm.max_children.*/pm.max_children = ${max_children}/; s/^;?pm.start_servers.*/pm.start_servers = ${start_servers}/; s/^;?pm.min_spare_servers.*/pm.min_spare_servers = ${min_spare_servers}/; s/^;?pm.max_spare_servers.*/pm.max_spare_servers = ${max_spare_servers}/; s/^;?pm.max_requests.*/pm.max_requests = ${max_requests}/;" "${fpm_config}"|sudo tee "${fpm_config}" >/dev/null
+sed -E "s/^;?pm.max_children.*/pm.max_children = ${max_children}/; s/^;?pm.start_servers.*/pm.start_servers = ${start_servers}/; s/^;?pm.min_spare_servers.*/pm.min_spare_servers = ${min_spare_servers}/; s/^;?pm.max_spare_servers.*/pm.max_spare_servers = ${max_spare_servers}/; s/^;?pm.max_requests.*/pm.max_requests = ${max_requests}/;" "${fpm_config}"|tee "${fpm_config}" >/dev/null
 
-config_test=$(sudo php-fpm${php_version} -t 2>&1|grep 'test is successful')
+config_test=$(php-fpm${php_version} -t 2>&1|grep 'test is successful')
 if [[ -z "${config_test}" ]]; then
    echo "[${name}] Config test failed, please manually check (php-fpm${php_version} -t) and try again."
    exit 1
@@ -66,7 +72,7 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 else
    echo
    echo "[${name}] Restarting FPM service"
-   sudo service php${php_version}-fpm restart
+   service "php${php_version}-fpm" restart
    echo
    echo "[${name}] All done!"
    exit 0
