@@ -16,8 +16,9 @@ fi
 root_pass=$1
 new_user_name=$2
 new_user_pass=$3
-# TODO: All args after NEW_USER_PASS should be table names to be created.
+new_databases="${@:4}"
 
+echo $new_databases; exit
 echo "[${name}] Installing."
 apt install -y mysql-server
 
@@ -32,8 +33,12 @@ mysql \
     --password $root_pass
     --execute="CREATE USER '${new_user_name}'@'%' IDENTIFIED WITH mysql_native_password BY '${new_user_pass}'; GRANT ALL PRIVILEGES ON *.* TO '${new_user_name}'@'%'; exit;"
 
-# If additional args, loop through and create databases
-# CREATE DATABASE database_name CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+for db in ${new_databases[@]}; do
+    echo "[${name}] Creating new database: ${db}"
+    mysql \
+        --user=root \
+        --execute="CREATE DATABASE ${db} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; exit;"
+done
 
 echo "[${name}] All done!"
 exit 0
