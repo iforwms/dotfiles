@@ -6,6 +6,8 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     exit 1
 fi
 
+echo "[${name}] Current system timezone: $(cat /etc/timezone)"
+
 read -r -p "[${name}] Enter timezone name: " user_timezone
 available_timezones=$(awk '/^Z/ { print $2 }; /^L/ { print $3 }' /usr/share/zoneinfo/tzdata.zi)
 if [[ -z $(echo $available_timezones | grep -w $user_timezone) ]]; then
@@ -17,18 +19,32 @@ echo "[${name}] Setting system timezone to ${user_timezone}."
 timedatectl set-timezone "${user_timezone}"
 
 if [[ $(command -v php) ]]; then
-    echo "[${name}] Found php, setting php-fpm timezone to ${user_timezone}."
     php_version=$(php -r 'echo PHP_VERSION;' | awk -F. '{print $1"."$2}')
     php_ini="/etc/php/${php_version}/fpm/php.ini"
+
+    echo "[${name}] Current php timezone: $(cat /etc/timezone)"
+
+    echo "[${name}] Found php, setting php-fpm timezone to ${user_timezone}."
     sed -iE "s/^;?\s?date\.timezone\s?=\s?.*$/date.timezone = ${user_timezone}/" $php_ini
-    service php${php_version}-fpm restart
+    echo
+
+    read -p "[${name}] Do you want to restart the service? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+       service php{$php_version}-fpm restart
+    fi
 fi
 
 if [[ $(command -v mysql) ]]; then
     echo "[${name}] Found mysql, setting mysql timezone to ${user_timezone}."
     mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql mysql
     sed -i "/default-time-zone/d;/\[mysqld\]/a default-time-zone = ${user_timezone}" /etc/mysql/mysql.conf.d/mysqld.cnf
-    service mysql restart
+
+    read -p "[${name}] Do you want to restart the service? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+       service mysql restart
+    fi
 fi
 
 echo "[${name}] All done!"
