@@ -48,5 +48,17 @@ EOL
 echo "[${name}] Updating gzip config."
 # sed replace gzip config
 
+read -p "[${name}] Do you want to install certbot? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+   $HOME/.dotfiles/scripts/server/install_certbot
+fi
+
+read -p "[${name}] Do you want to install the fancyindex plugin? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+   $HOME/.dotfiles/scripts/server/install_nginx_fancyindex
+fi
+
 echo "[${name}] All done!"
 exit 0

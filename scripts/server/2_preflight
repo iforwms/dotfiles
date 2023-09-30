@@ -11,7 +11,7 @@ mkdir -p "${download_dir}"
 
 echo "[${name}] Updating apt and upgrading packages."
 apt update
-apt upgrade
+apt upgrade -y
 
 read -r -p "[${name}] Enter the new server hostname: " server_name
 if [[ -z $server_name ]]; then
@@ -19,6 +19,13 @@ if [[ -z $server_name ]]; then
     exit 1
 fi
 hostnamectl set-hostname $server_name
+
+$HOME/.dotfiles/scripts/server/install_zsh
+$HOME/.dotfiles/scripts/server/install_tmux
+$HOME/.dotfiles/scripts/server/install_vim
+$HOME/.dotfiles/scripts/server/install_utils
+$HOME/.dotfiles/scripts/server/secure_ssh
+$HOME/.dotfiles/scripts/server/install_firewall
 
 echo "[${name}] All done!"
 exit 0

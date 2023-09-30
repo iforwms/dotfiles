@@ -6,4 +6,7 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     exit 1
 fi
 
+echo "[${name}] Installing."
+
+echo "[${name}] WIP Script, exiting."
 exit 0
