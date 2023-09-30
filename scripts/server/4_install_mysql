@@ -6,12 +6,12 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     exit 1
 fi
 
-root_pass=${1-:}
-new_user_name=${2-:}
-new_user_pass=${3-:}
-new_databases="${@:4}"
+# root_pass=${1-:}
+# new_user_name=${2-:}
+# new_user_pass=${3-:}
+# new_databases="${@:4}"
 
-if [[ -z root_pass ]]; then
+# if [[ -z root_pass ]]; then
     echo -n "[${name}] Enter mysql root password: "
     read -rs root_pass
     echo
@@ -20,17 +20,17 @@ if [[ -z root_pass ]]; then
         echo "[${name}] Passwords do not match."
         exit 1
     fi
-fi
+# fi
 
-if [[ -z new_user_name ]]; then
+# if [[ -z new_user_name ]]; then
     read -r -p "[${name}] Enter a new server username: " new_user_name
     if [[ -z $new_user_name ]]; then
         echo "[${name}] Username cannot be empty."
         exit 1
     fi
-fi
+# fi
 
-if [[ -z new_user_pass ]]; then
+# if [[ -z new_user_pass ]]; then
     echo -n "[${name}] Enter mysql new user password: "
     read -rs new_user_pass
     echo
@@ -39,17 +39,17 @@ if [[ -z new_user_pass ]]; then
         echo "[${name}] Passwords do not match."
         exit 1
     fi
-fi
+# fi
 
-if [[ -z new_databases ]]; then
+# if [[ -z new_databases ]]; then
     read -r -p "[${name}] If you wish to create new databases, enter a space delimited list of their names: " new_databases
-fi
+# fi
 
-if [[ "$#" -lt 3 ]]; then
-    echo "[${name}] Please enter a mysql root password, mysql new user name and new user password."
-    echo "[${name}] Usage: ./install_mysql ROOT_PASS NEW_USER_NAME NEW_USER_PASS"
-    exit 1
-fi
+# if [[ "$#" -lt 3 ]]; then
+#     echo "[${name}] Please enter a mysql root password, mysql new user name and new user password."
+#     echo "[${name}] Usage: ./install_mysql ROOT_PASS NEW_USER_NAME NEW_USER_PASS"
+#     exit 1
+# fi
 
 echo $new_databases; exit
 echo "[${name}] Installing."
