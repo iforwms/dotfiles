@@ -32,7 +32,7 @@ fi
 # fi
 
 # if [[ -z new_user_pass ]]; then
-    echo -n "[${name}] Enter mysql new user password: "
+    echo -n "[${name}] Enter a password for ${new_user_name}: "
     read -rs new_user_pass
     echo
     read -rs -p "[${name}] Confirm password: " NEW_USER_PASS_CONFIRM
