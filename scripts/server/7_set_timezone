@@ -6,7 +6,12 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     exit 1
 fi
 
-user_timezone=${1:-UTC}
+read -r -p "[${name}] Enter timezone name: " user_timezone
+available_timezones=$(awk '/^Z/ { print $2 }; /^L/ { print $3 }' /usr/share/zoneinfo/tzdata.zi)
+if [[ -z $(echo $available_timezones | grep -w $user_timezone) ]]; then
+    echo "[${name}] Not a recognised timezone. Use: 'timedatectl list-timezones' to view a list of available timezones."
+    exit 1
+fi
 
 echo "[${name}] Setting system timezone to ${user_timezone}."
 timedatectl set-timezone "${user_timezone}"
@@ -22,9 +27,7 @@ fi
 if [[ $(command -v mysql) ]]; then
     echo "[${name}] Found mysql, setting mysql timezone to ${user_timezone}."
     mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql mysql
-    # /etc/mysql/mysql.conf.d/mysqld.cnf
-    # default-time-zone='${user_timezone}'
-    # sed delete default-time-zone then add after [mysqld]
+    sed -i "/default-time-zone/d;/\[mysqld\]/a default-time-zone = ${user_timezone}" /etc/mysql/mysql.conf.d/mysqld.cnf
     service mysql restart
 fi
 
