@@ -7,3 +7,14 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
 fi
 
 home=/home/${SUDO_USER}
+
+echo "[${name}] Installing."
+$home/.dotfiles/scripts/server/install_nginx
+$home/.dotfiles/scripts/server/install_mysql
+$home/.dotfiles/scripts/server/install_php
+$home/.dotfiles/scripts/server/set_timezone
+$home/.dotfiles/scripts/server/install_pdf
+$home/.dotfiles/scripts/server/install_firewall
+
+echo "[${name}] All done!"
+exit 0
