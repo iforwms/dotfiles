@@ -38,7 +38,7 @@ mysql \
     --user=root \
     --execute="CREATE USER '${new_user_name}'@'%' IDENTIFIED WITH mysql_native_password BY '${new_user_pass}'; GRANT ALL PRIVILEGES ON *.* TO '${new_user_name}'@'%';"
 
-for db in "${new_databases[@]}"; do
+for db in ${new_databases[@]}; do
     echo "[${name}] Creating new database: ${db}"
     mysql \
         --user=root \
