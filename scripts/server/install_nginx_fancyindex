@@ -19,7 +19,7 @@ git clone https://github.com/aperezdc/ngx-fancyindex.git "${download_dir}/ngx-fa
 
 echo "[${name}] Fetching geoip module."
 wget https://github.com/leev/ngx_http_geoip2_module/archive/refs/tags/3.3.tar.gz -O "${download_dir}/3.3.tar.gz"
-tar xvfz "${download_dir}/3.3.tar.gz"
+tar xvfz "${download_dir}/3.3.tar.gz" "${download_dir}"
 
 echo "[${name}] Installing."
 
