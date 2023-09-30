@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+name=PREFLIGHT
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+    echo "[${name}] This script must be run as root (or sudo). Exiting."
+    exit 1
+fi
+
+download_dir="${HOME}/downloads"
+mkdir -p "${download_dir}"
+
+echo "[${name}] Updating apt and upgrading packages."
+apt update
+apt upgrade
+
+read -r -p "[${name}] Enter the new server hostname: " server_name
+if [[ -z $server_name ]]; then
+    echo "[${name}] Hostname cannot be empty."
+    exit 1
+fi
+hostnamectl set-hostname $server_name
+
+echo "[${name}] All done!"
+exit 0

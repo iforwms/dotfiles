@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 
-name=CERTBOT
+name=UTILS
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     echo "[${name}] This script must be run as root (or sudo). Exiting."
     exit 1
 fi
 
 echo "[${name}] Installing."
-snap install --classic certbot
-ln -s /snap/bin/certbot /usr/bin/certbot
+apt install -y libmaxminddb0 libmaxminddb-dev mmdb-bin build-essential libpcre3-dev zlib1g-dev libssl-dev libxml2-dev libxslt-dev libgd-dev tree wget htop tmux
 
 echo "[${name}] All done!"
 exit 0

@@ -101,31 +101,17 @@ Host ${server_name}
 $(cat "${ssh_config}")
 EOF
 
-# TODO: Test SSH can be accessed
-
-log "Creating account for ${username} on ${server_name}."
-ssh "${server_name}" "adduser --disabled-password --gecos '' ${username}"
-
-log "Setting user password."
-ssh "${server_name}" "usermod -p '$(echo ${pass}|openssl passwd -6 -stdin)' ${username}"
-
-log "User account for ${username} created successfully!"
-
-log "Adding user to sudo group."
-ssh "${server_name}" "usermod -a -G sudo ${username}"
+log "Creating account for ${username} on ${server_name} and setting password and adding user to sudo group."
+ssh "${server_name}" "adduser --disabled-password --gecos '' ${username} && ${server_name}" "usermod -p '$(echo ${pass}|openssl passwd -6 -stdin)' ${username} && ${server_name}" "usermod -a -G sudo ${username}"
 
 if [[ -n "${group}" && "${group}" != "${username}" ]]; then
     log "Found a group, adding ${username} to ${group} group."
     ssh "${server_name}" "usermod -a -G ${group} ${username}"
 fi
 
-log "Adding SSH key to authorized_keys."
+log "Adding SSH key to authorized_keys and fixing permissions."
 ssh "${server_name}" "umask 077; test -d /home/${username}/.ssh || mkdir /home/${username}/.ssh"
-cat "${HOME}/.ssh/${ssh_keyname}.pub" | ssh "${server_name}" "cat >> /home/${username}/.ssh/authorized_keys"
-
-log "Fixing SSH key permissions."
-ssh "${server_name}" "chmod 600 /home/${username}/.ssh/authorized_keys"
-ssh "${server_name}" "chown -R ${username}:${username} /home/${username}/"
+cat "${HOME}/.ssh/${ssh_keyname}.pub" | ssh "${server_name}" "cat >> /home/${username}/.ssh/authorized_keys && ${server_name}" "chmod 600 /home/${username}/.ssh/authorized_keys; ${server_name}" "chown -R ${username}:${username} /home/${username}/"
 
 log "Updating local SSH config to use ${username} instead of root."
 sed -i "/Host ${server_name}/{n;s/User root/User ${username}/}" "${ssh_config}"

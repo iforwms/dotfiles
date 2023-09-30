@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 
+name=NGINX
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
-    echo "This script must be run as root (or sudo). Exiting."
+    echo "[${name}] This script must be run as root (or sudo). Exiting."
     exit 1
 fi
 
-echo "Installing nginx."
+echo "[${name}] Installing."
 
 apt install -y nginx
 
-echo "Disabling nginx server tokens."
+echo "[${name}] Disabling server tokens."
 sed -i 's/# server_tokens off;/server_tokens off;/' /etc/nginx/nginx.conf
 
 gzip = << EOL
@@ -44,7 +45,8 @@ gzip_types
     text/xml;
 EOL
 
-echo "Updating nginx gzip config."
+echo "[${name}] Updating gzip config."
 # sed replace gzip config
 
+echo "[${name}] All done!"
 exit 0

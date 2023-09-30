@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
 
-name=CERTBOT
+name=NGINX_FANCYINDEX
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     echo "[${name}] This script must be run as root (or sudo). Exiting."
     exit 1
 fi
 
-echo "[${name}] Installing."
-snap install --classic certbot
-ln -s /snap/bin/certbot /usr/bin/certbot
-
-echo "[${name}] All done!"
 exit 0
