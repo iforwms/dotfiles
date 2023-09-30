@@ -53,7 +53,6 @@ fi
 #     exit 1
 # fi
 
-echo $new_databases; exit
 echo "[${name}] Installing."
 apt install -y mysql-server
 
