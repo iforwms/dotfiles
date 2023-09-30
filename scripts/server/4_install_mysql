@@ -20,7 +20,7 @@ if [[ -z root_pass ]]; then
         echo "[${name}] Passwords do not match."
         exit 1
     fi
-done
+fi
 
 if [[ -z new_user_name ]]; then
     read -r -p "[${name}] Enter a new server username: " new_user_name
@@ -28,7 +28,7 @@ if [[ -z new_user_name ]]; then
         echo "[${name}] Username cannot be empty."
         exit 1
     fi
-done
+fi
 
 if [[ -z new_user_pass ]]; then
     echo -n "[${name}] Enter mysql new user password: "
@@ -39,11 +39,11 @@ if [[ -z new_user_pass ]]; then
         echo "[${name}] Passwords do not match."
         exit 1
     fi
-done
+fi
 
 if [[ -z new_databases ]]; then
     read -r -p "[${name}] If you wish to create new databases, enter a space delimited list of their names: " new_databases
-done
+fi
 
 if [[ "$#" -lt 3 ]]; then
     echo "[${name}] Please enter a mysql root password, mysql new user name and new user password."
