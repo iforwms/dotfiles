@@ -58,14 +58,16 @@ if [[ -e "${local_ssh_private_key}" ]]; then
     log_w "A private key already exists at ${local_ssh_private_key}."
     read -p "Do you wish to use this file? (y/n) " -n 1 -r
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        log "Creating new SSH key pair for ${server_name}"
-        ssh-keygen -t rsa -N '' -b 4096 -f "${local_ssh_private_key}" -C "${server_name}" <<<y >/dev/null 2>&1
+        local_ssh_private_key="${local_ssh_private_key}_new"
     fi
-
-    cat "${local_ssh_private_key}.pub" | pbcopy
-    echo
-    log_n "SSH key copied to clipboard. Use this when creating the server."
+else
+    log "Creating new SSH key pair for ${server_name}"
+    ssh-keygen -t rsa -N '' -b 4096 -f "${local_ssh_private_key}" -C "${server_name}" <<<y >/dev/null 2>&1
 fi
+
+cat "${local_ssh_private_key}.pub" | pbcopy
+echo
+log_n "SSH key copied to clipboard. Use this when creating the server."
 
 echo -n "Enter sudo password for ${username}@${server_name}: "
 read -rs pass
@@ -124,6 +126,16 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     ssh "${server_name}" "cat ${remote_ssh_private_key}.pub" | pbcopy
     log_n "New public key copied to clipboard."
     log_n "To add to GitHub go here: https://github.com/settings/ssh/new"
+
+    read -p "Enter 'y' once the keys have been added to Github. " -n 1 -r
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        log_e "Aborting early..."
+        exit 1
+    fi
+
+    ssh "${server_name}" "git clone git@github.com:iforwms/dotfiles ~/.dotfiles"
 fi
+
+log "All done!"
 
 exit 0
