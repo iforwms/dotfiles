@@ -26,7 +26,7 @@ if [[ $(command -v php) ]]; then
     echo "[${name}] Current php timezone: $(php -r 'echo date_default_timezone_get().PHP_EOL;')"
 
     echo "[${name}] Found php, setting php-fpm timezone to ${user_timezone}."
-    sed -iE "s/^;?\s?date\.timezone\s?=\s?.*$/date.timezone = ${user_timezone}/" $php_ini
+    sed -i -E "s/^;?\s?date\.timezone\s?=.*$/date.timezone = ${user_timezone}/" $php_ini
     echo
 
     read -p "[${name}] Do you want to restart the service? (y/n) " -n 1 -r
