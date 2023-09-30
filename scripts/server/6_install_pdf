@@ -7,7 +7,7 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
 fi
 
 echo "[${name}] Installing required software."
-apt install -y fontconfig libxrender1 xfonts-75dpi xfonts-base xfonts-utils libssl3
+apt install -y fontconfig libxrender1 xfonts-75dpi xfonts-base xfonts-utils
 
 read -r -p "[${name}] Visit https://wkhtmltopdf.org/downloads.html and enter the appropriate download URL: " package_url
 
