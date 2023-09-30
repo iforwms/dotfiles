@@ -39,20 +39,22 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
    service nginx restart
 fi
 
-git clone --depth 1 git@github.com:Naereen/Nginx-Fancyindex-Theme "${download_dir}"
+git clone --depth 1 git@github.com:Naereen/Nginx-Fancyindex-Theme "${download_dir}/Nginx-Fancyindex-Theme"
 
 cat <<EOF
-fancyindex on;
-fancyindex_localtime on;
-fancyindex_exact_size off;
-# Specify the path to the header.html and foother.html files, that are server-wise,
-# ie served from root of the website. Remove the leading '/' otherwise.
-fancyindex_header "/Nginx-Fancyindex-Theme-light/header.html";
-fancyindex_footer "/Nginx-Fancyindex-Theme-light/footer.html";
-# Ignored files will not show up in the directory listing, but will still be public.
-fancyindex_ignore "examplefile.html";
-# Making sure folder where these files are do not show up in the listing.
-fancyindex_ignore "Nginx-Fancyindex-Theme-light";
+# Examply fancy index configuration
+
+    fancyindex on;
+    fancyindex_localtime on;
+    fancyindex_exact_size off;
+    # Specify the path to the header.html and foother.html files, that are server-wise,
+    # ie served from root of the website. Remove the leading '/' otherwise.
+    fancyindex_header "/Nginx-Fancyindex-Theme-light/header.html";
+    fancyindex_footer "/Nginx-Fancyindex-Theme-light/footer.html";
+    # Ignored files will not show up in the directory listing, but will still be public.
+    fancyindex_ignore "examplefile.html";
+    # Making sure folder where these files are do not show up in the listing.
+    fancyindex_ignore "Nginx-Fancyindex-Theme-light";
 EOF
 
 echo "[${name}] All done!"
