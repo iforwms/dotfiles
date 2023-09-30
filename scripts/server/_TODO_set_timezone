@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+name=TIMEZONE
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+    echo "[${name}] This script must be run as root (or sudo). Exiting."
+    exit 1
+fi
+
+user_timezone=${1:-UTC}
+
+echo "[${name}] Setting system timezone to ${user_timezone}."
+timedatectl set-timezone "${user_timezone}"
+
+if [[ $(command -v php) ]]; then
+    echo "[${name}] Found php, setting php-fpm timezone to ${user_timezone}."
+    php_version=$(php -r 'echo PHP_VERSION;' | awk -F. '{print $1"."$2}')
+    php_ini="/etc/php/${php_version}/fpm/php.ini"
+    sed -iE "s/^;?\s?date\.timezone\s?=\s?.*$/date.timezone = ${user_timezone}/" $php_ini
+    service php${php_version}-fpm restart
+fi
+
+if [[ $(command -v mysql) ]]; then
+    echo "[${name}] Found mysql, setting mysql timezone to ${user_timezone}."
+    mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql mysql
+    # /etc/mysql/mysql.conf.d/mysqld.cnf
+    # default-time-zone='${user_timezone}'
+    # sed delete default-time-zone then add after [mysqld]
+    service mysql restart
+fi
+
+echo "[${name}] All done!"
+exit 0

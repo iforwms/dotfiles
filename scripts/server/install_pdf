@@ -1,23 +1,28 @@
 #!/usr/bin/env bash
 
+name=PDF
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
-    echo "This script must be run as root (or sudo). Exiting."
+    echo "[${name}] This script must be run as root (or sudo). Exiting."
     exit 1
 fi
 
-echo "Installing PDF related software."
+echo "[${name}] Installing required software."
 apt install -y fontconfig libxrender1 xfonts-75dpi xfonts-base xfonts-utils
 
-echo "See: https://wkhtmltopdf.org/downloads.html"
-wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb
+read -r -p "[${name}] Visit https://wkhtmltopdf.org/downloads.html and enter the appropriate download URL: " package_url
 
-dpkg -i wkhtmltox_0.12.6.1-2.jammy_amd64.deb
+filename=${package_url##*/}
+download_dir=$HOME/downloads
+mkdir -p $download_dir
+download_path="${download_dir}/${filename}"
 
-echo "Copying binary to /usr/bin."
+wget $package_url -O "${download_path}"
+
+dpkg -i "${download_path}"
+
+echo "[${name}] Copying binary to /usr/bin."
 cp /usr/local/bin/wkhtmltopdf /usr/bin
 
-echo "Ensure \"'enable-local-file-access' => true\" is set when calling wkhtmltopdf."
-
-echo "All done!"
-
+echo "[${name}] Ensure \"'enable-local-file-access' => true\" is set when calling wkhtmltopdf."
+echo "[${name}] All done!"
 exit 0

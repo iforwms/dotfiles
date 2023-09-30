@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+name=VIM
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+    echo "[${name}] This script must be run as root (or sudo). Exiting."
+    exit 1
+fi
+
+echo "[${name}] Installing vim."
+apt install -y vim
+
+echo "[${name}] Creating vim symlinks."
+ln -s $HOME/.dotfiles/.vim $HOME
+ln -s $HOME/.dotfiles/.vimrc $HOME
+
+echo "[${name}] Fetching vim colour scheme."
+wget https://raw.githubusercontent.com/joshdick/onedark.vim/master/colors/onedark.vim -O $HOME/.vim/colors/onedark.vim
+wget https://raw.githubusercontent.com/joshdick/onedark.vim/master/autoload/onedark.vim -O $HOME/.vim/autoload/onedark.vim
+
+echo "[${name}] All done!"
+exit 0

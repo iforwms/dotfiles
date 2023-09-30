@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+name=ZSH
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+    echo "[${name}] This script must be run as root (or sudo). Exiting."
+    exit 1
+fi
+
+echo "[${name}] Installing zsh."
+apt install -y zsh
+
+echo "[${name}] Installing oh-my-zsh."
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+echo "[${name}] Installing zsh plugins."
+rm -rf $HOME/.dotfiles/zsh/plugins/zsh-autosuggestions;
+rm -rf $HOME/.dotfiles/zsh/plugins/zsh-syntax-highlighting;
+git clone --depth 1 https://github.com/zsh-users/zsh-autosuggestions $HOME/.dotfiles/zsh/plugins/zsh-autosuggestions;
+git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.dotfiles/zsh/plugins/zsh-syntax-highlighting
+
+echo "[${name}] Replacing default .zshrc with custom one."
+rm -rf $HOME/.zshrc
+ln -s $HOME/.dotfiles/zsh/.zshrc $HOME
+source $HOME/.zshrc
+
+echo "[${name}] All done!"
+exit 0

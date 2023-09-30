@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+name=PHP
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+    echo "[${name}] This script must be run as root (or sudo). Exiting."
+    exit 1
+fi
+
+php_version=${1:''}
+
+echo "[${name}] Installing php, php extensions and openssl."
+apt install -y openssl php${php_version} php${php_version}-{fpm,mysql,xml,mbstring,curl,zip,json,bcmath,tokenizer}
+
+echo "[${name}] Optimising PHP FPM."
+$HOME/.dotfiles/scripts/server/optimise_php_fpm
+
+read -p "[${name}] Do you want to install composer? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+   $HOME/.dotfiles/scripts/server/install_composer
+fi
+
+echo "[${name}] All done!"
+exit 0

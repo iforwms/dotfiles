@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 
-name=CERTBOT
+name=TMUX
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     echo "[${name}] This script must be run as root (or sudo). Exiting."
     exit 1
 fi
 
 echo "[${name}] Installing."
-snap install --classic certbot
-ln -s /snap/bin/certbot /usr/bin/certbot
+apt install -y tmux
+
+echo "[${name}] Creating symlinks."
+ln -s $HOME/.dotfiles/tmux/.tmux.conf $HOME
 
 echo "[${name}] All done!"
 exit 0

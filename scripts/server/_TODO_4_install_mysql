@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+name=MYSQL
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+    echo "[${name}] This script must be run as root (or sudo). Exiting."
+    exit 1
+fi
+
+if [[ "$#" -lt 3 ]]; then
+    echo "[${name}] Please enter a mysql root password, mysql new user name and new user password."
+    echo "[${name}] Usage: ./install_mysql ROOT_PASS NEW_USER_NAME NEW_USER_PASS"
+    exit 1
+fi
+
+
+root_pass=$1
+new_user_name=$2
+new_user_pass=$3
+# TODO: All args after NEW_USER_PASS should be table names to be created.
+
+echo "[${name}] Installing."
+apt install -y mysql-server
+
+echo "[${name}] Setting root password."
+mysql \
+    --user=root \
+    --execute="ALTER USER 'root'@'localhost' IDENTIFIED BY '${root_pass}'; FLUSH PRIVILEGES; exit;"
+
+echo "[${name}] Creating new mysql user."
+mysql \
+    --user root \
+    --password $root_pass
+    --execute="CREATE USER '${new_user_name}'@'%' IDENTIFIED WITH mysql_native_password BY '${new_user_pass}'; GRANT ALL PRIVILEGES ON *.* TO '${new_user_name}'@'%'; exit;"
+
+# If additional args, loop through and create databases
+# CREATE DATABASE database_name CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+echo "[${name}] All done!"
+exit 0
+
