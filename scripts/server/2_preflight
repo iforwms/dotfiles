@@ -28,5 +28,6 @@ $home/.dotfiles/scripts/server/install_utils
 $home/.dotfiles/scripts/server/secure_ssh
 
 echo "[${name}] All done, changing shell to zsh."
+sudo -u $SUDO_USER chsh -s $(which zsh)
 
-chsh -s $(which zsh)
+exit 0
