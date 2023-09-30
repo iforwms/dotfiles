@@ -56,10 +56,15 @@ remote_ssh_private_key="/home/${username}/.ssh/id_rsa"
 
 if [[ -e "${local_ssh_private_key}" ]]; then
     log_w "A private key already exists at ${local_ssh_private_key}."
-    read -p "Do you wish to continue and overwrite this file? (y/n) " -n 1 -r
+    read -p "Do you wish to use this file? (y/n) " -n 1 -r
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        local_ssh_private_key="${local_ssh_private_key}_new"
+        log "Creating new SSH key pair for ${server_name}"
+        ssh-keygen -t rsa -N '' -b 4096 -f "${local_ssh_private_key}" -C "${server_name}" <<<y >/dev/null 2>&1
     fi
+
+    cat "${local_ssh_private_key}.pub" | pbcopy
+    echo
+    log_n "SSH key copied to clipboard. Use this when creating the server."
 fi
 
 echo -n "Enter sudo password for ${username}@${server_name}: "
@@ -71,12 +76,7 @@ if [ "${pass}" != "${PASS_CONFIRM}" ]; then
     exit 1
 fi
 
-log "Creating new SSH key pair for ${server_name}"
-ssh-keygen -t rsa -N '' -b 4096 -f "${local_ssh_private_key}" -C "${server_name}" <<<y >/dev/null 2>&1
-
-cat "${HOME}/.ssh/${ssh_keyname}.pub" | pbcopy
-log_n "Newly created SSH key copied to clipboard. Use this when creating the server."
-
+echo
 read -p "Enter 'y' once the new server is live, or any other key to abort. " -n 1 -r
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     log_e "Aborting early..."
@@ -102,7 +102,7 @@ $(cat "${ssh_config}")
 EOF
 
 log "Creating account for ${username} on ${server_name} and setting password and adding user to sudo group."
-ssh "${server_name}" "adduser --disabled-password --gecos '' ${username} && ${server_name}" "usermod -p '$(echo ${pass}|openssl passwd -6 -stdin)' ${username} && ${server_name}" "usermod -a -G sudo ${username}"
+ssh "${server_name}" "adduser --disabled-password --gecos '' ${username}; usermod -p '$(echo ${pass}|openssl passwd -6 -stdin)' ${username}; usermod -a -G sudo ${username}; umask 077; test -d /home/${username}/.ssh || mkdir /home/${username}/.ssh"
 
 if [[ -n "${group}" && "${group}" != "${username}" ]]; then
     log "Found a group, adding ${username} to ${group} group."
@@ -110,18 +110,18 @@ if [[ -n "${group}" && "${group}" != "${username}" ]]; then
 fi
 
 log "Adding SSH key to authorized_keys and fixing permissions."
-ssh "${server_name}" "umask 077; test -d /home/${username}/.ssh || mkdir /home/${username}/.ssh"
-cat "${HOME}/.ssh/${ssh_keyname}.pub" | ssh "${server_name}" "cat >> /home/${username}/.ssh/authorized_keys && ${server_name}" "chmod 600 /home/${username}/.ssh/authorized_keys; ${server_name}" "chown -R ${username}:${username} /home/${username}/"
+cat "${HOME}/.ssh/${ssh_keyname}.pub" | ssh "${server_name}" "cat >> /home/${username}/.ssh/authorized_keys; chmod 600 /home/${username}/.ssh/authorized_keys; chown -R ${username}:${username} /home/${username}/"
 
 log "Updating local SSH config to use ${username} instead of root."
 sed -i "/Host ${server_name}/{n;s/User root/User ${username}/}" "${ssh_config}"
 
 read -p "Do you wish to set up SSH keys for the new user? (y/n) " -n 1 -r
 if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo
     log "Creating SSH key for ${username} on remote machine."
     ssh "${server_name}" "ssh-keygen -t rsa -b 4096 -f ${remote_ssh_private_key} -C ${server_name}"
 
-    </dev/null ssh "${server_name}" "cat ${remote_ssh_private_key}.pub" | pbcopy
+    ssh "${server_name}" "cat ${remote_ssh_private_key}.pub" | pbcopy
     log_n "New public key copied to clipboard."
     log_n "To add to GitHub go here: https://github.com/settings/ssh/new"
 fi
