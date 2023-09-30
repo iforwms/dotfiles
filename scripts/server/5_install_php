@@ -15,6 +15,14 @@ apt install -y openssl php${php_version} php${php_version}-{fpm,mysql,xml,mbstri
 echo "[${name}] Optimising PHP FPM."
 $home/.dotfiles/scripts/server/optimise_php_fpm
 
+echo
+read -p "[${name}] Do you want to restart the service? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+   php_version=$(php -r 'echo PHP_VERSION;' | awk -F. '{print $1"."$2}')
+   service php{$php_version}-fpm restart
+fi
+
 read -p "[${name}] Do you want to install composer? (y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then

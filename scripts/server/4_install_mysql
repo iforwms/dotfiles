@@ -45,6 +45,12 @@ for db in ${new_databases[@]}; do
         --execute="CREATE DATABASE ${db} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 done
 
+read -p "[${name}] Do you want to restart the service? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+   service mysql restart
+fi
+
 echo "[${name}] All done!"
 exit 0
 
