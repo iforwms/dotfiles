@@ -41,7 +41,7 @@ if [[ $(command -v mysql) ]]; then
     echo "Current mysql timezone: $(mysql -u root -B --disable-column-names -e 'SELECT @@global.time_zone;')"
 
     echo "[${name}] Found mysql, setting mysql timezone to ${user_timezone}."
-    mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql mysql 2>/dev/null
+    mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql mysql >/dev/null 2>&1
     sed -i "/default-time-zone/d;/\[mysqld\]/a default-time-zone = ${user_timezone}" /etc/mysql/mysql.conf.d/mysqld.cnf
 
     read -p "[${name}] Do you want to restart the service? (y/n) " -n 1 -r
