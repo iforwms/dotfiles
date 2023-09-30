@@ -12,7 +12,7 @@ echo "[${name}] Installing."
 apt install -y tmux
 
 echo "[${name}] Creating symlinks."
-ln -s $home/.dotfiles/tmux/.tmux.conf $HOME
+ln -s $home/.dotfiles/tmux/.tmux.conf $home
 
 echo "[${name}] All done!"
 exit 0
