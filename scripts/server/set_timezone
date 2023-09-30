@@ -17,12 +17,13 @@ fi
 
 echo "[${name}] Setting system timezone to ${user_timezone}."
 timedatectl set-timezone "${user_timezone}"
+echo "[${name}] Updated system timezone: $(cat /etc/timezone)"
 
 if [[ $(command -v php) ]]; then
     php_version=$(php -r 'echo PHP_VERSION;' | awk -F. '{print $1"."$2}')
     php_ini="/etc/php/${php_version}/fpm/php.ini"
 
-    echo "[${name}] Current php timezone: $(cat /etc/timezone)"
+    echo "[${name}] Current php timezone: $(php -r 'echo date_default_timezone_get().PHP_EOL;')"
 
     echo "[${name}] Found php, setting php-fpm timezone to ${user_timezone}."
     sed -iE "s/^;?\s?date\.timezone\s?=\s?.*$/date.timezone = ${user_timezone}/" $php_ini
@@ -33,9 +34,12 @@ if [[ $(command -v php) ]]; then
     if [[ $REPLY =~ ^[Yy]$ ]]; then
        service php{$php_version}-fpm restart
     fi
+    echo "[${name}] Updated php timezone: $(php -r 'echo date_default_timezone_get().PHP_EOL;')"
 fi
 
 if [[ $(command -v mysql) ]]; then
+    echo "Current mysql timezone: $(mysql -u root -B --disable-column-names -e 'SELECT @@global.time_zone;')"
+
     echo "[${name}] Found mysql, setting mysql timezone to ${user_timezone}."
     mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql mysql
     sed -i "/default-time-zone/d;/\[mysqld\]/a default-time-zone = ${user_timezone}" /etc/mysql/mysql.conf.d/mysqld.cnf
@@ -45,6 +49,7 @@ if [[ $(command -v mysql) ]]; then
     if [[ $REPLY =~ ^[Yy]$ ]]; then
        service mysql restart
     fi
+    echo "Updated mysql timezone: $(mysql -u root -B --disable-column-names -e 'SELECT @@global.time_zone;')"
 fi
 
 echo "[${name}] All done!"

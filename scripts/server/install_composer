@@ -11,10 +11,10 @@ mkdir -p "${download_dir}"
 
 echo "[${name}] Installing."
 php -r "copy('https://getcomposer.org/installer', '${download_dir}/composer-setup.php');"
-php composer-setup.php
+php "${download_dir}/composer-setup.php"
 php -r "unlink('${download_dir}/composer-setup.php');"
 
-mv composer.phar /usr/local/bin/composer
+mv "${download_dir}/composer.phar" /usr/local/bin/composer
 
 echo "[${name}] All done!"
 exit 0
