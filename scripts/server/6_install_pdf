@@ -11,8 +11,9 @@ apt install -y fontconfig libxrender1 xfonts-75dpi xfonts-base xfonts-utils
 
 read -r -p "[${name}] Visit https://wkhtmltopdf.org/downloads.html and enter the appropriate download URL: " package_url
 
+home=/home/${SUDO_USER}
 filename=${package_url##*/}
-download_dir=$HOME/downloads
+download_dir=$home/downloads
 mkdir -p $download_dir
 download_path="${download_dir}/${filename}"
 

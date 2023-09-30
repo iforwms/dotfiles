@@ -6,7 +6,7 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     exit 1
 fi
 
-download_dir="${HOME}/downloads"
+download_dir="/home/${SUDO_USER}/downloads"
 mkdir -p "${download_dir}"
 
 echo "[${name}] Installing."

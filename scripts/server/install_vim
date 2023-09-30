@@ -6,16 +6,18 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     exit 1
 fi
 
+home=/home/${SUDO_USER}
+
 echo "[${name}] Installing vim."
 apt install -y vim
 
 echo "[${name}] Creating vim symlinks."
-ln -s $HOME/.dotfiles/.vim $HOME
-ln -s $HOME/.dotfiles/.vimrc $HOME
+ln -s $home/.dotfiles/.vim $home
+ln -s $home/.dotfiles/.vimrc $home
 
 echo "[${name}] Fetching vim colour scheme."
-wget https://raw.githubusercontent.com/joshdick/onedark.vim/master/colors/onedark.vim -O $HOME/.vim/colors/onedark.vim
-wget https://raw.githubusercontent.com/joshdick/onedark.vim/master/autoload/onedark.vim -O $HOME/.vim/autoload/onedark.vim
+wget https://raw.githubusercontent.com/joshdick/onedark.vim/master/colors/onedark.vim -O $home/.vim/colors/onedark.vim
+wget https://raw.githubusercontent.com/joshdick/onedark.vim/master/autoload/onedark.vim -O $home/.vim/autoload/onedark.vim
 
 echo "[${name}] All done!"
 exit 0
