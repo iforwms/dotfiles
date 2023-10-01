@@ -36,7 +36,7 @@ rm "${download_dir}/tempconfigure.sh"
 make modules
 
 cp -vi ./objs/ngx_http_fancyindex_module.so ./objs/ngx_http_geoip2_module.so ./objs/ngx_stream_geoip2_module.so /usr/share/nginx/modules
-sed -i '\:include /etc/nginx/modules-enabled:a load_module /usr/share/nginx/modules/ngx_http_fancyindex_module.so;' $nginx_conf
+sed -i '\:/usr/share/nginx/modules/ngx_http_fancyindex_module.so;:d;\:include /etc/nginx/modules-enabled:a load_module /usr/share/nginx/modules/ngx_http_fancyindex_module.so;' $nginx_conf
 
 echo "[${name}] Checking configuration."
 nginx -t
@@ -49,8 +49,9 @@ fi
 
 git clone --depth 1 git@github.com:Naereen/Nginx-Fancyindex-Theme "${download_dir}/Nginx-Fancyindex-Theme"
 
+echo
 cat <<EOF
-# Examply fancy index configuration
+# Example fancy index configuration
 
     fancyindex on;
     fancyindex_localtime on;
@@ -65,5 +66,6 @@ cat <<EOF
     fancyindex_ignore "Nginx-Fancyindex-Theme-light";
 EOF
 
+echo
 echo "[${name}] All done!"
 exit 0
