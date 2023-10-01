@@ -6,6 +6,7 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     exit 1
 fi
 
+nginx_conf=/etc/nginx/nginx.conf
 download_dir="/home/${SUDO_USER}/downloads/nginx"
 geoip_version="3.3"
 nginx_version=$(nginx -v 2>&1 | awk -F' ' '{print $3}' | cut -d/ -f 2)
@@ -24,11 +25,11 @@ echo "[${name}] Fetching geoip module."
 wget https://github.com/leev/ngx_http_geoip2_module/archive/refs/tags/${geoip_version}.tar.gz -O "${download_dir}/${geoip_version}.tar.gz"
 tar xvfz "${download_dir}/${geoip_version}.tar.gz" -C "${download_dir}"
 
-echo "${download_dir}/nginx-${nginx_version}"
-echo "./configure ${nginx_build_args} --add-dynamic-module=../ngx-fancyindex --add-dynamic-module=../ngx_http_geoip2_module-${geoip_version} --with-stream"
-echo "make modules"
-echo "cp -vi ./objs/ngx_http_fancyindex_module.so ./objs/ngx_http_geoip2_module.so ./objs/ngx_stream_geoip2_module.so /usr/share/nginx/modules"
-echo "sed load_module /usr/share/nginx/modules/ngx_http_fancyindex_module.so; to /etc/nginx/nginx.conf"
+cd "${download_dir}/nginx-${nginx_version}"
+./configure ${nginx_build_args} --add-dynamic-module=../ngx-fancyindex --add-dynamic-module=../ngx_http_geoip2_module-${geoip_version} --with-stream
+make modules
+cp -vi ./objs/ngx_http_fancyindex_module.so ./objs/ngx_http_geoip2_module.so ./objs/ngx_stream_geoip2_module.so /usr/share/nginx/modules
+sed -i '\:include /etc/nginx/modules-enabled:a load_module /usr/share/nginx/modules/ngx_http_fancyindex_module.so;' $nginx_conf
 
 echo "[${name}] Checking configuration."
 nginx -t
