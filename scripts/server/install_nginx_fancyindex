@@ -26,6 +26,7 @@ wget https://github.com/leev/ngx_http_geoip2_module/archive/refs/tags/${geoip_ve
 tar xvfz "${download_dir}/${geoip_version}.tar.gz" -C "${download_dir}"
 
 cd "${download_dir}/nginx-${nginx_version}"
+echo "./configure ${nginx_build_args} --add-dynamic-module=../ngx-fancyindex --add-dynamic-module=../ngx_http_geoip2_module-${geoip_version} --with-stream"
 ./configure ${nginx_build_args} --add-dynamic-module=../ngx-fancyindex --add-dynamic-module=../ngx_http_geoip2_module-${geoip_version} --with-stream
 make modules
 cp -vi ./objs/ngx_http_fancyindex_module.so ./objs/ngx_http_geoip2_module.so ./objs/ngx_stream_geoip2_module.so /usr/share/nginx/modules
