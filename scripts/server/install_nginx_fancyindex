@@ -27,8 +27,14 @@ tar xvfz "${download_dir}/${geoip_version}.tar.gz" -C "${download_dir}"
 
 cd "${download_dir}/nginx-${nginx_version}"
 echo "./configure ${nginx_build_args} --add-dynamic-module=../ngx-fancyindex --add-dynamic-module=../ngx_http_geoip2_module-${geoip_version} --with-stream"
-./configure ${nginx_build_args} --add-dynamic-module=../ngx-fancyindex --add-dynamic-module=../ngx_http_geoip2_module-${geoip_version} --with-stream
+# ./configure ${nginx_build_args} --add-dynamic-module=../ngx-fancyindex --add-dynamic-module=../ngx_http_geoip2_module-${geoip_version} --with-stream
+echo "./configure ${nginx_build_args} --add-dynamic-module=../ngx-fancyindex --add-dynamic-module=../ngx_http_geoip2_module-${geoip_version} --with-stream" > "${download_dir}/tempconfigure.sh"
+chmod 755 "${download_dir}/tempconfigure.sh"
+${download_dir}/tempconfigure.sh
+rm "${download_dir}/tempconfigure.sh"
+
 make modules
+
 cp -vi ./objs/ngx_http_fancyindex_module.so ./objs/ngx_http_geoip2_module.so ./objs/ngx_stream_geoip2_module.so /usr/share/nginx/modules
 sed -i '\:include /etc/nginx/modules-enabled:a load_module /usr/share/nginx/modules/ngx_http_fancyindex_module.so;' $nginx_conf
 
