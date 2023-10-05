@@ -9,6 +9,7 @@ fi
 home=/home/${SUDO_USER}
 download_dir="${home}/downloads"
 mkdir -p "${download_dir}"
+chown -R "${SUDO_USER}:${SUDO_USER}" $download_dir
 
 echo "[${name}] Updating apt and upgrading packages."
 apt update
