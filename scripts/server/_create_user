@@ -134,7 +134,9 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     fi
 
     echo
-    ssh "${server_name}" "ssh-add -l; git clone git@github.com:iforwms/dotfiles ~/.dotfiles"
+    # ssh "${server_name}" "ssh-add -l; git clone git@github.com:iforwms/dotfiles ~/.dotfiles"
+    echo "git clone git@github.com:iforwms/dotfiles ~/.dotfiles" | pbcopy
+    echo "Dotfiles git clone command copied to clipboard."
 fi
 
 log "All done!"
