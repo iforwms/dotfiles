@@ -7,7 +7,7 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
 fi
 
 echo "[${name}] Installing."
-apt install -y libmaxminddb0 libmaxminddb-dev mmdb-bin build-essential libpcre3-dev zlib1g-dev libssl-dev libxml2-dev libxslt-dev libgd-dev tree wget htop tmux
+apt install -y software-properties-common libmaxminddb0 libmaxminddb-dev mmdb-bin build-essential libpcre3-dev zlib1g-dev libssl-dev libxml2-dev libxslt-dev libgd-dev tree wget htop tmux git
 
 echo "[${name}] All done!"
 exit 0
