@@ -2,6 +2,12 @@
 
 # Create local and remote SSH credentials and a new user on a
 # remote server.
+#
+# RED='\033[0;31m' # alerts
+# CYAN='\033[0;36m' # notice
+# NC='\033[0m' # no color
+# PURPLE='\033[0;35m' # status
+# WHITE='\033[1;37m'
 
 # 1. Create local SSH keys for logging into new server
 # 2. Update ~/.ssh/config with new server settings (as root)

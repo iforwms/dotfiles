@@ -1,0 +1,307 @@
+#!/bin/bash
+
+# Make sites into bedrock or normal WordPress
+# Version 2.0
+# Copyright (c) Kenny Eliason
+
+set -a
+source .env
+set +a
+
+if [[ "$*" == *"--more"* ]]
+then
+    WP=true
+    echo "👎 Convert to Vanilla WP"
+else
+    WP=false
+fi
+
+if [[ "$*" == *"--less"* ]]
+then
+    BEDROCK=true
+    echo "👍 Convert to Bedrock"
+else
+    BEDROCK=false
+fi
+
+# Set our variables that we need to run our scripts
+echo "*** This script must run from a folder adjacent to your site folder (ie. /code/website/ && /code/script/) ***"
+read -rp 'Enter the folder name of the website to be converted: ' SITENAME
+
+if [[ "$WP" = true ]]; then
+
+    cd ../ &&
+    mkdir "${SITENAME}-wp" &&
+    echo "*** Folder ${SITENAME}-wp created ***" &&
+    cd "${SITENAME}-wp"
+    wp core download
+    wp config create --dbname=vwp_$SITENAME --dbuser=root --dbpass=$MYSQL_ROOT_PWD
+    echo "*** Syncing content folder over, this may take a minute ***"
+    rsync -rz ../$SITENAME/web/app/ wp-content
+    rm -rf wp-content/mu-plugins/*
+    cd ../$SITENAME &&
+    wp db export ../${SITENAME}-wp/wp-content/dbbackup.sql
+
+    # Create the database if it isn't already made
+    if [[ -z "$MYSQL_ROOT_PWD" ]]
+    then
+        if ! $(command -v mysql) -u root -e "use vwp_$SITENAME"
+        then
+            $(command -v mysql) -uroot -e "CREATE DATABASE vwp_${SITENAME} /*\!40100 DEFAULT CHARACTER SET utf8mb4 */;"
+            $(command -v mysql) -uroot -e "FLUSH PRIVILEGES;"
+            echo -e "Created vwp_$SITENAME database."
+        else
+            echo "The \"vwp_$SITENAME\" database already exists. Continue? "
+            options=("Proceed" "Drop database and proceed" "Quit")
+            select opt in "${options[@]}"
+            do
+                case $opt in
+                    "Proceed")
+                        echo "Continuing without modifying \"vwp_$SITENAME\"..."
+                        break
+                        ;;
+                    "Drop database and proceed")
+                        # TODO Maybe a macOS popup to confirm?
+                        echo Y | $(command -v mysqladmin) -uroot drop "vwp_$SITENAME"
+                        $(command -v mysql) -uroot -e "CREATE DATABASE vwp_${SITENAME} /*\!40100 DEFAULT CHARACTER SET utf8mb4 */;"
+                        $(command -v mysql) -uroot -e "FLUSH PRIVILEGES;"
+                        echo -e "Created vwp_$SITENAME database."
+                        break
+                        ;;
+                    "Quit")
+                        echo "Terminated by user. Deleting project files."
+                        $(command -v rm) -rf "$SITENAME"
+                        exit 0
+                        ;;
+                    *) echo "Try again -- $REPLY is not an option";;
+                esac
+            done
+        fi
+    else
+        if ! $(command -v mysql) -u root -p"$MYSQL_ROOT_PWD" -e "use $SITENAME"
+        then
+            $(command -v mysql) -uroot -p"$MYSQL_ROOT_PWD" -e "CREATE DATABASE ${SITENAME} /*\!40100 DEFAULT CHARACTER SET utf8mb4 */;"
+            $(command -v mysql) -uroot -p"$MYSQL_ROOT_PWD" -e "FLUSH PRIVILEGES;"
+            echo -e "Created $SITENAME database."
+        else
+            echo -e "Could not create $SITENAME database. Please delete it and try again."
+            exit 1
+        fi
+    fi
+    # echo $PWD
+    cd ../${SITENAME}-wp &&
+    chmod -R 755 wp-content/uploads/ &&
+    wp db import wp-content/dbbackup.sql &&
+    wp search-replace "$SITENAME" "$SITENAME-wp" &&
+    wp search-replace "/app/" "/wp-content/" &&
+    wp option update home "http://${SITENAME}-wp.test" &&
+    wp option update siteurl "http://${SITENAME}-wp.test"
+fi
+
+
+if [[ "$BEDROCK" = true ]]; then
+
+    RED='\033[0;31m' # alerts
+    BROWN='\033[0;33m' # modifiable in env
+    CYAN='\033[0;36m' # notice
+    NC='\033[0m' # no color
+    PURPLE='\033[0;35m' # status
+    WHITE='\033[1;37m'
+
+    set -a
+    source .env
+    set +a
+
+    # Set our variables that we need to run our scripts
+    echo "
+
+    ${PURPLE}Site Details from ENV file:
+    ${CYAN}Local Domain Suffix: ${BROWN}$DOMAIN${NC}
+    ${CYAN}Staging IP: ${BROWN}$STAGING_IP
+    ${CYAN}Production IP: ${BROWN}$PRODUCTION_IP ${NC}
+
+
+    ${PURPLE}*** This project name will be the DB and GIT repo name${BROWN}
+    "
+    read -rp 'Enter a project name (no spaces, no hyphens): ' PROJECT
+    echo "${NC}"
+
+    if [[ -d $PROJECT ]]
+    then
+        echo "
+        ${RED}The '$PROJECT' folder already exists! Stopping.${NC}"
+        exit 1
+    else
+        echo "
+        ${PURPLE}*** Creating database wp_${PROJECT}_project${NC}
+
+        "
+    fi
+
+    echo $"
+
+    ${PURPLE}*** Installing Bedrock${NC}
+
+    "
+    $(command -v composer) create-project roots/bedrock "$PROJECT"
+    $(command -v composer) update -d "$PROJECT"
+
+    # Create the database if it isn't already made
+    if [[ -z "$MYSQL_ROOT_PWD" ]]
+    then
+        if ! $(command -v mysql) -u root -e "use wp_${PROJECT}_bedrock"
+        then
+            $(command -v mysql) -uroot -e "CREATE DATABASE wp_${PROJECT}_bedrock /*\!40100 DEFAULT CHARACTER SET utf8mb4 */;"
+            $(command -v mysql) -uroot -e "FLUSH PRIVILEGES;"
+            echo "Created wp_${PROJECT}_bedrock database."
+        else
+            echo "${RED}The \"wp_${PROJECT}_bedrock\" database already exists. Continue? ${NC}"
+            options=("Proceed" "Drop database and proceed" "Quit")
+            select opt in "${options[@]}"
+            do
+                case $opt in
+                    "Proceed")
+                        echo "Continuing without modifying \"wp_${PROJECT}_bedrock\"..."
+                        break
+                        ;;
+                    "Drop database and proceed")
+                        # TODO Maybe a macOS popup to confirm?
+                        echo Y | $(command -v mysqladmin) -uroot drop "wp_${PROJECT}_bedrock"
+                        $(command -v mysql) -uroot -e "CREATE DATABASE wp_${PROJECT}_bedrock /*\!40100 DEFAULT CHARACTER SET utf8mb4 */;"
+                        $(command -v mysql) -uroot -e "FLUSH PRIVILEGES;"
+                        echo -e "Created wp_${PROJECT}_bedrock database."
+                        break
+                        ;;
+                    "Quit")
+                        echo "Terminated by user. Deleting project files."
+                        $(command -v rm) -rf "$PROJECT"
+                        exit 0
+                        ;;
+                    *) echo "Try again -- $REPLY is not an option";;
+                esac
+            done
+        fi
+    else
+        if ! $(command -v mysql) -u root -p"$MYSQL_ROOT_PWD" -e "use $PROJECT"
+        then
+            $(command -v mysql) -uroot -p"$MYSQL_ROOT_PWD" -e "CREATE DATABASE ${PROJECT} /*\!40100 DEFAULT CHARACTER SET utf8mb4 */;"
+            $(command -v mysql) -uroot -p"$MYSQL_ROOT_PWD" -e "FLUSH PRIVILEGES;"
+            echo -e "Created $PROJECT database."
+        else
+            echo -e "${RED}Could not create $PROJECT database. Please delete it and try again.${NC}"
+            exit 1
+        fi
+    fi
+
+    echo "
+
+    ${PURPLE}*** Copying wp-content folder to app
+    "
+
+    $(command -v cp) -r ../$SITENAME/wp-content/ $PROJECT/web/app
+
+    # Create .env file
+    $(command -v cd) "$PROJECT" || exit 1
+    $(command -v cp) -r ../.env.example .
+    $(command -v cp) -r ../resources/storage .
+
+    # php -d memory_limit=1024M $(command -v wp) package install aaemnnosttv/wp-cli-dotenv-command:^2.0
+    # TODO fix this ^
+    $(command -v wp) dotenv init --template=.env.example
+    $(command -v wp) dotenv salts regenerate
+    $(command -v wp) dotenv set DB_NAME "wp_${PROJECT}_bedrock"
+    $(command -v wp) dotenv set DB_USER "root"
+    $(command -v wp) dotenv set DB_PASSWORD "$MYSQL_ROOT_PWD"
+    $(command -v wp) dotenv set WP_HOME "http://$PROJECT.$DOMAIN"
+
+    printf "\n" >> .env
+    $(command -v wp) dotenv set STAGING_IP "$STAGING_IP"
+    $(command -v wp) dotenv set STAGING_URL "https://$PROJECT.satispress.xyz"
+    $(command -v wp) dotenv set STAGING_FOLDER "$PROJECT.satispress.xyz"
+    $(command -v wp) dotenv set PRODUCTION_IP "$PRODUCTION_IP"
+    $(command -v wp) dotenv set PRODUCTION_URL "https://$PROJECT.com"
+    $(command -v wp) dotenv set PRODUCTION_FOLDER "$PROJECT.com"
+
+    # Export current wordpress database
+    $(command -v cd) ../../$SITENAME
+    $(command -v wp) db export temp.sql
+    $(command -v mv) temp.sql ../newwp/$PROJECT
+    $(command -v cd) ../newwp/$PROJECT
+
+    # Import sql dump
+    $(command -v wp) db import temp.sql
+    $(command -v wp) search-replace "$SITENAME" "$PROJECT" &&
+    $(command -v wp) search-replace "/wp-content/" "/app/" &&
+    $(command -v wp) option update home "http://${PROJECT}.test" &&
+    $(command -v wp) option update siteurl "http://${PROJECT}.test"
+
+    $(command -v cd) ..
+
+    # Remove those pesky default themes
+    $(command -v rm) "$PROJECT/web/app/mu-plugins/register-theme-directory.php"
+
+    # Add to the .gitignore (custom Stuff)
+    $(command -v echo) "# custom stuff
+    .DS_Store
+    .idea
+    *.sql
+    /report.*.json
+
+    /web/app/advanced-cache.php
+    /web/imagify-backup
+    /web/conf
+    " >> "$PROJECT/.gitignore"
+
+    # Add the sync script
+    echo "
+
+    ${PURPLE}*** Configuring Sync Script${NC}
+
+    "
+    $(command -v mkdir) "$PROJECT/scripts"
+    $(command -v cp) sync.sh "$PROJECT/scripts"
+    $(command -v chmod) +x "$PROJECT/scripts/sync.sh"
+    $(command -v cat) resources/append-to-wp-cli.yml >> "$PROJECT/wp-cli.yml"
+
+    # Add the debug log as a part of the dev environment
+    gsed -i "/WP_DEBUG_DISPLAY/i Config::define('WP_DEBUG_LOG', true);" "$PROJECT/config/environments/development.php"
+    gsed -i "/SCRIPT_DEBUG/i Config::define('FORCE_SSL_ADMIN', false);" "$PROJECT/config/environments/development.php"
+    gsed -i "/DISALLOW_FILE_MODS/i Config::define('FORCE_SSL_ADMIN', true);" "$PROJECT/config/application.php"
+
+    # Add the modified .env.example
+    $(command -v cp) resources/.env.example "$PROJECT/.env.example"
+
+    # Add the plugin configurator
+    echo "
+
+    ${PURPLE}*** Configuring Plugin Activation Script${NC}
+
+    "
+    $(command -v cp) resources/plugins.yml "$PROJECT/config"
+    $(command -v cp) resources/plugin-activation.php "$PROJECT/web/app/mu-plugins"
+
+    # Install default plugins
+    echo "
+
+    ${PURPLE}*** Installing Plugins${NC}
+
+    "
+    $(command -v composer) require -d "$PROJECT" roots/wordpress primetime/wp-plugin-activation-manifest roots/soil doctrine/inflector
+
+    # Start the git repo locally
+    # echo "
+
+    # ${PURPLE}*** Setup Git and Push to Github${NC}
+
+    # "
+    # git init
+    # git add .
+    # git commit -a -m 'Post-Script Initial Commit'
+    # gh repo create $GITHUB_BIZ/$PROJECT --private
+    # git remote add origin git@github.com:$GITHUB_BIZ/$PROJECT.git
+    # git push -u origin master
+    # gh repo view $GITHUB_BIZ/$PROJECT
+
+    # Move the project outside of this folder
+    $(command -v mv) "$PROJECT" ..
+fi
