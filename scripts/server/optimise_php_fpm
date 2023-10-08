@@ -8,7 +8,6 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
 fi
 
 php_version=${1:-$(php -r 'echo PHP_VERSION;' | awk -F. '{print $1"."$2}')}
-echo $php_version; exit
 
 fpm_config=/Users/ifor/Downloads/www.conf
 fpm_config="/etc/php/${php_version}/fpm/pool.d/www.conf"
