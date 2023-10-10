@@ -1,9 +1,3 @@
-# Install php
-# udo apt-get update
-# sudo apt -y install software-properties-common
-# sudo add-apt-repository ppa:ondrej/php
-# sudo apt-get updateo
-# sudo apt -y install php7.4
 # sudo apt-get install -y php7.4-{bcmath,curl,bz2,intl,xml,gd,mbstring,mysql,zip}
 
 # Shortcuts
