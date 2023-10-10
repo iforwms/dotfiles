@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-# Create local and remote SSH credentials and a new user on a
-# remote server.
-#
+# Set up a new user and SSH credentials on a remote server.
+
 # RED='\033[0;31m' # alerts
 # CYAN='\033[0;36m' # notice
 # NC='\033[0m' # no color
