@@ -10,7 +10,10 @@ home=/home/${SUDO_USER}
 php_version=${1:''}
 
 echo "[${name}] Installing php, php extensions and openssl."
-apt install -y openssl php${php_version} php${php_version}-{fpm,mysql,xml,mbstring,curl,zip,json,bcmath,tokenizer,gd}
+apt install -y \
+    openssl \
+    php${php_version} \
+    php${php_version}-{fpm,mysql,xml,mbstring,curl,zip,json,bcmath,tokenizer,gd} #,bz2,intl}
 
 echo "[${name}] Optimising PHP FPM."
 $home/.dotfiles/scripts/server/optimise_php_fpm
