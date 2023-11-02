@@ -1,7 +1,0 @@
-#!/bin/bash
-
-filename="bbsl_backup_$(date +%Y-%m-%d)"
-destination="/Users/ifor/Documents/backup"
-
-scp clients:/home/ifor/code/bbsl/bbsl.json "${destination}/${filename}.json"
-
