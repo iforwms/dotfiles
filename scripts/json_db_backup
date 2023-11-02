@@ -1,0 +1,24 @@
+#!/bin/bash
+
+destination="/Users/ifor/Documents/backup"
+
+echo "Backing up pool stats..."
+filename="backup_pool_stats_$(date +%Y-%m-%d)"
+base_dir="/var/www/pool_stats/db"
+scp "me:${base_dir}/players.json" "${destination}/${filename}_players.json"
+scp "me:${base_dir}/matches.json" "${destination}/${filename}_matches.json"
+
+echo "Backing up year planner..."
+filename="backup_year_planner_$(date +%Y-%m-%d)"
+base_dir="/var/www/year_planner/db"
+scp "me:${base_dir}/data.json" "${destination}/${filename}_data.json"
+scp "me:${base_dir}/workout.json" "${destination}/${filename}_workout.json"
+
+echo "Backing up basketball shooting logger..."
+filename="backup_bbsl_$(date +%Y-%m-%d)"
+base_dir="/var/www/basketball_shooting_log"
+scp "me:${base_dir}/bbsl.json" "${destination}/${filename}.json"
+
+echo "Backing up pedalboard settings..."
+scp -r me:/var/www/pedalboard/db/* "$destination/pedbalboard/"
+
