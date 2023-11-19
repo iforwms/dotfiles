@@ -94,10 +94,10 @@ def preflight_checks():
     remote_path = args.remote_path
 
     if not os.path.isdir(working_directory):
-        raise Exception("The specified directory does not exist. \n" + help_text)
+        raise Exception("The specified directory does not exist.")
 
     if not os.path.isfile(markers_path):
-        raise Exception("Missing 'markers' file. \n" + help_text)
+        raise Exception("Missing 'markers' file.")
 
 def check_raw_files():
     global working_directory, input_filetype, recording_date, raw_files, stems
