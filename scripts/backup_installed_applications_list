@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+/bin/ls -1v /Applications | sed 's/.app//' > /Users/ifor/Documents/backup/installed_applications.txt
