@@ -86,6 +86,7 @@ cask 'sublime-text'
 cask 'tableplus'
 cask 'the-unarchiver'
 cask 'tinkerwell'
+cask 'tomatobar'
 cask 'transmission'
 cask 'vagrant'
 cask 'virtualbox' # Might need to allow access in Security settings
