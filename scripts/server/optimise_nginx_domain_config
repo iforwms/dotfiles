@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+name=OPTIMISE_NGINX_DOMAIN_CONFIG
+usage="usage: ./optimise_nginx_domain_config CONFIG_FILE"
+
+config_file=$1
+
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+    echo "[${name}] This script must be run as root (or sudo). Exiting."
+    exit 1
+fi
+
+if [[ "$#" -lt 1 ]]; then
+    echo "[${name}] Please enter the path to the nginx domain config file you wish to optimise."
+    echo "[${name}] ${usage}"
+    exit 1
+fi
+
+if [[ ! -e "${config_file}" ]]; then
+    echo "[${name}] Config file does not exist, aborting."
+    exit 1
+fi
+
+domain_name=$(sed -rn '/server_name/ s/server_name ([ a-z].*);/\1/p' "$config_file" | xargs)
+
+server_block_count=$(grep -c 'server ' "$config_file")
+if [[ "$server_block_count" -gt 1 ]]; then
+    echo "[${name}] Removing managed by certbot lines."
+    tac "$config_file" | sed '0,/server {/d' | tac | sed '/# managed by Certbot/d;' | sed '/^$/N;/^\n$/D' > "$config_file".bak
+    mv "${config_file}.bak" "$config_file"
+fi
+
+echo "[${name}] Removing listen directive."
+sed -i '/listen/d' "$config_file"
+
+sed -i "
+/server /a\
+    listen 443 ssl http2;\n\n\
+\
+    include h5bp\/tls\/ssl_engine.conf;\n\
+    ssl_certificate \/etc\/letsencrypt\/live/${domain_name}\/fullchain.pem;\n\
+    ssl_certificate_key \/etc\/letsencrypt\/live/${domain_name}\/privkey.pem;\n\
+    include h5bp\/tls\/policy_strict.conf;\n\
+\
+" "$config_file"
+
+# manually add in redirect and cert info
+
+echo "[${name}] All done!"
+exit 0
