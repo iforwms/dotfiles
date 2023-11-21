@@ -15,6 +15,9 @@ mv "${base_dir}" "${base_dir}.bak"
 echo "[${name}] Cloning h5bp nginx config."
 git clone --depth 1 git@github.com:h5bp/server-configs-nginx.git "${base_dir}"
 
+echo "[${name}] Force redirect all non-https requests to https."
+sed -i "s|# return 301 https://\$host\$request_uri;|return 301 https://\$host\$request_uri;|" "${base_dir}/conf.d/no-ssl.default.conf"
+
 echo "[${name}] Copying fastcgi and php-fpm config from original nginx config."
 cp -r "$base_dir".bak/fastcgi* "${base_dir}.bak/snippets" "${base_dir}"
 

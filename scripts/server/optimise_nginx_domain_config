@@ -21,7 +21,10 @@ if [[ ! -e "${config_file}" ]]; then
     exit 1
 fi
 
-domain_name=$(sed -rn '/server_name/ s/server_name ([ a-z].*);/\1/p' "$config_file" | xargs)
+echo "[${name}] Creating backup file."
+cp "$config_file" ".${config_file}.bak"
+
+domain_name=$(sed -rn '/server_name/ s/server_name ([ a-z].*);/\1/p' "$config_file" | head -1 | xargs)
 
 server_block_count=$(grep -c 'server ' "$config_file")
 if [[ "$server_block_count" -gt 1 ]]; then
@@ -35,16 +38,38 @@ sed -i '/listen/d' "$config_file"
 
 sed -i "
 /server /a\
-    listen 443 ssl http2;\n\n\
-\
+    listen 443 ssl http2;\n\
+\n\
     include h5bp\/tls\/ssl_engine.conf;\n\
     ssl_certificate \/etc\/letsencrypt\/live/${domain_name}\/fullchain.pem;\n\
     ssl_certificate_key \/etc\/letsencrypt\/live/${domain_name}\/privkey.pem;\n\
     include h5bp\/tls\/policy_strict.conf;\n\
-\
+\n\
 " "$config_file"
 
-# manually add in redirect and cert info
+echo
+read -p "[${name}] Would you like to force www to non-www? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+   echo
+   echo "[${name}] Updating config to force non-www URL."
+
+sed -i "
+1 i\
+server {\n\
+    listen 443 ssl http2;\n\
+\n\
+    server_name www.${domain_name};\n\
+\n\
+    include h5bp/tls/ssl_engine.conf;\n\
+    ssl_certificate \/etc\/letsencrypt\/live/${domain_name}\/fullchain.pem;\n\
+    ssl_certificate_key \/etc\/letsencrypt\/live/${domain_name}\/privkey.pem;\n\
+    include h5bp/tls/policy_balanced.conf;\n\
+\n\
+    return 301 \$scheme://${domain_name}\$request_uri;\n\
+}\n\n\
+" "$config_file"
+fi
 
 echo "[${name}] All done!"
 exit 0
