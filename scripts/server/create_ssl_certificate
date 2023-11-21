@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+
+name=CREATE_SSL_CERTIFICATE
+usage="usage: ./create_ssl_certificate EMAIL WEB_ROOT DOMAIN [DOMAIN_2]"
+
+email=$1
+web_root=$2
+domains="${@:3}"
+
+function isEmailValid() {
+    regex="^([A-Za-z]+[A-Za-z0-9]*((\.|\-|\_)?[A-Za-z]+[A-Za-z0-9]*){1,})@(([A-Za-z]+[A-Za-z0-9]*)+((\.|\-|\_)?([A-Za-z]+[A-Za-z0-9]*)+){1,})+\.([A-Za-z]{2,})+$"
+    [[ "${1}" =~ $regex ]]
+}
+
+if [[ "$#" -lt 3 ]]; then
+    echo "[${name}] Please enter an email address, web root directory path and a space-delimited list of domains."
+    echo "[${name}] ${usage}"
+    exit 1
+fi
+
+if [[ -z "${email}" ]]; then
+    echo "[${name}] Please enter an email address."
+    echo "[${name}] ${usage}"
+    exit 1
+fi
+
+if ! isEmailValid "${email}"; then
+    echo "[${name}] Please enter a valid email address."
+    exit 1
+fi
+
+if [[ -z "${web_root}" ]]; then
+    echo "[${name}] Please enter the path to the root directory of your website."
+    echo "[${name}] ${usage}"
+    exit 1
+fi
+
+if [[ ! -d "${web_root}" ]]; then
+    echo "[${name}] '${web_root}' does not exist, aborting."
+    exit 1
+fi
+
+if [[ -z "${domains}" ]]; then
+    echo "[${name}] Please enter a domain name or list of domain names."
+    echo "[${name}] ${usage}"
+    exit 1
+fi
+
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+    echo "[${name}] This script must be run as root (or sudo). Exiting."
+    exit 1
+fi
+
+domain_args=""
+for domain in $domains; do
+    domain_args+="-d ${domain} "
+done
+
+if [[ ! -x $(which certbot) ]]; then
+    echo "[${name}] certbot not found."
+    read -p "Do you wish install certbot? (y/n) " -n 1 -r
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo
+        echo "[${name}] certbot not installed, aborting."
+        exit 1
+    fi
+
+    echo "[${name}] Removing any old versions of certbot."
+    apt -y remove certbot
+
+    echo "[${name}] Installing cerbot."
+    snap install --classic certbot
+
+    echo "[${name}] Creating symlink for cerbot."
+    ln -s /snap/bin/certbot /usr/bin/certbot
+fi
+
+certbot certonly --webroot \
+    -w ${web_root} \
+    ${domain_args} \
+    --post-hook "service nginx reload" \
+    --non-interactive \
+    --agree-tos \
+    --email ${email} \
+    --force-renewal
+
+echo "[${name}] All done!"
+exit 0
+

@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+name=OPTIMISE_NGINX
+base_dir="/etc/nginx"
+base_dir="/Users/ifor/Downloads/script-temp/nginx"
+
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+    echo "[${name}] This script must be run as root (or sudo). Exiting."
+    exit 1
+fi
+
+echo "[${name}] Backing up current nginx config."
+mv "${base_dir}" "${base_dir}.bak"
+
+echo "[${name}] Cloning h5bp nginx config."
+git clone --depth 1 git@github.com:h5bp/server-configs-nginx.git "${base_dir}"
+
+echo "[${name}] Copying fastcgi and php-fpm config from original nginx config."
+cp -r "$base_dir".bak/fastcgi* "${base_dir}.bak/snippets" "${base_dir}"
+
+echo "[${name}] Migrating existing site configuration files to new nginx folder."
+for f in "$base_dir."bak/sites-available/*; do cp "${f}" "${base_dir}/conf.d/.${f##*/}.conf"; done
+for f in "$base_dir/"conf.d/.*; do mv "${f}" "${f//.conf.conf/.conf}"; done
+for f in "$base_dir".bak/sites-enabled/*; do mv "${base_dir}/conf.d/.${f##*/}.conf" "${base_dir}/conf.d/${f##*/}.conf"; done
+
+echo "[${name}] Adding h5bp basic configuration include to existing site configs."
+shopt -s dotglob
+for f in "$base_dir"/conf.d/*; do sed -i '/fpm.sock/,/}/ s/}/} \n\n    include h5bp\/basic.conf;\n\n/' "$f"; done
+shopt -u dotglob
+
+config_test=$(nginx -t 2>&1|grep 'test is successful')
+if [[ -z "${config_test}" ]]; then
+   echo "[${name}] Config test failed, please manually check (nginx -t) and try again."
+   exit 1
+fi
+
+echo
+read -p "[${name}] Settings updated, you need to restart the NGINX service for these changes to take effect, restart now? (y/n) " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+   echo
+   echo "[${name}] Service not restarted."
+   exit 1
+else
+   echo
+   echo "[${name}] Restarting NGINX service"
+   service "nginx" restart
+   echo
+   echo "[${name}] All done!"
+   exit 0
+fi
+
