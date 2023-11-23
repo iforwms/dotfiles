@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+url=$1
+domain=$(echo "$url" | awk -F/ '{print $3}')
+directory=${2:-.}
+level=${3:-5}
+
+usage="Usage: ./mirror_site URL [OUTPUT_DIR=.] [LEVEL=5]"
+
+if [[ -z $url ]]; then
+    echo "A URL is required, aborting."
+    echo $usage
+    exit 1
+fi
+
+if ! [[ $level =~ ^[0-9]+$ ]]; then
+    echo "Level must be an integer, aborting."
+    echo $usage
+    exit 1
+fi
+
+if ! [[ "$url" == "http"* ]]; then
+    echo "Please enter a valid URL beginning with http(s)://"
+    echo $usage
+    exit 1
+fi
+
+echo "Starting to mirror ${url}";
+wget \
+    --recursive \
+    --timestamping \
+    --level "$level" \
+    --no-remove-listing \
+    --no-clobber \
+    --directory-prefix="$directory" \
+    --convert-links \
+    --adjust-extension \
+    --span-hosts \
+    --domains "$domain" \
+    --page-requisites \
+    --no-parent \
+    --no-cookies \
+    --user-agent Mozilla \
+    --execute robots=off \
+    "$url"
+
+echo "All done!"
+exit 0
