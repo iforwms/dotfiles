@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-scp $1 me:/home/ifor/code/downloads
+scp $1 me:/var/www/downloads
