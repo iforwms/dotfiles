@@ -36,14 +36,15 @@ with open(file_path) as fp:
     else:
         content = content.find_all('p')
 
-    for c, child in enumerate(content):
+    for index, child in enumerate(content):
         if child.get_text().startswith('PubQuizQuestionsHQ'):
             break;
 
+        print(child)
         if child.get_text().strip() == '':
             continue
-        else:
-            print(child)
+        # else:
+        #     print(child)
     exit()
 
     answers = content.find('strong', string=re.compile(r'Answers*'))
