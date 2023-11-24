@@ -1,0 +1,97 @@
+#!/usr/local/bin/python3
+
+from bs4 import BeautifulSoup
+from datetime import datetime
+import re, json, sys, os
+
+if len(sys.argv) < 2:
+    exit("[ERROR] Missing file path.")
+
+file_path = sys.argv[1]
+if not os.path.isfile(file_path):
+    timestamp = datetime.now().replace(microsecond=0)
+    exit(f'[{timestamp}] [ERROR] File not found.')
+
+with open(file_path) as fp:
+    soup = BeautifulSoup(fp, 'html.parser')
+    data = []
+    questions = []
+    answers = []
+    intros = []
+
+    title_regex = r"(?:Quiz)? \(Round \d+\)"
+    title_string = soup.find('h1').get_text()
+    title = re.sub(title_regex, "", title_string, 0)
+    content = soup.find('div', {"class":"content"})
+    category = title
+
+    answers = content.find('strong', string=re.compile(r'Answers*'))
+    if not answers:
+        content = soup.find('div', {"class":"content"})
+        paragraphs = content.find_all('p')
+    else:
+        paragraphs = answers.parent.find_all_next()
+
+    for index, paragraph in enumerate(paragraphs):
+        option_1 = None
+        option_2 = None
+        option_3 = None
+        option_4 = None
+
+        if paragraph.strong and paragraph.br:
+            question = paragraph.strong.get_text().strip()
+            answer = paragraph.find(string=True, recursive=False).strip()
+            data.append({"text": question, "answer": answer, "category": category, "option_1": option_1, "option_2": option_2, "option_3": option_3, "option_4": option_4})
+            continue
+
+        is_question = not paragraph.strong
+        if paragraph.name == 'div':
+            break
+
+        if not is_question:
+            continue
+
+        if paragraph.get_text().startswith("a)"):
+            continue
+
+        if not paragraph.get_text().strip():
+            continue
+
+        if paragraph.name == 'strong':
+            continue
+
+
+        if is_question is not None:
+            try:
+                answer = paragraphs[index+1].get_text()
+            except IndexError:
+                continue
+
+            question = re.sub("^\d+\.?\)? ", "", paragraph.get_text())
+
+            next_paragraph = paragraph.find_next_sibling()
+            if next_paragraph.get_text().startswith("a)"):
+                options_string = re.sub(r"\w\)", "|", next_paragraph.get_text())
+                options = options_string.split("|")
+                option_number = 1;
+                for option in options:
+                    if option == '':
+                        continue
+
+                    globals()[f"option_{option_number}"] = option
+                    option_number += 1
+
+                answer = re.sub("^\w\.?\)? ", "", paragraphs[index+2].get_text())
+            else:
+                answer = paragraphs[index+1].get_text().strip()
+
+            data.append({"text": question, "answer": answer, "category": category, "option_1": option_1, "option_2": option_2, "option_3": option_3, "option_4": option_4})
+
+
+print(data)
+timestamp = datetime.now().replace(microsecond=0)
+print(f'[{timestamp}] [INFO] [{category}] Writing to file.')
+# file1 = open(json_path, 'w')
+# file1.write(json.dumps(data))
+# file1.close()
+exit('All done!')
