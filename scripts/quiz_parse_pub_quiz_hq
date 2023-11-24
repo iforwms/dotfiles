@@ -2,15 +2,20 @@
 
 from bs4 import BeautifulSoup
 from datetime import datetime
+from pathlib import Path
 import re, json, sys, os
 
 if len(sys.argv) < 2:
     exit("[ERROR] Missing file path.")
 
 file_path = sys.argv[1]
+json_path = f"/Users/ifor/Downloads/quizzes/{Path(file_path).stem}.json"
+
 if not os.path.isfile(file_path):
     timestamp = datetime.now().replace(microsecond=0)
     exit(f'[{timestamp}] [ERROR] File not found.')
+
+db_categories = ["Animals", "Art", "Celebrities", "Food and Drink", "General Knowledge", "Geography", "History", "Language", "Literature", "Movies", "Music", "Mythology", "On This Day", "Religion", "Riddles", "Science", "Technology", "True or False", "Yangshuo", "Common Misconceptions", "Entertainment", "Famous Directors", "Famous Firsts", "Fashion", "Film Quotes", "Foreign Languages", "Information Technology", "Inventors", "Song Lyrics", "Maths", "Measurements And Conversions", "Nature", "Science Fiction", "Sports", "Words", "Flags", "Arnold Schwarzenegger", "Pot Luck", "Alter-Egos", "Famous Siblings", "China"]
 
 with open(file_path) as fp:
     soup = BeautifulSoup(fp, 'html.parser')
@@ -23,7 +28,23 @@ with open(file_path) as fp:
     title_string = soup.find('h1').get_text()
     title = re.sub(title_regex, "", title_string, 0)
     content = soup.find('div', {"class":"content"})
-    category = title
+    category = title.strip()
+
+    answers = content.find('strong', string=re.compile(r'Answers*'))
+    if answers is not None:
+        content = answers.parent.find_all_next('p')
+    else:
+        content = content.find_all('p')
+
+    for c, child in enumerate(content):
+        if child.get_text().startswith('PubQuizQuestionsHQ'):
+            break;
+
+        if child.get_text().strip() == '':
+            print('empty p, next p is a question')
+        else:
+            print(child)
+    exit()
 
     answers = content.find('strong', string=re.compile(r'Answers*'))
     if not answers:
@@ -38,11 +59,23 @@ with open(file_path) as fp:
         option_3 = None
         option_4 = None
 
+        next_sibling  = paragraph.find_next_sibling()
+        if next_sibling is None:
+            exit('sibling is none')
+            continue
+        print(next_sibling)
+
+        if paragraph.strong and next_sibling.find_next_sibling().get_text().strip() == '':
+            exit('new question type')
+
         if paragraph.strong and paragraph.br:
             question = paragraph.strong.get_text().strip()
-            answer = paragraph.find(string=True, recursive=False).strip()
+            answer = re.sub("^\w\.?\)? ", "", paragraph.find(string=True, recursive=False).strip())
             data.append({"text": question, "answer": answer, "category": category, "option_1": option_1, "option_2": option_2, "option_3": option_3, "option_4": option_4})
             continue
+
+        if paragraph.strong:
+            exit('todo!')
 
         is_question = not paragraph.strong
         if paragraph.name == 'div':
@@ -59,7 +92,6 @@ with open(file_path) as fp:
 
         if paragraph.name == 'strong':
             continue
-
 
         if is_question is not None:
             try:
@@ -88,10 +120,10 @@ with open(file_path) as fp:
             data.append({"text": question, "answer": answer, "category": category, "option_1": option_1, "option_2": option_2, "option_3": option_3, "option_4": option_4})
 
 
-print(data)
+print(json.dumps(data[:1], sort_keys=True, indent=2))
 timestamp = datetime.now().replace(microsecond=0)
-print(f'[{timestamp}] [INFO] [{category}] Writing to file.')
-# file1 = open(json_path, 'w')
-# file1.write(json.dumps(data))
-# file1.close()
-exit('All done!')
+# print(f'[{timestamp}] [INFO] [{category}] Writing to file.')
+file1 = open(json_path, 'w')
+file1.write(json.dumps(data))
+file1.close()
+# exit('All done!')
