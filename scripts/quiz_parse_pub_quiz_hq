@@ -41,7 +41,7 @@ with open(file_path) as fp:
             break;
 
         if child.get_text().strip() == '':
-            print('empty p, next p is a question')
+            continue
         else:
             print(child)
     exit()
