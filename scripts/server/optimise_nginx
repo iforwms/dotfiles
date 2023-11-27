@@ -9,6 +9,7 @@ name=OPTIMISE_NGINX
 base_dir="/etc/nginx"
 base_dir="/Users/ifor/Downloads/script-temp/nginx"
 skip_www=${1:-0}
+script_path=$(dirname $(realpath -s $0))
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     echo -e "${red}[${name}] This script must be run as root (or sudo). Exiting.${nc}"
@@ -16,7 +17,7 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
 fi
 
 echo -e "${blue}[${name}] Backing up current nginx config.${nc}"
-mv "${base_dir}" "${base_dir}.bak"
+mv -v "${base_dir}" "${base_dir}.bak"
 if [[ $? -ne 0 ]]; then
     echo -e "${red}[${name}] Failed to move current nginx config. Exiting.${nc}"
 fi
@@ -25,7 +26,7 @@ echo -e "${blue}[${name}] Cloning h5bp nginx config.${nc}"
 git clone --depth 1 git@github.com:h5bp/server-configs-nginx.git "${base_dir}"
 if [[ $? -ne 0 ]]; then
     echo -e "${red}[${name}] Failed to clone h5bp nginx config. Using local copy.${nc}"
-    tar xzvf "$(dirname $(realpath -s $0))/h5bp-server-configs.tar.gz" --directory="${base_dir}.bak/.."
+    tar xzvf "${script_path}/h5bp-server-configs.tar.gz" --directory="${base_dir}.bak/.."
 fi
 
 echo -e "${blue}[${name}] Force redirect all non-https requests to https.${nc}"
@@ -39,9 +40,12 @@ echo -e "${blue}[${name}] Copying fastcgi and php-fpm config from original nginx
 cp -vr "$base_dir".bak/fastcgi* "${base_dir}.bak/snippets" "${base_dir}"
 
 echo -e "${blue}[${name}] Migrating existing site configuration files to new nginx folder.${nc}"
-for f in "$base_dir."bak/sites-available/*; do cp "${f}" "${base_dir}/conf.d/.${f##*/}.conf"; done
-for f in "$base_dir/"conf.d/.*; do mv "${f}" "${f//.conf.conf/.conf}"; done
-for f in "$base_dir".bak/sites-enabled/*; do mv "${base_dir}/conf.d/.${f##*/}.conf" "${base_dir}/conf.d/${f##*/}.conf"; done
+# First copy all existing config files to new conf.d directory.
+for f in "$base_dir."bak/sites-available/*; do cp -v "${f}" "${base_dir}/conf.d/.${f##*/}.conf"; done
+# Replace any duplicate file extensions in new conf.d directory.
+for f in "$base_dir/"conf.d/.*; do mv -v "${f}" "${f//.conf.conf/.conf}"; done
+# Loop all enabled sites in old config and enable them in new config.
+for f in "$base_dir".bak/sites-enabled/*; do mv -v "${base_dir}/conf.d/.${f##*/}.conf" "${base_dir}/conf.d/${f##*/}.conf"; done
 
 echo -e "${blue}[${name}] Adding h5bp basic configuration include to existing site configs.${nc}"
 shopt -s dotglob
@@ -51,10 +55,10 @@ shopt -u dotglob
 
 echo -e "${blue}[${name}] Optimising individual server configs.${nc}"
 for f in "$base_dir"/conf.d/.*; do
-   ./optimise_nginx_domain_config "$f" "$skip_www"
+   "${script_path}/optimise_nginx_domain_config" "$f" "$skip_www"
 done
 for f in "$base_dir"/conf.d/*; do
-   ./optimise_nginx_domain_config "$f" "$skip_www"
+   "${script_path}/optimise_nginx_domain_config" "$f" "$skip_www"
 done
 
 echo -e "${blue}[${name}] Restoring default nginx configs.${nc}"
@@ -63,7 +67,8 @@ mv -fv "${base_dir}/no-ssl.default.conf" "${base_dir}/conf.d"
 
 config_test=$(nginx -t 2>&1|grep 'test is successful')
 if [[ -z "${config_test}" ]]; then
-   echo -e "${red}[${name}] Config test failed, please manually check (nginx -t) and try again.${nc}"
+   echo -e "${red}[${name}] Config test failed, see below for error message.${nc}"
+   nginx -t
    exit 1
 fi
 
@@ -77,7 +82,7 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 else
    echo
    echo -e "${blue}[${name}] Restarting NGINX service${nc}"
-   service "nginx" restart
+   service nginx restart
    echo
    echo -e "${green}[${name}] All done!${nc}"
    exit 0
