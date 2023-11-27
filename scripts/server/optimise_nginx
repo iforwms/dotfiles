@@ -3,6 +3,7 @@
 name=OPTIMISE_NGINX
 base_dir="/etc/nginx"
 base_dir="/Users/ifor/Downloads/script-temp/nginx"
+skip_www=${1:-0}
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     echo "[${name}] This script must be run as root (or sudo). Exiting."
@@ -25,6 +26,10 @@ fi
 echo "[${name}] Force redirect all non-https requests to https."
 sed -i "s|# return 301 https://\$host\$request_uri;|return 301 https://\$host\$request_uri;|" "${base_dir}/conf.d/no-ssl.default.conf"
 
+echo "[${name}] Temporarily moving default nginx config to base directory."
+mv -v "${base_dir}/conf.d/.default.conf" "$base_dir"
+mv -v "${base_dir}/conf.d/no-ssl.default.conf" "$base_dir"
+
 echo "[${name}] Copying fastcgi and php-fpm config from original nginx config."
 cp -r "$base_dir".bak/fastcgi* "${base_dir}.bak/snippets" "${base_dir}"
 
@@ -42,11 +47,15 @@ shopt -u dotglob
 
 echo "[${name}] Optimising individual server configs."
 for f in "$base_dir"/conf.d/.*; do
-   ./optimise_nginx_domain_config "$f"
+   ./optimise_nginx_domain_config "$f" "$skip_www"
 done
 for f in "$base_dir"/conf.d/*; do
-   ./optimise_nginx_domain_config "$f"
+   ./optimise_nginx_domain_config "$f" "$skip_www"
 done
+
+echo "[${name}] Restoring default nginx configs."
+mv -fv "${base_dir}/.default.conf" "${base_dir}/conf.d"
+mv -fv "${base_dir}/no-ssl.default.conf" "${base_dir}/conf.d"
 
 config_test=$(nginx -t 2>&1|grep 'test is successful')
 if [[ -z "${config_test}" ]]; then
