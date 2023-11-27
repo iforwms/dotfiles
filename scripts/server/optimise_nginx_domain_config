@@ -4,7 +4,7 @@ name=OPTIMISE_NGINX_DOMAIN_CONFIG
 usage="usage: ./optimise_nginx_domain_config CONFIG_FILE"
 
 config_file=$1
-force_www=0
+skip_www=${2:-0}
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     echo "[${name}] This script must be run as root (or sudo). Exiting."
@@ -28,8 +28,7 @@ if [[ ! -e "${config_file}" ]]; then
 fi
 
 if [[ "$#" -eq 2 ]]; then
-    echo "forcing www"
-    exit 1
+    force_www=1
 fi
 
 echo "[${name}] Creating backup file for ${config_file}."
@@ -60,9 +59,14 @@ sed -i "
 \n\
 " "$config_file"
 
-echo
-read -p "[${name}] Would you like to force www to non-www? (y/n) " -n 1 -r
-echo
+if [[ $skip_www -eq 0 ]]; then
+    echo
+    read -p "[${name}] Would you like to force www to non-www? (y/n) " -n 1 -r
+    echo
+else
+    REPLY="n"
+fi
+
 if [[ $REPLY =~ ^[Yy]$ ]]; then
    echo
    echo "[${name}] Updating config to force non-www URL."
