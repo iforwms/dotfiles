@@ -11,6 +11,7 @@ usage="usage: ./optimise_nginx_domain_config CONFIG_FILE [SKIP_WWW_REDIRECT:0]"
 config_file=$1
 config_name=${config_file##*/}
 skip_www=${2:-0}
+script_path=$(dirname "$(realpath -s "$0")")
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     echo -e "${red}[${name}] This script must be run as root (or sudo). Exiting.${nc}"
@@ -33,16 +34,14 @@ if [[ ! -e "${config_file}" ]]; then
     exit 1
 fi
 
-if [[ "$#" -eq 2 ]]; then
-    force_www=1
-fi
-
 echo -e "${blue}[${name}] [${config_name}] Creating backup file for ${config_file}.${nc}"
 output_filepath="${config_file%/*}/.${config_file##*/}.bak"
 output_filepath=${output_filepath/../.}
 cp -v "$config_file" "${output_filepath}"
 
 domain_name=$(sed -rn '/server_name/ s/server_name ([ a-z].*);/\1/p' "$config_file" | head -1 | xargs)
+web_root=$(sed -rn '/root/p' "$config_file" | awk '{print $2}')
+web_root=${web_root/;/}
 
 server_block_count=$(grep -c 'server ' "$config_file")
 if [[ "$server_block_count" -gt 1 ]]; then
@@ -73,6 +72,7 @@ else
     REPLY="n"
 fi
 
+www_domain=""
 if [[ $REPLY =~ ^[Yy]$ ]]; then
    echo
    echo -e "${blue}[${name}] [${config_name}] Updating config to force non-www URL.${nc}"
@@ -92,7 +92,12 @@ server {\n\
     return 301 \$scheme://${domain_name}\$request_uri;\n\
 }\n\n\
 " "$config_file"
+
+www_domain="www.${domain_name}"
 fi
+
+echo -e "${blue}[${name}] [${config_name}] Creating SSL certificate.${nc}"
+"${script_path}/create_ssl_certificate" ifor@cors.tech "$web_root" "$domain_name" "$www_domain"
 
 echo -e "${green}[${name}] [${config_name}] All done!${nc}"
 exit 0
