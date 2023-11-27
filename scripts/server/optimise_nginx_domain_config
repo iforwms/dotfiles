@@ -40,7 +40,7 @@ output_filepath=${output_filepath/../.}
 cp -v "$config_file" "${output_filepath}"
 
 domain_name=$(sed -rn '/server_name/ s/server_name ([ a-z].*);/\1/p' "$config_file" | head -1 | xargs)
-web_root=$(sed -rn '/^\s+root/p' "$config_file" | awk '{print $2}')
+web_root=$(sed -rn '/^\s+root /p' "$config_file" | awk '{print $2}')
 web_root=${web_root/;/}
 
 server_block_count=$(grep -c 'server ' "$config_file")
