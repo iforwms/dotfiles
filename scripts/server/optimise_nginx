@@ -36,7 +36,7 @@ mv -v "${base_dir}/conf.d/.default.conf" "$base_dir"
 mv -v "${base_dir}/conf.d/no-ssl.default.conf" "$base_dir"
 
 echo -e "${blue}[${name}] Copying fastcgi and php-fpm config from original nginx config.${nc}"
-cp -r "$base_dir".bak/fastcgi* "${base_dir}.bak/snippets" "${base_dir}"
+cp -vr "$base_dir".bak/fastcgi* "${base_dir}.bak/snippets" "${base_dir}"
 
 echo -e "${blue}[${name}] Migrating existing site configuration files to new nginx folder.${nc}"
 for f in "$base_dir."bak/sites-available/*; do cp "${f}" "${base_dir}/conf.d/.${f##*/}.conf"; done
