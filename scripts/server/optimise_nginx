@@ -6,8 +6,7 @@ red='\033[0;31m'
 nc='\033[0m'
 
 name=OPTIMISE_NGINX
-base_dir="/etc/nginx"
-base_dir="/Users/ifor/Downloads/script-temp/nginx"
+base_dir=${2:-"/etc/nginx"}
 skip_www=${1:-0}
 script_path=$(dirname "$(realpath -s "$0")")
 
