@@ -18,41 +18,41 @@ function isEmailValid() {
 }
 
 if [[ "$#" -lt 3 ]]; then
-    echo "${red}[${name}] Please enter an email address, web root directory path and a space-delimited list of domains.${nc}"
-    echo "${red}[${name}] ${usage}${nc}"
+    echo -e "${red}[${name}] Please enter an email address, web root directory path and a space-delimited list of domains.${nc}"
+    echo -e "${red}[${name}] ${usage}${nc}"
     exit 1
 fi
 
 if [[ -z "${email}" ]]; then
-    echo "${red}[${name}] Please enter an email address.${nc}"
-    echo "${red}[${name}] ${usage}${nc}"
+    echo -e "${red}[${name}] Please enter an email address.${nc}"
+    echo -e "${red}[${name}] ${usage}${nc}"
     exit 1
 fi
 
 if ! isEmailValid "${email}"; then
-    echo "${red}[${name}] Please enter a valid email address.${nc}"
+    echo -e "${red}[${name}] Please enter a valid email address.${nc}"
     exit 1
 fi
 
 if [[ -z "${web_root}" ]]; then
-    echo "${red}[${name}] Please enter the path to the root directory of your website.${nc}"
-    echo "${red}[${name}] ${usage}${nc}"
+    echo -e "${red}[${name}] Please enter the path to the root directory of your website.${nc}"
+    echo -e "${red}[${name}] ${usage}${nc}"
     exit 1
 fi
 
 if [[ ! -d "${web_root}" ]]; then
-    echo "${red}[${name}] '${web_root}' does not exist, aborting.${nc}"
+    echo -e "${red}[${name}] '${web_root}' does not exist, aborting.${nc}"
     exit 1
 fi
 
 if [[ -z "${domains}" ]]; then
-    echo "${red}[${name}] Please enter a domain name or list of domain names.${nc}"
-    echo "${red}[${name}] ${usage}${nc}"
+    echo -e "${red}[${name}] Please enter a domain name or list of domain names.${nc}"
+    echo -e "${red}[${name}] ${usage}${nc}"
     exit 1
 fi
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
-    echo "${red}[${name}] This script must be run as root (or sudo). Exiting.${nc}"
+    echo -e "${red}[${name}] This script must be run as root (or sudo). Exiting.${nc}"
     exit 1
 fi
 
@@ -62,21 +62,21 @@ for domain in $domains; do
 done
 
 if [[ ! -x $(which certbot) ]]; then
-    echo "${red}[${name}] certbot not found.${nc}"
+    echo -e "${red}[${name}] certbot not found.${nc}"
     read -p "Do you wish install certbot? (y/n) " -n 1 -r
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo
-        echo "${cyan}[${name}] certbot not installed, aborting.${nc}"
+        echo -e "${cyan}[${name}] certbot not installed, aborting.${nc}"
         exit 1
     fi
 
-    echo "${cyan}[${name}] Removing any old versions of certbot.${nc}"
+    echo -e "${cyan}[${name}] Removing any old versions of certbot.${nc}"
     apt -y remove certbot
 
-    echo "${cyan}[${name}] Installing cerbot.${nc}"
+    echo -e "${cyan}[${name}] Installing cerbot.${nc}"
     snap install --classic certbot
 
-    echo "${cyan}[${name}] Creating symlink for cerbot.${nc}"
+    echo -e "${cyan}[${name}] Creating symlink for cerbot.${nc}"
     ln -s /snap/bin/certbot /usr/bin/certbot
 fi
 
@@ -89,6 +89,6 @@ certbot certonly --webroot \
     --email "$email" \
     --force-renewal
 
-echo "${green}[${name}] All done!${nc}"
+echo -e "${green}[${name}] All done!${nc}"
 exit 0
 
