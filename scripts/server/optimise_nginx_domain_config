@@ -6,20 +6,20 @@ red='\033[0;31m'
 nc='\033[0m'
 
 name=OPTIMISE_NGINX_DOMAIN_CONFIG
-usage="usage: ./optimise_nginx_domain_config CONFIG_FILE"
+usage="usage: ./optimise_nginx_domain_config CONFIG_FILE [SKIP_WWW_REDIRECT:0]"
 
 config_file=$1
 config_name=${config_file##*/}
 skip_www=${2:-0}
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
-    echo -e "${red}[${name}] [${config_name}] This script must be run as root (or sudo). Exiting.${nc}"
+    echo -e "${red}[${name}] This script must be run as root (or sudo). Exiting.${nc}"
     exit 1
 fi
 
 if [[ "$#" -lt 1 ]]; then
-    echo -e "${red}[${name}] [${config_name}] Please enter the path to the nginx domain config file you wish to optimise.${nc}"
-    echo -e "${red}[${name}] [${config_name}] ${usage}${nc}"
+    echo -e "${red}[${name}] Please enter the path to the nginx domain config file you wish to optimise.${nc}"
+    echo -e "${red}[${name}] ${usage}${nc}"
     exit 1
 fi
 
