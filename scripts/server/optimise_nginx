@@ -11,9 +11,16 @@ fi
 
 echo "[${name}] Backing up current nginx config."
 mv "${base_dir}" "${base_dir}.bak"
+if [[ $? -ne 0 ]]; then
+    echo "[${name}] Failed to move current nginx config. Exiting."
+fi
 
 echo "[${name}] Cloning h5bp nginx config."
 git clone --depth 1 git@github.com:h5bp/server-configs-nginx.git "${base_dir}"
+if [[ $? -ne 0 ]]; then
+    echo "[${name}] Failed to clone h5bp nginx config. Using local copy."
+    tar xzvf "$(dirname $(realpath -s $0))/h5bp-server-configs.tar.gz" --directory="${base_dir}.bak/.."
+fi
 
 echo "[${name}] Force redirect all non-https requests to https."
 sed -i "s|# return 301 https://\$host\$request_uri;|return 301 https://\$host\$request_uri;|" "${base_dir}/conf.d/no-ssl.default.conf"
@@ -29,7 +36,17 @@ for f in "$base_dir".bak/sites-enabled/*; do mv "${base_dir}/conf.d/.${f##*/}.co
 echo "[${name}] Adding h5bp basic configuration include to existing site configs."
 shopt -s dotglob
 for f in "$base_dir"/conf.d/*; do sed -i '/fpm.sock/,/}/ s/}/} \n\n    include h5bp\/basic.conf;\n\n/' "$f"; done
+for f in "$base_dir"/conf.d/.*; do sed -i '/fpm.sock/,/}/ s/}/} \n\n    include h5bp\/basic.conf;\n\n/' "$f"; done
 shopt -u dotglob
+
+
+echo "[${name}] Optimising individual server configs."
+for f in "$base_dir"/conf.d/.*; do
+   ./optimise_nginx_domain_config "$f"
+done
+for f in "$base_dir"/conf.d/*; do
+   ./optimise_nginx_domain_config "$f"
+done
 
 config_test=$(nginx -t 2>&1|grep 'test is successful')
 if [[ -z "${config_test}" ]]; then

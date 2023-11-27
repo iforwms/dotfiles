@@ -19,6 +19,7 @@ brew 'cmus' # terminal player
 brew 'colordiff'
 brew 'coreutils' # Those that come with macOS are outdated
 brew 'dfu-programmer' # Flashing Arduino bootloaders
+brew 'dnsmasq'
 brew 'dos2unix'
 brew 'entr'
 brew 'findutils'
