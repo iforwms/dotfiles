@@ -4,6 +4,7 @@ name=OPTIMISE_NGINX_DOMAIN_CONFIG
 usage="usage: ./optimise_nginx_domain_config CONFIG_FILE"
 
 config_file=$1
+force_www=0
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     echo "[${name}] This script must be run as root (or sudo). Exiting."
@@ -16,21 +17,33 @@ if [[ "$#" -lt 1 ]]; then
     exit 1
 fi
 
+if [[ -d "$config_file" ]]; then
+    echo "[${name}] Specified path is a directory, aborting."
+    exit 1
+fi
+
 if [[ ! -e "${config_file}" ]]; then
     echo "[${name}] Config file does not exist, aborting."
     exit 1
 fi
 
-echo "[${name}] Creating backup file."
-cp "$config_file" ".${config_file}.bak"
+if [[ "$#" -eq 2 ]]; then
+    echo "forcing www"
+    exit 1
+fi
+
+echo "[${name}] Creating backup file for ${config_file}."
+output_filepath="${config_file%/*}/.${config_file##*/}.bak"
+output_filepath=${output_filepath/../.}
+cp -v "$config_file" "${output_filepath}"
 
 domain_name=$(sed -rn '/server_name/ s/server_name ([ a-z].*);/\1/p' "$config_file" | head -1 | xargs)
 
 server_block_count=$(grep -c 'server ' "$config_file")
 if [[ "$server_block_count" -gt 1 ]]; then
     echo "[${name}] Removing managed by certbot lines."
-    tac "$config_file" | sed '0,/server {/d' | tac | sed '/# managed by Certbot/d;' | sed '/^$/N;/^\n$/D' > "$config_file".bak
-    mv "${config_file}.bak" "$config_file"
+    tac "$config_file" | sed '0,/server {/d' | tac | sed '/# managed by Certbot/d;' | sed '/^$/N;/^\n$/D' > "$config_file".tmp
+    mv -v "${config_file}.tmp" "$config_file"
 fi
 
 echo "[${name}] Removing listen directive."
