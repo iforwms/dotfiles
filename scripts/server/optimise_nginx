@@ -1,51 +1,55 @@
 #!/usr/bin/env bash
 
+blue='\033[0;34m'
+green='\033[0;32m'
+red='\033[0;31m'
+nc='\033[0m'
+
 name=OPTIMISE_NGINX
 base_dir="/etc/nginx"
 base_dir="/Users/ifor/Downloads/script-temp/nginx"
 skip_www=${1:-0}
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
-    echo "[${name}] This script must be run as root (or sudo). Exiting."
+    echo -e "${red}[${name}] This script must be run as root (or sudo). Exiting.${nc}"
     exit 1
 fi
 
-echo "[${name}] Backing up current nginx config."
+echo -e "${blue}[${name}] Backing up current nginx config.${nc}"
 mv "${base_dir}" "${base_dir}.bak"
 if [[ $? -ne 0 ]]; then
-    echo "[${name}] Failed to move current nginx config. Exiting."
+    echo -e "${red}[${name}] Failed to move current nginx config. Exiting.${nc}"
 fi
 
-echo "[${name}] Cloning h5bp nginx config."
+echo -e "${blue}[${name}] Cloning h5bp nginx config.${nc}"
 git clone --depth 1 git@github.com:h5bp/server-configs-nginx.git "${base_dir}"
 if [[ $? -ne 0 ]]; then
-    echo "[${name}] Failed to clone h5bp nginx config. Using local copy."
+    echo -e "${red}[${name}] Failed to clone h5bp nginx config. Using local copy.${nc}"
     tar xzvf "$(dirname $(realpath -s $0))/h5bp-server-configs.tar.gz" --directory="${base_dir}.bak/.."
 fi
 
-echo "[${name}] Force redirect all non-https requests to https."
+echo -e "${blue}[${name}] Force redirect all non-https requests to https.${nc}"
 sed -i "s|# return 301 https://\$host\$request_uri;|return 301 https://\$host\$request_uri;|" "${base_dir}/conf.d/no-ssl.default.conf"
 
-echo "[${name}] Temporarily moving default nginx config to base directory."
+echo -e "${blue}[${name}] Temporarily moving default nginx config to base directory.${nc}"
 mv -v "${base_dir}/conf.d/.default.conf" "$base_dir"
 mv -v "${base_dir}/conf.d/no-ssl.default.conf" "$base_dir"
 
-echo "[${name}] Copying fastcgi and php-fpm config from original nginx config."
+echo -e "${blue}[${name}] Copying fastcgi and php-fpm config from original nginx config.${nc}"
 cp -r "$base_dir".bak/fastcgi* "${base_dir}.bak/snippets" "${base_dir}"
 
-echo "[${name}] Migrating existing site configuration files to new nginx folder."
+echo -e "${blue}[${name}] Migrating existing site configuration files to new nginx folder.${nc}"
 for f in "$base_dir."bak/sites-available/*; do cp "${f}" "${base_dir}/conf.d/.${f##*/}.conf"; done
 for f in "$base_dir/"conf.d/.*; do mv "${f}" "${f//.conf.conf/.conf}"; done
 for f in "$base_dir".bak/sites-enabled/*; do mv "${base_dir}/conf.d/.${f##*/}.conf" "${base_dir}/conf.d/${f##*/}.conf"; done
 
-echo "[${name}] Adding h5bp basic configuration include to existing site configs."
+echo -e "${blue}[${name}] Adding h5bp basic configuration include to existing site configs.${nc}"
 shopt -s dotglob
 for f in "$base_dir"/conf.d/*; do sed -i '/fpm.sock/,/}/ s/}/} \n\n    include h5bp\/basic.conf;\n\n/' "$f"; done
 for f in "$base_dir"/conf.d/.*; do sed -i '/fpm.sock/,/}/ s/}/} \n\n    include h5bp\/basic.conf;\n\n/' "$f"; done
 shopt -u dotglob
 
-
-echo "[${name}] Optimising individual server configs."
+echo -e "${blue}[${name}] Optimising individual server configs.${nc}"
 for f in "$base_dir"/conf.d/.*; do
    ./optimise_nginx_domain_config "$f" "$skip_www"
 done
@@ -53,13 +57,13 @@ for f in "$base_dir"/conf.d/*; do
    ./optimise_nginx_domain_config "$f" "$skip_www"
 done
 
-echo "[${name}] Restoring default nginx configs."
+echo -e "${blue}[${name}] Restoring default nginx configs.${nc}"
 mv -fv "${base_dir}/.default.conf" "${base_dir}/conf.d"
 mv -fv "${base_dir}/no-ssl.default.conf" "${base_dir}/conf.d"
 
 config_test=$(nginx -t 2>&1|grep 'test is successful')
 if [[ -z "${config_test}" ]]; then
-   echo "[${name}] Config test failed, please manually check (nginx -t) and try again."
+   echo -e "${red}[${name}] Config test failed, please manually check (nginx -t) and try again.${nc}"
    exit 1
 fi
 
@@ -68,14 +72,14 @@ read -p "[${name}] Settings updated, you need to restart the NGINX service for t
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
    echo
-   echo "[${name}] Service not restarted."
+   echo -e "${red}[${name}] Service not restarted.${nc}"
    exit 1
 else
    echo
-   echo "[${name}] Restarting NGINX service"
+   echo -e "${blue}[${name}] Restarting NGINX service${nc}"
    service "nginx" restart
    echo
-   echo "[${name}] All done!"
+   echo -e "${green}[${name}] All done!${nc}"
    exit 0
 fi
 

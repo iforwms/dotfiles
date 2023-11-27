@@ -1,29 +1,35 @@
 #!/usr/bin/env bash
 
+blue='\033[0;34m'
+green='\033[0;32m'
+red='\033[0;31m'
+nc='\033[0m'
+
 name=OPTIMISE_NGINX_DOMAIN_CONFIG
 usage="usage: ./optimise_nginx_domain_config CONFIG_FILE"
 
 config_file=$1
+config_name=${config_file##*/}
 skip_www=${2:-0}
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
-    echo "[${name}] This script must be run as root (or sudo). Exiting."
+    echo -e "${red}[${name}] [${config_name}] This script must be run as root (or sudo). Exiting.${nc}"
     exit 1
 fi
 
 if [[ "$#" -lt 1 ]]; then
-    echo "[${name}] Please enter the path to the nginx domain config file you wish to optimise."
-    echo "[${name}] ${usage}"
+    echo -e "${red}[${name}] [${config_name}] Please enter the path to the nginx domain config file you wish to optimise.${nc}"
+    echo -e "${red}[${name}] [${config_name}] ${usage}${nc}"
     exit 1
 fi
 
 if [[ -d "$config_file" ]]; then
-    echo "[${name}] Specified path is a directory, aborting."
+    echo -e "${red}[${name}] [${config_name}] Specified path is a directory, aborting.${nc}"
     exit 1
 fi
 
 if [[ ! -e "${config_file}" ]]; then
-    echo "[${name}] Config file does not exist, aborting."
+    echo -e "${red}[${name}] [${config_name}] Config file does not exist, aborting.${nc}"
     exit 1
 fi
 
@@ -31,7 +37,7 @@ if [[ "$#" -eq 2 ]]; then
     force_www=1
 fi
 
-echo "[${name}] Creating backup file for ${config_file}."
+echo -e "${blue}[${name}] [${config_name}] Creating backup file for ${config_file}.${nc}"
 output_filepath="${config_file%/*}/.${config_file##*/}.bak"
 output_filepath=${output_filepath/../.}
 cp -v "$config_file" "${output_filepath}"
@@ -40,12 +46,12 @@ domain_name=$(sed -rn '/server_name/ s/server_name ([ a-z].*);/\1/p' "$config_fi
 
 server_block_count=$(grep -c 'server ' "$config_file")
 if [[ "$server_block_count" -gt 1 ]]; then
-    echo "[${name}] Removing managed by certbot lines."
+    echo -e "${blue}[${name}] [${config_name}] Removing managed by certbot lines.${nc}"
     tac "$config_file" | sed '0,/server {/d' | tac | sed '/# managed by Certbot/d;' | sed '/^$/N;/^\n$/D' > "$config_file".tmp
     mv -v "${config_file}.tmp" "$config_file"
 fi
 
-echo "[${name}] Removing listen directive."
+echo -e "${blue}[${name}] [${config_name}] Removing listen directive.${nc}"
 sed -i '/listen/d' "$config_file"
 
 sed -i "
@@ -61,7 +67,7 @@ sed -i "
 
 if [[ $skip_www -eq 0 ]]; then
     echo
-    read -p "[${name}] Would you like to force www to non-www? (y/n) " -n 1 -r
+    read -p "[${name}] [${config_name}] Would you like to force www to non-www? (y/n) " -n 1 -r
     echo
 else
     REPLY="n"
@@ -69,7 +75,7 @@ fi
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
    echo
-   echo "[${name}] Updating config to force non-www URL."
+   echo -e "${blue}[${name}] [${config_name}] Updating config to force non-www URL.${nc}"
 
 sed -i "
 1 i\
@@ -88,5 +94,5 @@ server {\n\
 " "$config_file"
 fi
 
-echo "[${name}] All done!"
+echo -e "${green}[${name}] [${config_name}] All done!${nc}"
 exit 0
