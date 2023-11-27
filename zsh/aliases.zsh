@@ -65,7 +65,7 @@ alias doc="docker-compose"
 # Directories
 alias dot="cd $DOTFILES"
 alias library="cd $HOME/Library"
-alias code="cd $HOME/code"
+alias code="cd $HOME/code || cd /var/www"
 alias ssd="$DOTFILES/scripts/shutdown"
 alias ind="cd $HOME/code/indier"
 alias dom="cd $HOME/code/domino"
