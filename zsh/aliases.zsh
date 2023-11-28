@@ -32,8 +32,8 @@ alias c="clear"
 # alias zbundle="antibody bundle < $DOTFILES/zsh_plugins.txt > $DOTFILES/zsh_plugins"
 alias vimgolf='docker run --rm -it -e "key=***REDACTED***" kramos/vimgolf'
 alias deploy='sudo -u www-data ./deploy'
-alias l='ls -lAh --color=auto --time-style="+%Y %b %d %H:%M"'
-alias ls='ls -A --color=auto --time-style="+%Y %b %d %H:%M"'
+alias l='ls -vlAh --color=auto --time-style="+%Y %b %d %H:%M"'
+alias ls='ls -vA --color=auto --time-style="+%Y %b %d %H:%M"'
 alias sagi='sudo apt-get install'
 alias sagu='sudo apt-get update'
 
