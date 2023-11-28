@@ -35,7 +35,8 @@ if [[ ! -e "${config_file}" ]]; then
 fi
 
 echo -e "${blue}[${name}] [${config_name}] Creating backup file for ${config_file}.${nc}"
-output_filepath="${config_file%/*}/.${config_file##*/}.bak"
+base_filepath=${config_file##*/}
+output_filepath="${config_file%$base_filepath}.${config_file##*/}.bak"
 output_filepath=${output_filepath/../.}
 cp -v "$config_file" "${output_filepath}"
 
@@ -53,9 +54,11 @@ fi
 echo -e "${blue}[${name}] [${config_name}] Removing listen directive.${nc}"
 sed -i '/listen/d' "$config_file"
 
+echo -e "${blue}[${name}] [${config_name}] Adding h5bp basic configuration include to existing site configs.${nc}"
+sed -i '/fastcgi_pass/,/}/ s/}/} \n\n    include h5bp\/basic.conf;\n\n/' "$config_file"
+
 sed -i "
-/server /a\
-    listen 443 ssl http2;\n\
+/server /a\ \ \ \ listen 443 ssl http2;\n\
 \n\
     include h5bp\/tls\/ssl_engine.conf;\n\
     ssl_certificate \/etc\/letsencrypt\/live/${domain_name}\/fullchain.pem;\n\
