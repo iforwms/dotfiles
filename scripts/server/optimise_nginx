@@ -7,7 +7,7 @@ nc='\033[0m'
 
 name=OPTIMISE_NGINX
 base_dir=${2:-"/etc/nginx"}
-skip_www=${1:-0}
+force_www=${1:-0}
 script_path=$(dirname "$(realpath -s "$0")")
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
@@ -48,10 +48,10 @@ for f in "$base_dir".bak/sites-enabled/*; do mv -v "${base_dir}/conf.d/.${f##*/}
 
 echo -e "${blue}[${name}] Optimising individual server configs.${nc}"
 for f in "$base_dir"/conf.d/.*; do
-   "${script_path}/optimise_nginx_domain_config" "$f" "$skip_www"
+   "${script_path}/optimise_nginx_domain_config" "$f" "$force_www"
 done
 for f in "$base_dir"/conf.d/*; do
-   "${script_path}/optimise_nginx_domain_config" "$f" "$skip_www"
+   "${script_path}/optimise_nginx_domain_config" "$f" "$force_www"
 done
 
 echo -e "${blue}[${name}] Restoring default nginx configs.${nc}"
