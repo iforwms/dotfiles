@@ -6,7 +6,7 @@ red='\033[0;31m'
 nc='\033[0m'
 
 name=OPTIMISE_NGINX_DOMAIN_CONFIG
-usage="usage: ./optimise_nginx_domain_config CONFIG_FILE [FORCE_WWW_REDIRECT:0]"
+usage="usage: ./optimise_nginx_domain_config CONFIG_FILE [FORCE_WWW_REDIRECT:0 - Do nothing; 1 - Force non-www; 2 - Force www]"
 
 config_file=$1
 config_name=${config_file##*/}
@@ -46,10 +46,13 @@ web_root=${web_root/;/}
 
 server_block_count=$(grep -c 'server ' "$config_file")
 if [[ "$server_block_count" -gt 1 ]]; then
-    echo -e "${blue}[${name}] [${config_name}] Removing managed by certbot lines.${nc}"
-    tac "$config_file" | sed '0,/server {/d' | tac | sed '/# managed by Certbot/d;' | sed '/^$/N;/^\n$/D' > "$config_file".tmp
+    echo -e "${blue}[${name}] [${config_name}] Removing unused server block.${nc}"
+    tac "$config_file" | sed '0,/server {/d' | tac | sed '/^$/N;/^\n$/D' > "$config_file".tmp
     mv -v "${config_file}.tmp" "$config_file"
 fi
+
+echo -e "${blue}[${name}] [${config_name}] Removing managed by Certbot lines.${nc}"
+sed -i '/# managed by Certbot/d;' "$config_file"
 
 echo -e "${blue}[${name}] [${config_name}] Removing listen directive.${nc}"
 sed -i '/listen/d' "$config_file"
@@ -67,16 +70,8 @@ sed -i "
 \n\
 " "$config_file"
 
-if [[ $force_www -eq 0 ]]; then
-    REPLY=0
-else
-    echo
-    read -p "[${name}] [${config_name}] Would you like to force www to non-www or vice-versa? \n0: Do nothing\n1: Force www to non-www\n2: Force non-www to www" -n 1 -r
-    echo
-fi
-
 www_domain=""
-if [[ $REPLY == 1 ]]; then
+if [[ $force_www == 1 ]]; then
    echo
    echo -e "${blue}[${name}] [${config_name}] Updating config to force non-www URL.${nc}"
 
@@ -97,7 +92,7 @@ server {\n\
 " "$config_file"
 
     www_domain="www.${domain_name}"
-elif [[ $REPLY == 2 ]]; then
+elif [[ $force_www == 2 ]]; then
    echo
    echo -e "${blue}[${name}] [${config_name}] Updating config to force www URL.${nc}"
 
