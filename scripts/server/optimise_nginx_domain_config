@@ -116,7 +116,7 @@ server {\n\
 fi
 
 echo -e "${blue}[${name}] [${config_name}] Creating SSL certificate.${nc}"
-echo "${script_path}/create_ssl_certificate" ifor@cors.tech "$web_root" "$domain_name" "$www_domain"
+"${script_path}/create_ssl_certificate" ifor@cors.tech "$web_root" "$domain_name" "$www_domain"
 
 echo -e "${green}[${name}] [${config_name}] All done!${nc}"
 exit 0
