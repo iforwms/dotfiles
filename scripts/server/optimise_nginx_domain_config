@@ -6,11 +6,11 @@ red='\033[0;31m'
 nc='\033[0m'
 
 name=OPTIMISE_NGINX_DOMAIN_CONFIG
-usage="usage: ./optimise_nginx_domain_config CONFIG_FILE [SKIP_WWW_REDIRECT:0]"
+usage="usage: ./optimise_nginx_domain_config CONFIG_FILE [FORCE_WWW_REDIRECT:0]"
 
 config_file=$1
 config_name=${config_file##*/}
-skip_www=${2:-0}
+force_www=${2:-0}
 script_path=$(dirname "$(realpath -s "$0")")
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
@@ -64,16 +64,16 @@ sed -i "
 \n\
 " "$config_file"
 
-if [[ $skip_www -eq 0 ]]; then
-    echo
-    read -p "[${name}] [${config_name}] Would you like to force www to non-www? (y/n) " -n 1 -r
-    echo
+if [[ $force_www -eq 0 ]]; then
+    REPLY=0
 else
-    REPLY="n"
+    echo
+    read -p "[${name}] [${config_name}] Would you like to force www to non-www or vice-versa? \n0: Do nothing\n1: Force www to non-www\n2: Force non-www to www" -n 1 -r
+    echo
 fi
 
 www_domain=""
-if [[ $REPLY =~ ^[Yy]$ ]]; then
+if [[ $REPLY == 1 ]]; then
    echo
    echo -e "${blue}[${name}] [${config_name}] Updating config to force non-www URL.${nc}"
 
@@ -93,11 +93,32 @@ server {\n\
 }\n\n\
 " "$config_file"
 
-www_domain="www.${domain_name}"
+    www_domain="www.${domain_name}"
+elif [[ $REPLY == 2 ]]; then
+   echo
+   echo -e "${blue}[${name}] [${config_name}] Updating config to force www URL.${nc}"
+
+sed -i "
+1 i\
+server {\n\
+    listen 443 ssl http2;\n\
+\n\
+    server_name ${domain_name};\n\
+\n\
+    include h5bp/tls/ssl_engine.conf;\n\
+    ssl_certificate \/etc\/letsencrypt\/live/${domain_name}\/fullchain.pem;\n\
+    ssl_certificate_key \/etc\/letsencrypt\/live/${domain_name}\/privkey.pem;\n\
+    include h5bp/tls/policy_balanced.conf;\n\
+\n\
+    return 301 \$scheme://www.${domain_name}\$request_uri;\n\
+}\n\n\
+" "$config_file"
+
+    www_domain="${domain_name}"
 fi
 
 echo -e "${blue}[${name}] [${config_name}] Creating SSL certificate.${nc}"
-"${script_path}/create_ssl_certificate" ifor@cors.tech "$web_root" "$domain_name" "$www_domain"
+echo "${script_path}/create_ssl_certificate" ifor@cors.tech "$web_root" "$domain_name" "$www_domain"
 
 echo -e "${green}[${name}] [${config_name}] All done!${nc}"
 exit 0
