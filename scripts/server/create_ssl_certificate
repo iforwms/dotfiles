@@ -83,12 +83,11 @@ fi
 certbot certonly --webroot \
     -w "$web_root" \
     "$domain_args" \
-    --post-hook "service nginx reload" \
     --non-interactive \
     --agree-tos \
     --email "$email" \
     --force-renewal
 
-echo -e "${green}[${name}] All done!${nc}"
+echo -e "${green}[${name}] All done! For these changes to be in effect please reload nginx.${nc}"
 exit 0
 
