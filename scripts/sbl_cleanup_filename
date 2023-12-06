@@ -8,6 +8,10 @@ function clean() {
     dest="${src//  / }"
     dest="${src// - /-}"
     dest="${dest// /.}"
+    dest="${dest//｜/-}"
+    dest="${dest//|/-}"
+    dest="${dest//\'/}"
+    dest="${dest//,/.}"
     dest="${dest//+/.}"
     dest="${dest//\&/and}"
     dest="${dest//\(/}"
@@ -26,7 +30,7 @@ function clean() {
 
 export -f clean
 
-find -type f \( -name '*.mp3' -o -name '*.pdf' -o -name '*.mp4' -o -name '*.wav' \) -print0 | \
+find . -type f \( -name '*.mkv' -o -name '*.mp3' -o -name '*.pdf' -o -name '*.mp4' -o -name '*.wav' \) -print0 | \
     xargs -0 -I {} bash -c "clean '{}'"
 
 echo
@@ -35,7 +39,7 @@ echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     DEBUG=0
     echo
-    find -type f \( -name '*.mp3' -o -name '*.pdf' -o -name '*.mp4' -o -name '*.wav' \) -print0 | \
+    find . -type f \( -name '*.mkv' -o -name '*.mp3' -o -name '*.pdf' -o -name '*.mp4' -o -name '*.wav' \) -print0 | \
         xargs -0 -I {} bash -c "clean '{}'"
 fi
 
