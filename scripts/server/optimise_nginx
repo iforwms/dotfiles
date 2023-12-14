@@ -15,6 +15,15 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     exit 1
 fi
 
+echo
+read -p "[${name}] Are you sure you want to run this script? (y/n) " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+   echo
+   echo -e "${red}[${name}] Aborting.${nc}"
+   exit 1
+fi
+
 echo -e "${blue}[${name}] Backing up current nginx config.${nc}"
 mv -v "${base_dir}" "${base_dir}.bak"
 if [[ $? -ne 0 ]]; then
