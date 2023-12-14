@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+
+blue='\033[0;34m'
+green='\033[0;32m'
+red='\033[0;31m'
+nc='\033[0m'
+
+name=OPTIMISE_PHP_INI
+
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+    echo -e "{${red}[${name}] This script must be run as root (or sudo). Exiting.${nc}"
+    exit 1
+fi
+
+php_version=${1:-$(php -r 'echo PHP_VERSION;' | awk -F. '{print $1"."$2}')}
+
+ini_file="/etc/php/${php_version}/fpm/php.ini"
+ini_file=/Users/ifor/Downloads/php.ini
+
+if [[ ! -r "${ini_file}" ]]; then
+   echo -e "${red}[${name}] Unable to read config file at ${ini_file}"
+   echo -e "[${name}] Aborting...${nc}"
+   exit 1
+fi
+
+echo -e "${blue}[${name}] Active ini file: ${ini_file}${nc}"
+echo
+echo -e "${blue}[${name}] Current settings:${nc}"
+grep '^;\?memory_limit\|^;\?max_execution_time\|^;\?display_errors\|^;\?zend_extension\|^;\?opcache.enable\|^;\?upload_max_filesize\|^;\?post_max_size\|^;\?allow_url_fopen\|^;\?zlib.output_compression\|^;\?zlib.output_compression_level\|^;\?realpath_cache_size\|^;\?realpath_cache_ttl\|^;\?session.save_handler\|^;\?session.save_path\|^;\?session.cache_limiter\|^;\?session.cache_expire' "${ini_file}" | \
+   sed 's/\;/[Disabled] /'
+
+allow_url_fopen="off"
+display_errors="off"
+max_execution_time="120"
+memory_limit="256M"
+opcache_enable="1"
+post_max_size="64M"
+realpath_cache_size="16M"
+realpath_cache_ttl="120"
+session_cache_expire="180"
+session_cache_limiter="public"
+session_save_handler="files"
+session_save_path="/var/lib/php/sessions"
+upload_max_filesize="64M"
+zend_extension="opcache"
+zlib_output_compression="on"
+zlib_output_compression_level="5"
+
+echo
+echo -e "${blue}[${name}] Proposed settings:${nc}"
+echo "zlib.output_compression = ${zlib_output_compression}"
+echo "zlib.output_compression_level = ${zlib_output_compression_level}"
+
+echo "realpath_cache_size = ${realpath_cache_size}"
+echo "realpath_cache_ttl = ${realpath_cache_ttl}"
+
+echo "max_execution_time = ${max_execution_time}"
+echo "memory_limit = ${memory_limit}"
+
+echo "display_errors = ${display_errors}"
+
+echo "post_max_size = ${post_max_size}"
+echo "upload_max_filesize = ${upload_max_filesize}"
+
+echo "allow_url_fopen = ${allow_url_fopen}"
+
+echo "zend_extension = ${zend_extension}"
+
+echo "session.save_handler = ${session_save_handler}"
+echo "session.save_path = ${session_save_path}"
+echo "session.cache_limiter = ${session_cache_limiter}"
+echo "session.cache_expire = ${session_cache_expire}"
+
+echo "opcache.enable = ${opcache_enable}"
+echo
+
+read -p "[${name}] Do you want to update the FPM config file? (y/n) " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+   echo
+   echo -e "[${red}${name}] Aborting...${nc}"
+   exit 1
+fi
+
+echo
+echo -e "${blue}[${name}] Updating config file...${nc}"
+# sed -E "s/^;?pm.max_children.*/pm.max_children = ${max_children}/; s/^;?pm.start_servers.*/pm.start_servers = ${start_servers}/; s/^;?pm.min_spare_servers.*/pm.min_spare_servers = ${min_spare_servers}/; s/^;?pm.max_spare_servers.*/pm.max_spare_servers = ${max_spare_servers}/; s/^;?pm.max_requests.*/pm.max_requests = ${max_requests}/;" "${fpm_config}"|tee "${fpm_config}" >/dev/null
+
+config_test=$(php-fpm${php_version} -t 2>&1|grep 'test is successful')
+if [[ -z "${config_test}" ]]; then
+   echo -e "${red}[${name}] Config test failed, see below:${nc}"
+   service "php${php_version}" -t
+   exit 1
+fi
+
+echo
+echo "[${name}] Optimised settings:"
+grep '^;\?memory_limit\|^;\?max_execution_time\|^;\?display_errors\|^;\?zend_extension\|^;\?opcache.enable\|^;\?upload_max_filesize\|^;\?post_max_size\|^;\?allow_url_fopen\|^;\?zlib.output_compression\|^;\?zlib.output_compression_level\|^;\?realpath_cache_size\|^;\?realpath_cache_ttl\|^;\?session.save_handler\|^;\?session.save_path\|^;\?session.cache_limiter\|^;\?session.cache_expire' "${ini_file}"|grep -v ";"|sed 's/pm\.//'
+
+echo
+read -p "[${name}] Settings updated, you need to restart the FPM service for these changes to take effect, restart now? (y/n) " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+   echo
+   echo -e "${red}[${name}] Service not restarted.${nc}"
+   exit 1
+else
+   echo
+   echo -e "${blue}[${name}] Restarting FPM service${nc}"
+   service "php${php_version}-fpm" restart
+   echo
+   echo "${blue}[${name}] All done!${nc}"
+   exit 0
+fi
+
