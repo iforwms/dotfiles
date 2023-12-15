@@ -8,7 +8,7 @@ nc='\033[0m'
 name=OPTIMISE_PHP_INI
 
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
-    echo -e "{${red}[${name}] This script must be run as root (or sudo). Exiting.${nc}"
+    echo -e "${red}[${name}] This script must be run as root (or sudo). Exiting.${nc}"
     exit 1
 fi
 
@@ -74,18 +74,41 @@ echo "session.cache_expire = ${session_cache_expire}"
 echo "opcache.enable = ${opcache_enable}"
 echo
 
-read -p "[${name}] Do you want to update the FPM config file? (y/n) " -n 1 -r
+read -p "[${name}] Do you want to update the ini file? (y/n) " -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
    echo
-   echo -e "[${red}${name}] Aborting...${nc}"
+   echo -e "${red}[${name}] Aborting...${nc}"
    exit 1
 fi
 
+session_save_path="\"${session_save_path//\//\\\/}\""
+
 echo
 echo -e "${blue}[${name}] Updating config file...${nc}"
-# sed -E "s/^;?pm.max_children.*/pm.max_children = ${max_children}/; s/^;?pm.start_servers.*/pm.start_servers = ${start_servers}/; s/^;?pm.min_spare_servers.*/pm.min_spare_servers = ${min_spare_servers}/; s/^;?pm.max_spare_servers.*/pm.max_spare_servers = ${max_spare_servers}/; s/^;?pm.max_requests.*/pm.max_requests = ${max_requests}/;" "${fpm_config}"|tee "${fpm_config}" >/dev/null
+sed -E "
+   s/^;? ?zlib\.output_compression ?=.*$/zliboutput_compression = ${zlib_output_compression}/;
+   s/^;? ?zlib\.output_compression_level ?=.*$/zliboutput_compression_level = ${zlib_output_compression_level}/;
+   s/^;? ?realpath_cache_size ?=.*$/realpath_cache_size = ${realpath_cache_size}/;
+   s/^;? ?realpath_cache_ttl ?=.*$/realpath_cache_ttl = ${realpath_cache_ttl}/;
+   s/^;? ?max_execution_time ?=.*$/max_execution_time = ${max_execution_time}/;
+   s/^;? ?memory_limit ?=.*$/memory_limit = ${memory_limit}/;
+   s/^;? ?display_errors ?=.*$/display_errors = ${display_errors}/;
+   s/^;? ?post_max_size ?=.*$/post_max_size = ${post_max_size}/;
+   s/^;? ?upload_max_filesize ?=.*$/upload_max_filesize = ${upload_max_filesize}/;
+   s/^;? ?allow_url_fopen ?=.*$/allow_url_fopen = ${allow_url_fopen}/;
+   s/^;? ?zend_extension ?=.*$/zend_extension = ${zend_extension}/;
+   s/^;? ?session\.save_handler ?=.*$/session.save_handler = ${session_save_handler}/;
+   s/^;? ?session\.save_path ?=.*$/session.save_path = ${session_save_path}/;
+   s/^;? ?session\.cache_limiter ?=.*$/session.cache_limiter = ${session_cache_limiter}/;
+   s/^;? ?session\.cache_expire ?=.*$/session.cache_expire = ${session_cache_expire}/;
+   s/^;? ?opcache\.enable ?=.*$/opcache.enable = ${opcache_enable}/;
+   " \
+   "${ini_file}" | \
+   tee "${ini_file}.temp" > /dev/null
+mv "${ini_file}.temp" "$ini_file"
 
+exit
 config_test=$(php-fpm${php_version} -t 2>&1|grep 'test is successful')
 if [[ -z "${config_test}" ]]; then
    echo -e "${red}[${name}] Config test failed, see below:${nc}"
