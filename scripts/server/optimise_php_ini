@@ -82,7 +82,7 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
    exit 1
 fi
 
-session_save_path="\"${session_save_path//\//\\\/}\""
+escaped_session_save_path="\"${session_save_path//\//\\\/}\""
 
 echo
 echo -e "${blue}[${name}] Updating config file...${nc}"
@@ -99,7 +99,7 @@ sed -E "
    s/^;? ?allow_url_fopen ?=.*$/allow_url_fopen = ${allow_url_fopen}/;
    s/^;? ?zend_extension ?=.*$/zend_extension = ${zend_extension}/;
    s/^;? ?session\.save_handler ?=.*$/session.save_handler = ${session_save_handler}/;
-   s/^;? ?session\.save_path ?=.*$/session.save_path = ${session_save_path}/;
+   s/^;? ?session\.save_path ?=.*$/session.save_path = ${escaped_session_save_path}/;
    s/^;? ?session\.cache_limiter ?=.*$/session.cache_limiter = ${session_cache_limiter}/;
    s/^;? ?session\.cache_expire ?=.*$/session.cache_expire = ${session_cache_expire}/;
    s/^;? ?opcache\.enable ?=.*$/opcache.enable = ${opcache_enable}/;
@@ -108,7 +108,11 @@ sed -E "
    tee "${ini_file}.temp" > /dev/null
 mv "${ini_file}.temp" "$ini_file"
 
-exit
+echo
+echo -e "${blue}[${name}] Creating sessions directory and setting permissions...${nc}"
+chown -R www-data:www-data "$session_save_path"
+chmod -R 700 "$session_save_path"
+
 config_test=$(php-fpm${php_version} -t 2>&1|grep 'test is successful')
 if [[ -z "${config_test}" ]]; then
    echo -e "${red}[${name}] Config test failed, see below:${nc}"
