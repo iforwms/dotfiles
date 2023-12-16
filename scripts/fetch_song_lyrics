@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+
+from bs4 import BeautifulSoup
+from pathlib import Path
+import re, json, sys, os, requests
+
+if len(sys.argv) < 2:
+    exit("[ERROR] Missing url.")
+
+r = requests.get(sys.argv[1])
+
+url = r.url  # this is base url
+data = r.content  # this is content of page
+
+soup = BeautifulSoup(data, 'html.parser')
+containers = soup.findAll("div", {"class" : re.compile('Lyrics__Container.*')})
+lyrics = ""
+for container in containers:
+    lyrics += "\n".join(container.findAll(string=True, recursive=True))
+
+lyrics = lyrics.replace("[", "\n\n[").replace("\n\n\n", "\n\n").strip()
+print(lyrics)
