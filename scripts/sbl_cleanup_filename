@@ -5,12 +5,12 @@ declare -x DEBUG
 
 function clean() {
     src="$1"
+    dest="${dest//\'/}"
     dest="${src//  / }"
     dest="${src// - /-}"
     dest="${dest// /.}"
     dest="${dest//｜/-}"
     dest="${dest//|/-}"
-    dest="${dest//\'/}"
     dest="${dest//,/.}"
     dest="${dest//+/.}"
     dest="${dest//\&/and}"
