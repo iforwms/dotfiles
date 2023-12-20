@@ -4,21 +4,21 @@ DEBUG=1
 declare -x DEBUG
 
 function clean() {
+    LANG=C
+
     src="$1"
-    dest="${dest//\'/}"
-    dest="${src//  / }"
-    dest="${src// - /-}"
-    dest="${dest// /.}"
-    dest="${dest//｜/-}"
-    dest="${dest//|/-}"
-    dest="${dest//,/.}"
-    dest="${dest//+/.}"
-    dest="${dest//\&/and}"
-    dest="${dest//\(/}"
-    dest="${dest//\)/}"
-    dest="${dest//../.}"
-    dest="${dest//.-./-}"
-    dest="${dest//../.}"
+    dest=$(echo $src | sed "
+        s/^\.\//XXXX/;
+        s/^\.\/\./XXXX/;
+        s/[^[:alnum:]_\/\ \.-]//g;
+        s/_/\./g;
+        s/  / /g;
+        s/ - /-/g;
+        s/\.-\./-/g;
+        s/ /\./g;
+        s/\.\././g;
+        s/^XXXX/\.\//
+    ")
     dest="${dest,,}"
 
     if [[ $DEBUG != 1 ]]; then
@@ -30,8 +30,8 @@ function clean() {
 
 export -f clean
 
-find . -type f \( -name '*.mkv' -o -name '*.mp3' -o -name '*.pdf' -o -name '*.mp4' -o -name '*.wav' \) -print0 | \
-    xargs -0 -I {} bash -c "clean '{}'"
+find . -type f \( -name '*.webm' -o -name '*.flv' -o -name '*.mkv' -o -name '*.mp3' -o -name '*.pdf' -o -name '*.mp4' -o -name '*.wav' \) -print0 | \
+    xargs -0 -I {} bash -c "clean \"{}'\""
 
 echo
 read -p "Do you want to rename these files? (y/n) " -n 1 -r
@@ -39,7 +39,7 @@ echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     DEBUG=0
     echo
-    find . -type f \( -name '*.mkv' -o -name '*.mp3' -o -name '*.pdf' -o -name '*.mp4' -o -name '*.wav' \) -print0 | \
-        xargs -0 -I {} bash -c "clean '{}'"
+    find . -type f \( -name '*.webm' -o -name '*.flv' -o -name '*.mkv' -o -name '*.mp3' -o -name '*.pdf' -o -name '*.mp4' -o -name '*.wav' \) -print0 | \
+        xargs -0 -I {} bash -c "clean \"{}\""
 fi
 
