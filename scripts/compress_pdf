@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+/usr/local/Cellar/ghostscript/10.02.1/bin/gs \
+    -sDEVICE=pdfwrite \
+    -dAutoRotatePages=/None \
+    -dCompatibilityLevel=1.4 \
+    -dPDFSETTINGS=/${3:-"ebook"} \
+    -dNOPAUSE \
+    -dBATCH \
+    -dColorImageResolution=150 \
+    -sOutputFile="$2" \
+    "$1"
