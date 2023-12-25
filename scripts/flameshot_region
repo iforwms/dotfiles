@@ -36,6 +36,7 @@ if [[ "$region" == "create" ]]; then
         fi
 
         echo "INFO: Merging screenshots."
+        rm -rf "${output_dir}/00.png" 2>/dev/null
         convert "${output_dir}/*.png" -append "${output_filename}.png"
 
         if [[ -n "$input_duration" ]]; then
