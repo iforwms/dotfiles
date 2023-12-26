@@ -71,6 +71,8 @@ if [[ "$region" == "create" ]]; then
             -i "${output_filename}_for_video.png" \
             -filter_complex "color=white:s=${image_width}x${video_height}, fps=fps=60[bg];[bg][0]overlay=y=-'t*${scroll_rate}':shortest=1[video]" \
             -preset ultrafast \
+            -vcodec libx265 \
+            -crf 28 \
             -map '[video]' "${output_filename}_no_audio.mp4"
                     # -r [val] set frame rate (Hz value, fraction or abbreviation)
                     # -t [val] record or transcode "duration" seconds of audio/video
