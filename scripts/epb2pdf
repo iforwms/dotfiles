@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+$in=$1
+$out=$2
+
+if [[ ! -e $in ]]; then
+    echo "Input file not found, aborting."
+    exit 1
+fi
+
+echo "Converting ${in} to ${out}..."
+pandoc \
+    --pdf-engine=lualatex \
+    -f epub \
+    -t pdf \
+    -o $2 \
+    $1
+
+echo "All done!"
+exit 0
+
