@@ -11,18 +11,18 @@
     <showMargins>0</showMargins>
     <open>1</open>
     <metaTag name="arranger"></metaTag>
-    <metaTag name="composer">My Composer</metaTag>
-    <metaTag name="copyright">My Copyright</metaTag>
-    <metaTag name="creationDate">2023-12-30</metaTag>
+    <metaTag name="composer">XXCOMPOSERXX</metaTag>
+    <metaTag name="copyright">Ifor Waldo Williams</metaTag>
+    <metaTag name="creationDate">XXCREATIONXX</metaTag>
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
     <metaTag name="platform">Apple Macintosh</metaTag>
     <metaTag name="source"></metaTag>
-    <metaTag name="subtitle">My Subtitle</metaTag>
+    <metaTag name="subtitle">XXSUBTITLEXX</metaTag>
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
-    <metaTag name="workTitle">My Title</metaTag>
+    <metaTag name="workTitle">XXTITLEXX</metaTag>
     <Order id="orchestral">
       <name>Orchestral</name>
       <instrument id="electric-bass">
@@ -121,331 +121,49 @@
         <Text>
           <eid>8589934598</eid>
           <style>title</style>
-          <text>My Title</text>
+          <text>XXTITLEXX</text>
         </Text>
         <Text>
           <eid>12884901894</eid>
           <style>subtitle</style>
-          <text>My Subtitle</text>
+          <text>XXSUBTITLEXX</text>
         </Text>
         <Text>
           <eid>17179869190</eid>
           <style>composer</style>
-          <text>My Composer
-Bass: My Artist</text>
+          <text>Words and Music: XXCOMPOSERXX
+XXEXTRAXX</text>
         </Text>
         <Text>
           <eid>171798691846</eid>
           <style>user_1</style>
-          <text>My Subtitle</text>
+          <text>XXSUBTITLEXX</text>
         </Text>
       </VBox>
       <Measure>
         <voice>
           <KeySig>
             <eid>21474836502</eid>
-            <concertKey>1</concertKey>
+            <concertKey>XXKEY_SIGNATUREXX</concertKey>
           </KeySig>
           <TimeSig>
             <eid>25769803800</eid>
-            <sigN>4</sigN>
-            <sigD>4</sigD>
+            <sigN>XXTIME_SIG_TOPXX</sigN>
+            <sigD>XXTIME_SIG_BTMXX</sigD>
           </TimeSig>
           <Tempo>
-            <tempo>2.133333</tempo>
+            <tempo>XXTEMPO_DECIMALXX</tempo>
             <followText>1</followText>
             <eid>30064771119</eid>
             <text>
               <sym>metNoteQuarterUp</sym>
-              <font face="Avenir"/> = 128
+              <font face="Avenir"/> = XXTEMPOXX
             </text>
           </Tempo>
           <Rest>
             <eid>34359738393</eid>
             <durationType>measure</durationType>
-            <duration>4/4</duration>
+            <duration>XXTIME_SIGNATUREXX</duration>
           </Rest>
         </voice>
       </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>38654705689</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>42949672985</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>47244640281</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>51539607577</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>55834574873</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>60129542169</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>64424509465</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>68719476761</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>73014444057</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>77309411353</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>81604378649</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>85899345945</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>90194313241</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>94489280537</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>98784247833</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>103079215129</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>107374182425</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>111669149721</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>115964117017</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>120259084313</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>124554051609</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>128849018905</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>133143986201</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>137438953497</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>141733920793</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>146028888089</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>150323855385</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>154618822681</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>158913789977</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>163208757273</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-      <Measure>
-        <voice>
-          <Rest>
-            <eid>167503724569</eid>
-            <durationType>measure</durationType>
-            <duration>4/4</duration>
-          </Rest>
-        </voice>
-      </Measure>
-    </Staff>
-  </Score>
-</museScore>
