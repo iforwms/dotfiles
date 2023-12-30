@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<museScore version="4.20">
+  <programVersion>4.2.0</programVersion>
+  <programRevision>eb8d33c</programRevision>
+  <LastEID>39</LastEID>
+  <Score>
+    <Division>480</Division>
+    <showInvisible>1</showInvisible>
+    <showUnprintable>1</showUnprintable>
+    <showFrames>1</showFrames>
+    <showMargins>0</showMargins>
+    <open>1</open>
+    <metaTag name="arranger"></metaTag>
+    <metaTag name="composer">My Composer</metaTag>
+    <metaTag name="copyright">My Copyright</metaTag>
+    <metaTag name="creationDate">2023-12-30</metaTag>
+    <metaTag name="lyricist"></metaTag>
+    <metaTag name="movementNumber"></metaTag>
+    <metaTag name="movementTitle"></metaTag>
+    <metaTag name="platform">Apple Macintosh</metaTag>
+    <metaTag name="source"></metaTag>
+    <metaTag name="subtitle">My Subtitle</metaTag>
+    <metaTag name="translator"></metaTag>
+    <metaTag name="workNumber"></metaTag>
+    <metaTag name="workTitle">My Title</metaTag>
+    <Order id="orchestral">
+      <name>Orchestral</name>
+      <instrument id="electric-bass">
+        <family id="bass-guitars">Bass Guitars</family>
+      </instrument>
+      <section id="woodwind" brackets="true" barLineSpan="true" thinBrackets="true">
+        <family>flutes</family>
+        <family>oboes</family>
+        <family>clarinets</family>
+        <family>saxophones</family>
+        <family>bassoons</family>
+        <unsorted group="woodwinds"/>
+      </section>
+      <section id="brass" brackets="true" barLineSpan="true" thinBrackets="true">
+        <family>horns</family>
+        <family>trumpets</family>
+        <family>cornets</family>
+        <family>flugelhorns</family>
+        <family>trombones</family>
+        <family>tubas</family>
+        <unsorted group="brass"/>
+      </section>
+      <section id="timpani" brackets="true" barLineSpan="true" thinBrackets="true">
+        <family>timpani</family>
+      </section>
+      <section id="percussion" brackets="true" barLineSpan="true" thinBrackets="true">
+        <family>keyboard-percussion</family>
+        <unsorted group="pitched-percussion"/>
+        <family>drums</family>
+        <family>unpitched-metal-percussion</family>
+        <family>unpitched-wooden-percussion</family>
+        <family>other-percussion</family>
+        <unsorted group="unpitched-percussion"/>
+      </section>
+      <family>keyboards</family>
+      <family>harps</family>
+      <family>organs</family>
+      <family>synths</family>
+      <unsorted/>
+      <soloists/>
+      <section id="voices" brackets="true" barLineSpan="false" thinBrackets="true">
+        <family>voices</family>
+        <family>voice-groups</family>
+      </section>
+      <section id="strings" brackets="true" barLineSpan="true" thinBrackets="true">
+        <family>orchestral-strings</family>
+      </section>
+    </Order>
+    <Part id="1">
+      <Staff id="1">
+        <StaffType group="pitched">
+          <name>stdNormal</name>
+        </StaffType>
+        <defaultConcertClef>F8vb</defaultConcertClef>
+        <defaultTransposingClef>F</defaultTransposingClef>
+      </Staff>
+      <trackName>Electric Bass</trackName>
+      <Instrument id="electric-bass">
+        <longName>Electric Bass</longName>
+        <shortName>El. B.</shortName>
+        <trackName>Electric Bass</trackName>
+        <minPitchP>28</minPitchP>
+        <maxPitchP>67</maxPitchP>
+        <minPitchA>28</minPitchA>
+        <maxPitchA>65</maxPitchA>
+        <transposeDiatonic>-7</transposeDiatonic>
+        <transposeChromatic>-12</transposeChromatic>
+        <instrumentId>pluck.bass.electric</instrumentId>
+        <concertClef>F8vb</concertClef>
+        <transposingClef>F</transposingClef>
+        <StringData>
+          <frets>24</frets>
+          <string>40</string>
+          <string>45</string>
+          <string>50</string>
+          <string>55</string>
+        </StringData>
+        <Channel>
+          <program value="33"/>
+          <synti>Fluid</synti>
+        </Channel>
+        <Channel name="slap">
+          <program value="36"/>
+          <synti>Fluid</synti>
+        </Channel>
+        <Channel name="pop">
+          <program value="37"/>
+          <synti>Fluid</synti>
+        </Channel>
+      </Instrument>
+    </Part>
+    <Staff id="1">
+      <VBox>
+        <height>10</height>
+        <eid>4294967418</eid>
+        <Text>
+          <eid>8589934598</eid>
+          <style>title</style>
+          <text>My Title</text>
+        </Text>
+        <Text>
+          <eid>12884901894</eid>
+          <style>subtitle</style>
+          <text>My Subtitle</text>
+        </Text>
+        <Text>
+          <eid>17179869190</eid>
+          <style>composer</style>
+          <text>My Composer
+Bass: My Artist</text>
+        </Text>
+        <Text>
+          <eid>171798691846</eid>
+          <style>user_1</style>
+          <text>My Subtitle</text>
+        </Text>
+      </VBox>
+      <Measure>
+        <voice>
+          <KeySig>
+            <eid>21474836502</eid>
+            <concertKey>1</concertKey>
+          </KeySig>
+          <TimeSig>
+            <eid>25769803800</eid>
+            <sigN>4</sigN>
+            <sigD>4</sigD>
+          </TimeSig>
+          <Tempo>
+            <tempo>2.133333</tempo>
+            <followText>1</followText>
+            <eid>30064771119</eid>
+            <text>
+              <sym>metNoteQuarterUp</sym>
+              <font face="Avenir"/> = 128
+            </text>
+          </Tempo>
+          <Rest>
+            <eid>34359738393</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>38654705689</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>42949672985</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>47244640281</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>51539607577</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>55834574873</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>60129542169</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>64424509465</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>68719476761</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>73014444057</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>77309411353</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>81604378649</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>85899345945</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>90194313241</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>94489280537</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>98784247833</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>103079215129</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>107374182425</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>111669149721</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>115964117017</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>120259084313</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>124554051609</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>128849018905</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>133143986201</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>137438953497</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>141733920793</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>146028888089</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>150323855385</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>154618822681</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>158913789977</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>163208757273</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+      <Measure>
+        <voice>
+          <Rest>
+            <eid>167503724569</eid>
+            <durationType>measure</durationType>
+            <duration>4/4</duration>
+          </Rest>
+        </voice>
+      </Measure>
+    </Staff>
+  </Score>
+</museScore>
