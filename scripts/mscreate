@@ -42,15 +42,51 @@ time_signature_btm=$(echo $time_signature | awk -F'/' '{print $2}')
 tempo_decimal=$(echo "${tempo}/60" | bc -l | cut -c -10)
 filename="${song_title,,}"
 
-echo "$filename"
-echo $song_title
-echo $artist_name
-echo $album_name
-echo $tempo
-echo $key_signature
-echo $time_signature
-echo $composer
-echo $part_musician
+case $key_signature in
+  Gb)
+    key_signature_int=-6
+    ;;
+  Db)
+    key_signature_int=-5
+    ;;
+  Ab)
+    key_signature_int=-4
+    ;;
+  Eb)
+    key_signature_int=-3
+    ;;
+  Bb)
+    key_signature_int=-2
+    ;;
+  F)
+    key_signature_int=-1
+    ;;
+  C)
+    key_signature_int=0
+    ;;
+  G)
+    key_signature_int=1
+    ;;
+  D)
+    key_signature_int=2
+    ;;
+  A)
+    key_signature_int=3
+    ;;
+  E)
+    key_signature_int=4
+    ;;
+  B)
+    key_signature_int=5
+    ;;
+  F\#)
+    key_signature_int=6
+    ;;
+  *)
+    echo -n "Unknown key signature, defaulting to C major."
+    key_signature_int=0
+    ;;
+esac
 
 view_settings='{"notation":{"viewMode":"continuous_h"}}'
 audio_settings='{"activeSoundProfile":"MuseSounds","aux":[{"out":{"balance":0,"fxChain":{"0":{"active":true,"chainOrder":0,"resourceMeta":{"attributes":{},"hasNativeEditorSupport":true,"id":"MuseReverb","type":"muse_plugin","vendor":"Muse"},"unitConfiguration":{}}},"volumeDb":0},"soloMuteState":{"mute":false,"solo":false}},{"out":{"balance":0,"fxChain":{},"volumeDb":0},"soloMuteState":{"mute":false,"solo":false}}],"master":{"balance":0,"fxChain":{},"volumeDb":0},"tracks":[{"in":{"resourceMeta":{"attributes":{"museCategory":"MuseGuitarsVol1","museName":"ElectricBass","museUID":"13013","playbackSetupData":"strings.bass_guitar.plucked:electric"},"hasNativeEditorSupport":false,"id":"MuseGuitarsVol1\\ElectricBass\\13013","type":"muse_sampler_sound_pack","vendor":"MuseGuitarsVol.1"},"unitConfiguration":{}},"instrumentId":"electric-bass","out":{"auxSends":[{"active":true,"signalAmount":0.30000001192092896},{"active":true,"signalAmount":0.30000001192092896}],"balance":0,"fxChain":{},"volumeDb":0},"partId":"1","soloMuteState":{"mute":false,"solo":false}},{"in":{"resourceMeta":{"attributes":{"museCategory":"MusePercussion","museName":"Shaker","museUID":"149","playbackSetupData":"percussions.shaker"},"hasNativeEditorSupport":false,"id":"MusePercussion\\Shaker\\149","type":"muse_sampler_sound_pack","vendor":"MusePercussion"},"unitConfiguration":{}},"instrumentId":"metronome","out":{"balance":0,"fxChain":{},"volumeDb":-11.300000190734863},"partId":"999","soloMuteState":{"mute":false,"solo":false}},{"in":{"resourceMeta":{"attributes":{"museCategory":"MuseKeys","museName":"SoftPiano","museUID":"169","playbackSetupData":"keyboards.piano.soft"},"hasNativeEditorSupport":false,"id":"MuseKeys\\SoftPiano\\169","type":"muse_sampler_sound_pack","vendor":"MuseKeys"},"unitConfiguration":{}},"instrumentId":"chord_symbols","out":{"auxSends":[{"active":true,"signalAmount":0.4000000059604645},{"active":true,"signalAmount":0.30000001192092896}],"balance":0,"fxChain":{},"volumeDb":-22.700000762939453},"partId":"1","soloMuteState":{"mute":false,"solo":false}}]}'
@@ -95,7 +131,7 @@ s|XXTEMPO_DECIMALXX|${tempo_decimal}|g;
 s|XXCREATIONXX|${date_now}|g;
 s|XXEXTRAXX|${part_musician}|g;
 s|XXTIME_SIGNATUREXX|${time_signature}|g;
-s|XXKEY_SIGNATUREXX|${key_signature}|g;
+s|XXKEY_SIGNATUREXX|${key_signature_int}|g;
 s|XXTIME_SIG_TOPXX|${time_signature_top}|g;
 s|XXTIME_SIG_BTMXX|${time_signature_btm}|g;
 " "${script_path}/musescore_template.xml" > "${output_dir}/${filename}/${filename}.mscx"
