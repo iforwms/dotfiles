@@ -23,58 +23,37 @@
     <metaTag name="translator"></metaTag>
     <metaTag name="workNumber"></metaTag>
     <metaTag name="workTitle">XXTITLEXX</metaTag>
-    <Order id="orchestral">
-      <name>Orchestral</name>
-      <instrument id="electric-bass">
-        <family id="bass-guitars">Bass Guitars</family>
-      </instrument>
-      <section id="woodwind" brackets="true" barLineSpan="true" thinBrackets="true">
-        <family>flutes</family>
-        <family>oboes</family>
-        <family>clarinets</family>
-        <family>saxophones</family>
-        <family>bassoons</family>
-        <unsorted group="woodwinds"/>
-      </section>
-      <section id="brass" brackets="true" barLineSpan="true" thinBrackets="true">
-        <family>horns</family>
-        <family>trumpets</family>
-        <family>cornets</family>
-        <family>flugelhorns</family>
-        <family>trombones</family>
-        <family>tubas</family>
-        <unsorted group="brass"/>
-      </section>
-      <section id="timpani" brackets="true" barLineSpan="true" thinBrackets="true">
-        <family>timpani</family>
-      </section>
-      <section id="percussion" brackets="true" barLineSpan="true" thinBrackets="true">
-        <family>keyboard-percussion</family>
-        <unsorted group="pitched-percussion"/>
-        <family>drums</family>
-        <family>unpitched-metal-percussion</family>
-        <family>unpitched-wooden-percussion</family>
-        <family>other-percussion</family>
-        <unsorted group="unpitched-percussion"/>
-      </section>
-      <family>keyboards</family>
-      <family>harps</family>
-      <family>organs</family>
-      <family>synths</family>
-      <unsorted/>
-      <soloists/>
-      <section id="voices" brackets="true" barLineSpan="false" thinBrackets="true">
-        <family>voices</family>
-        <family>voice-groups</family>
-      </section>
-      <section id="strings" brackets="true" barLineSpan="true" thinBrackets="true">
-        <family>orchestral-strings</family>
-      </section>
-    </Order>
     <Part id="1">
       <Staff id="1">
+        <linkedTo>2</linkedTo>
         <StaffType group="pitched">
           <name>stdNormal</name>
+        </StaffType>
+        <defaultConcertClef>F8vb</defaultConcertClef>
+        <defaultTransposingClef>F</defaultTransposingClef>
+      </Staff>
+      <Staff id="2">
+        <linkedTo>1</linkedTo>
+        <StaffType group="tablature">
+          <name>tab4StrCommon</name>
+          <lines>4</lines>
+          <lineDistance>1.5</lineDistance>
+          <durations>0</durations>
+          <durationFontName>MuseScore Tab Modern</durationFontName>
+          <durationFontSize>15</durationFontSize>
+          <durationFontY>0</durationFontY>
+          <fretFontName>MuseScore Tab Sans</fretFontName>
+          <fretFontSize>9</fretFontSize>
+          <fretFontY>0</fretFontY>
+          <linesThrough>0</linesThrough>
+          <minimStyle>1</minimStyle>
+          <onLines>1</onLines>
+          <showRests>1</showRests>
+          <stemsDown>1</stemsDown>
+          <stemsThrough>0</stemsThrough>
+          <upsideDown>0</upsideDown>
+          <showTabFingering>1</showTabFingering>
+          <useNumbers>1</useNumbers>
         </StaffType>
         <defaultConcertClef>F8vb</defaultConcertClef>
         <defaultTransposingClef>F</defaultTransposingClef>
@@ -93,6 +72,8 @@
         <instrumentId>pluck.bass.electric</instrumentId>
         <concertClef>F8vb</concertClef>
         <transposingClef>F</transposingClef>
+        <concertClef staff="2">F8vb</concertClef>
+        <transposingClef staff="2">F</transposingClef>
         <StringData>
           <frets>24</frets>
           <string>40</string>
@@ -131,7 +112,7 @@
         <Text>
           <eid>17179869190</eid>
           <style>composer</style>
-          <text>Words and Music: XXCOMPOSERXX
+          <text>XXCOMPOSERXX
 XXEXTRAXX</text>
         </Text>
         <Text>
