@@ -25,6 +25,7 @@ alias killPhotoA="launchctl disable user/$(id -u)/com.apple.photoanalysisd"
 # weather() { curl -4 "wttr.in/${1:-yangshuo}" }
 # alias phpstorm='open -a /Applications/PhpStorm.app "`pwd`"'
 alias subl='open -a "/Applications/Sublime Text.app" "$(pwd)"'
+alias mscore='/Applications/MuseScore\ 4.app/Contents/MacOS/mscore'
 alias c="clear"
 # alias ping='ping -c 5'  # Pings with 5 packets, not unlimited
 # alias df='df -h'        # Disk free, in gigabytes, not bytes

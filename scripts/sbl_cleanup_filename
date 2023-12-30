@@ -3,6 +3,9 @@
 DEBUG=1
 declare -x DEBUG
 
+file_type="${1:-*}"
+file_depth="${2:-1}"
+
 function clean() {
     LANG=C
 
@@ -30,8 +33,12 @@ function clean() {
 
 export -f clean
 
-find . -type f \( -name '*.webm' -o -name '*.flv' -o -name '*.mkv' -o -name '*.mp3' -o -name '*.pdf' -o -name '*.mp4' -o -name '*.wav' \) -print0 | \
-    xargs -0 -I {} bash -c "clean \"{}'\""
+find . \
+    -maxdepth "$file_depth" \
+    -type f \
+    -name "$file_type" \
+    -print0 | \
+    xargs -0 -I {} bash -c "clean \"{}\""
 
 echo
 read -p "Do you want to rename these files? (y/n) " -n 1 -r
@@ -39,7 +46,11 @@ echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     DEBUG=0
     echo
-    find . -type f \( -name '*.webm' -o -name '*.flv' -o -name '*.mkv' -o -name '*.mp3' -o -name '*.pdf' -o -name '*.mp4' -o -name '*.wav' \) -print0 | \
+    find . \
+        -maxdepth "$file_depth" \
+        -type f \
+        -name "$file_type" \
+        -print0 | \
         xargs -0 -I {} bash -c "clean \"{}\""
 fi
 
