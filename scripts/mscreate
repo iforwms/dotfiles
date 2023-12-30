@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+
+blue='\033[0;34m'
+green='\033[0;32m'
+red='\033[0;31m'
+nc='\033[0m'
+
+name="MuseScore"
+base_dir="/Users/ifor/Documents/MuseScore4"
+style_file_path="${base_dir}/Styles/my_style.mss"
+output_dir="/Users/ifor/Downloads"
+
+script_path=$(dirname "$(realpath -s "$0")")
+
+song_title="$1"
+artist_name=""
+album_name=""
+tempo=""
+key_signature=""
+time_signature=""
+composer=""
+part_musician=""
+
+if [[ -z "$song_title" ]]; then
+  read -p "[${name}] Enter the song title: " -r song_title
+  if [[ -z "$song_title" ]]; then
+     echo
+     echo -e "${red}[${name}] Song title required, aborting.${nc}"
+     exit 1
+  fi
+fi
+
+read -p "[${name}] Enter the artist name (optional): " -r artist_name
+read -p "[${name}] Enter the album name and year (optional): " -r album_name
+read -p "[${name}] Enter song tempo (optional): " -r tempo
+tempo="${tempo:-120}"
+read -p "[${name}] Enter the key signature (optional): " -r key_signature
+key_signature="${key_signature:-'C'}"
+read -p "[${name}] Enter the time signature (optional): " -r time_signature
+time_signature="${time_signature:-'4/4'}"
+read -p "[${name}] Enter the composer (optional): " -r composer
+read -p "[${name}] Enter the musician playing this part (optional): " -r part_musician
+
+filename="${song_title,,}"
+
+echo "$filename"
+echo $song_title
+echo $artist_name
+echo $album_name
+echo $tempo
+echo $key_signature
+echo $time_signature
+echo $composer
+echo $part_musician
+
+view_settings='{"notation":{"viewMode":"continuous_v"}}'
+audio_settings='{"activeSoundProfile":"MuseSounds","aux":[{"out":{"balance":0,"fxChain":{"0":{"active":true,"chainOrder":0,"resourceMeta":{"attributes":{},"hasNativeEditorSupport":true,"id":"MuseReverb","type":"muse_plugin","vendor":"Muse"},"unitConfiguration":{}}},"volumeDb":0},"soloMuteState":{"mute":false,"solo":false}},{"out":{"balance":0,"fxChain":{},"volumeDb":0},"soloMuteState":{"mute":false,"solo":false}}],"master":{"balance":0,"fxChain":{},"volumeDb":0},"tracks":[{"in":{"resourceMeta":{"attributes":{"museCategory":"MuseGuitarsVol1","museName":"ElectricBass","museUID":"13013","playbackSetupData":"strings.bass_guitar.plucked:electric"},"hasNativeEditorSupport":false,"id":"MuseGuitarsVol1\\ElectricBass\\13013","type":"muse_sampler_sound_pack","vendor":"MuseGuitarsVol.1"},"unitConfiguration":{}},"instrumentId":"electric-bass","out":{"auxSends":[{"active":true,"signalAmount":0.30000001192092896},{"active":true,"signalAmount":0.30000001192092896}],"balance":0,"fxChain":{},"volumeDb":0},"partId":"1","soloMuteState":{"mute":false,"solo":false}},{"in":{"resourceMeta":{"attributes":{"museCategory":"MusePercussion","museName":"Shaker","museUID":"149","playbackSetupData":"percussions.shaker"},"hasNativeEditorSupport":false,"id":"MusePercussion\\Shaker\\149","type":"muse_sampler_sound_pack","vendor":"MusePercussion"},"unitConfiguration":{}},"instrumentId":"metronome","out":{"balance":0,"fxChain":{},"volumeDb":-11.300000190734863},"partId":"999","soloMuteState":{"mute":false,"solo":false}},{"in":{"resourceMeta":{"attributes":{"museCategory":"MuseKeys","museName":"SoftPiano","museUID":"169","playbackSetupData":"keyboards.piano.soft"},"hasNativeEditorSupport":false,"id":"MuseKeys\\SoftPiano\\169","type":"muse_sampler_sound_pack","vendor":"MuseKeys"},"unitConfiguration":{}},"instrumentId":"chord_symbols","out":{"auxSends":[{"active":true,"signalAmount":0.4000000059604645},{"active":true,"signalAmount":0.30000001192092896}],"balance":0,"fxChain":{},"volumeDb":-22.700000762939453},"partId":"1","soloMuteState":{"mute":false,"solo":false}}]}'
+
+meta_inf="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<container>
+  <rootfiles>
+    <rootfile full-path=\"score_style.mss\"/>
+    <rootfile full-path=\"${filename}.mscx\"/>
+    <rootfile full-path=\"Thumbnails/thumbnail.png\"/>
+    <rootfile full-path=\"audiosettings.json\"/>
+    <rootfile full-path=\"viewsettings.json\"/>
+  </rootfiles>
+</container>"
+
+echo "Creating temp directory structure."
+mkdir -p $output_dir/$filename/{META-INF,Thumbnails}
+
+echo "Creating audio settings file."
+echo $audio_settings > "${output_dir}/${filename}/audiosettings.json"
+
+echo "Creating container file."
+echo $meta_inf > "${output_dir}/${filename}/META-INF/container.xml"
+
+echo "Creating view settings file."
+echo $view_settings > "${output_dir}/${filename}/viewsettings.json"
+
+echo "Copying style file."
+cp "$style_file_path" "${output_dir}/${filename}/"
+
+echo "Generating faux thumbnail."
+convert -size "181x256" canvas:white "${output_dir}/${filename}/Thumbnails/thumbnail.png"
+
+echo "Generating mscx file."
+touch "${output_dir}/${filename}/${filename}.mscx"
+
+echo "Generating compressed mscz file."
+(cd ${output_dir}/${filename} && zip -r - .) > "${output_dir}/${filename}.mscz"
+
+echo "Removing temp directory."
+rm -rf "${output_dir}/${filename}"
+
+echo -e "${green}[${name}] All done!${nc}"
+exit 0
+
