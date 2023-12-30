@@ -4,13 +4,18 @@ blue='\033[0;34m'
 green='\033[0;32m'
 red='\033[0;31m'
 nc='\033[0m'
-
 name="MuseScore"
 base_dir="/Users/ifor/Documents/MuseScore4"
 style_file_path="${base_dir}/Styles/my_style.mss"
 output_dir="/Users/ifor/Downloads"
+output_dir="${base_dir}/Scores"
 
 script_path=$(dirname "$(realpath -s "$0")")
+
+declare -rA key_signatures=(
+  ["Gb"]=-6 ["Db"]=-5 ["Ab"]=-4 ["Eb"]=-3 ["Bb"]=-2 ["F"]=-1
+  ["C"]=0 ["G"]=1 ["D"]=2 ["A"]=3 ["E"]=4 ["B"]=5 ["F#"]=6
+)
 
 song_title="$1"
 date_now=$(date "+%Y-%m-%d")
@@ -22,6 +27,13 @@ if [[ -z "$song_title" ]]; then
      echo -e "${red}[${name}] Song title required, aborting.${nc}"
      exit 1
   fi
+fi
+
+filename="${song_title,,}"
+
+if [[ -e "${output_dir}/${filename}.mscz" ]]; then
+   echo -e "${red}[${name}] A file with that name already exists, aborting.${nc}"
+   exit 1
 fi
 
 read -p "[${name}] Enter the artist name (optional): " -r artist_name
@@ -40,53 +52,13 @@ no_of_bars="${no_of_bars:-32}"
 time_signature_top=$(echo $time_signature | awk -F'/' '{print $1}')
 time_signature_btm=$(echo $time_signature | awk -F'/' '{print $2}')
 tempo_decimal=$(echo "${tempo}/60" | bc -l | cut -c -10)
-filename="${song_title,,}"
 
-case $key_signature in
-  Gb)
-    key_signature_int=-6
-    ;;
-  Db)
-    key_signature_int=-5
-    ;;
-  Ab)
-    key_signature_int=-4
-    ;;
-  Eb)
-    key_signature_int=-3
-    ;;
-  Bb)
-    key_signature_int=-2
-    ;;
-  F)
-    key_signature_int=-1
-    ;;
-  C)
-    key_signature_int=0
-    ;;
-  G)
-    key_signature_int=1
-    ;;
-  D)
-    key_signature_int=2
-    ;;
-  A)
-    key_signature_int=3
-    ;;
-  E)
-    key_signature_int=4
-    ;;
-  B)
-    key_signature_int=5
-    ;;
-  F\#)
-    key_signature_int=6
-    ;;
-  *)
-    echo -n "Unknown key signature, defaulting to C major."
-    key_signature_int=0
-    ;;
-esac
+if [[ -v "key_signatures[${key_signature}]" ]] ; then
+  key_signature_int="${key_signatures[$key_signature]}"
+else
+  echo -e "${blue}[${name}] Unknown key signature, defaulting to C major.${nc}"
+  key_signature_int=0
+fi
 
 view_settings='{"notation":{"viewMode":"continuous_h"}}'
 audio_settings='{"activeSoundProfile":"MuseSounds","aux":[{"out":{"balance":0,"fxChain":{"0":{"active":true,"chainOrder":0,"resourceMeta":{"attributes":{},"hasNativeEditorSupport":true,"id":"MuseReverb","type":"muse_plugin","vendor":"Muse"},"unitConfiguration":{}}},"volumeDb":0},"soloMuteState":{"mute":false,"solo":false}},{"out":{"balance":0,"fxChain":{},"volumeDb":0},"soloMuteState":{"mute":false,"solo":false}}],"master":{"balance":0,"fxChain":{},"volumeDb":0},"tracks":[{"in":{"resourceMeta":{"attributes":{"museCategory":"MuseGuitarsVol1","museName":"ElectricBass","museUID":"13013","playbackSetupData":"strings.bass_guitar.plucked:electric"},"hasNativeEditorSupport":false,"id":"MuseGuitarsVol1\\ElectricBass\\13013","type":"muse_sampler_sound_pack","vendor":"MuseGuitarsVol.1"},"unitConfiguration":{}},"instrumentId":"electric-bass","out":{"auxSends":[{"active":true,"signalAmount":0.30000001192092896},{"active":true,"signalAmount":0.30000001192092896}],"balance":0,"fxChain":{},"volumeDb":0},"partId":"1","soloMuteState":{"mute":false,"solo":false}},{"in":{"resourceMeta":{"attributes":{"museCategory":"MusePercussion","museName":"Shaker","museUID":"149","playbackSetupData":"percussions.shaker"},"hasNativeEditorSupport":false,"id":"MusePercussion\\Shaker\\149","type":"muse_sampler_sound_pack","vendor":"MusePercussion"},"unitConfiguration":{}},"instrumentId":"metronome","out":{"balance":0,"fxChain":{},"volumeDb":-11.300000190734863},"partId":"999","soloMuteState":{"mute":false,"solo":false}},{"in":{"resourceMeta":{"attributes":{"museCategory":"MuseKeys","museName":"SoftPiano","museUID":"169","playbackSetupData":"keyboards.piano.soft"},"hasNativeEditorSupport":false,"id":"MuseKeys\\SoftPiano\\169","type":"muse_sampler_sound_pack","vendor":"MuseKeys"},"unitConfiguration":{}},"instrumentId":"chord_symbols","out":{"auxSends":[{"active":true,"signalAmount":0.4000000059604645},{"active":true,"signalAmount":0.30000001192092896}],"balance":0,"fxChain":{},"volumeDb":-22.700000762939453},"partId":"1","soloMuteState":{"mute":false,"solo":false}}]}'
@@ -121,7 +93,6 @@ echo "Generating faux thumbnail."
 convert -size "181x256" canvas:white "${output_dir}/${filename}/Thumbnails/thumbnail.png"
 
 echo "Generating mscx file."
-key_signature=1
 sed "
 s|XXTITLEXX|${song_title}|g;
 s|XXSUBTITLEXX|${album_name}|g;
@@ -136,8 +107,9 @@ s|XXTIME_SIG_TOPXX|${time_signature_top}|g;
 s|XXTIME_SIG_BTMXX|${time_signature_btm}|g;
 " "${script_path}/musescore_template.xml" > "${output_dir}/${filename}/${filename}.mscx"
 
+id=38654705689
 for m in $(seq 2 $no_of_bars); do
-  id=$((38654705689 + $m))
+  id=$(($id + $m))
   echo "      <Measure>
         <voice>
           <Rest>
@@ -148,20 +120,58 @@ for m in $(seq 2 $no_of_bars); do
         </voice>
       </Measure>" >> "${output_dir}/${filename}/${filename}.mscx"
 done
+echo "    </Staff>" >> "${output_dir}/${filename}/${filename}.mscx"
 
-echo "    </Staff>
-  </Score>
+echo "    <Staff id=\"2\">
+      <Measure>
+        <voice>
+          <KeySig>
+            <eid>171798691862</eid>
+            <linked></linked>
+            <concertKey>${key_signature_int}</concertKey>
+          </KeySig>
+          <TimeSig>
+            <eid>171798691864</eid>
+            <sigN>${time_signature_top}</sigN>
+            <sigD>${time_signature_btm}</sigD>
+          </TimeSig>
+          <Rest>
+            <eid>176093659161</eid>
+            <linked></linked>
+            <durationType>measure</durationType>
+            <duration>${time_signature}</duration>
+          </Rest>
+        </voice>
+      </Measure>" >> "${output_dir}/${filename}/${filename}.mscx"
+
+for m in $(seq 2 $no_of_bars); do
+  id=$(($id + $m))
+  echo "      <Measure>
+        <voice>
+          <Rest>
+            <eid>${id}</eid>
+            <linked></linked>
+            <durationType>measure</durationType>
+            <duration>${time_signature}</duration>
+          </Rest>
+        </voice>
+      </Measure>" >> "${output_dir}/${filename}/${filename}.mscx"
+done
+echo "    </Staff>" >> "${output_dir}/${filename}/${filename}.mscx"
+
+echo "  </Score>
 </museScore>" >> "${output_dir}/${filename}/${filename}.mscx"
 
-cat "${output_dir}/${filename}/${filename}.mscx"
-exit
-
 echo "Generating compressed mscz file."
-# (cd ${output_dir}/${filename} && zip -r - .) > "${output_dir}/${filename}.mscz"
+(cd ${output_dir}/${filename} && zip -r - .) > "${output_dir}/${filename}.mscz"
 
 echo "Removing temp directory."
-# rm -rf "${output_dir}/${filename}"
+rm -rf "${output_dir}/${filename}"
 
 echo -e "${green}[${name}] All done!${nc}"
+
+echo "Opening new file..."
+open "${output_dir}/${filename}.mscz"
+
 exit 0
 
