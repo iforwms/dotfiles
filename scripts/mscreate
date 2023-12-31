@@ -22,8 +22,6 @@ declare -rA key_signatures=(
 
 song_title="$1"
 if [[ $# -gt 1 ]]; then
-  echo "Entering auto-mode!"
-
   composer="$2"
   artist_name="$3"
   album_name="$4"
@@ -52,15 +50,18 @@ else
   read -p "[${name}] Enter number of bars (optional): " -r no_of_bars
 fi
 
-filename=$(echo $song_title | sed "
+filename=$(echo "${artist_name}-${song_title}" | sed "
   s/[^[:alnum:]_\/\ \.-]//g;
   s/ /./g;
+  s/\.\././g;
 ")
 filename="${filename,,}"
 if [[ -e "${output_dir}/${filename}.mscz" ]]; then
    echo -e "${red}[${name}] A file with that name already exists, aborting.${nc}"
    exit 1
 fi
+# echo $filename
+# exit
 
 tempo="${tempo:-120}"
 tempo_decimal=$(echo "${tempo}/60" | bc -l | cut -c -10)
@@ -88,17 +89,18 @@ else
   key_signature_int=0
 fi
 
-echo -e "${green}Song Details:
-Composer: ${composer}
-Title: ${song_title}
-Artist: ${artist_name}
-Album: ${album_name}
-Tempo: ${tempo}
-Key Sig: ${key_signature}
-Time Sig: ${time_signature} (${time_signature_raw})
-Part Musician: ${part_musician}
-No of Bars: ${no_of_bars}
-${nc}"
+# echo -e "${green}Song Details:
+# Composer: ${composer}
+# Title: ${song_title}
+# Artist: ${artist_name}
+# Album: ${album_name}
+# Tempo: ${tempo}
+# Key Sig: ${key_signature}
+# Time Sig: ${time_signature} (${time_signature_raw})
+# Musician: ${part_musician}
+# No of Bars: ${no_of_bars}
+# ${nc}"
+# exit
 
 view_settings='{"notation":{"viewMode":"continuous_h"}}'
 meta_inf="<?xml version=\"1.0\" encoding=\"UTF-8\"?>

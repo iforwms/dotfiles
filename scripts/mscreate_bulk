@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+name="MuseScore Bulk"
+script_path=$(dirname "$(realpath -s "$0")")
+input_file="$1"
+
+if [[ ! -r $input_file ]]; then
+    echo "[${name}] Cannot read input file, aborting."
+    exit 1
+fi
+
+while read -r args; do
+  [[ $args =~ ^#.* ]] && continue
+  bash -c "${script_path}/mscreate ${args[@]}"
+done < $input_file
+
+echo "[${name}] All done!"
+exit 0
