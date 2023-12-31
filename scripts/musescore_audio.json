@@ -1,0 +1,143 @@
+{
+    "activeSoundProfile": "MuseSounds",
+    "aux": [
+        {
+            "out": {
+                "balance": 0,
+                "fxChain": {
+                },
+                "volumeDb": 0
+            },
+            "soloMuteState": {
+                "mute": false,
+                "solo": false
+            }
+        },
+        {
+            "out": {
+                "balance": 0,
+                "fxChain": {
+                },
+                "volumeDb": 0
+            },
+            "soloMuteState": {
+                "mute": false,
+                "solo": false
+            }
+        }
+    ],
+    "master": {
+        "balance": 0,
+        "fxChain": {
+        },
+        "volumeDb": 0
+    },
+    "tracks": [
+        {
+            "in": {
+                "resourceMeta": {
+                    "attributes": {
+                        "museCategory": "Muse Keys",
+                        "museName": "Soft Piano",
+                        "museUID": "169",
+                        "playbackSetupData": "keyboards.piano.soft"
+                    },
+                    "hasNativeEditorSupport": false,
+                    "id": "Muse Keys\\Soft Piano\\169",
+                    "type": "muse_sampler_sound_pack",
+                    "vendor": "Muse Keys"
+                },
+                "unitConfiguration": {
+                }
+            },
+            "instrumentId": "chord_symbols",
+            "out": {
+                "auxSends": [
+                    {
+                        "active": true,
+                        "signalAmount": 0.15000000596046448
+                    },
+                    {
+                        "active": true,
+                        "signalAmount": 0.30000001192092896
+                    }
+                ],
+                "balance": 0,
+                "fxChain": {
+                },
+                "volumeDb": -13.300000190734863
+            },
+            "partId": "1"
+        },
+        {
+            "in": {
+                "resourceMeta": {
+                    "attributes": {
+                        "museCategory": "Muse Percussion",
+                        "museName": "Shaker",
+                        "museUID": "149",
+                        "playbackSetupData": "percussions.shaker"
+                    },
+                    "hasNativeEditorSupport": false,
+                    "id": "Muse Percussion\\Shaker\\149",
+                    "type": "muse_sampler_sound_pack",
+                    "vendor": "Muse Percussion"
+                },
+                "unitConfiguration": {
+                }
+            },
+            "instrumentId": "metronome",
+            "out": {
+                "balance": 0,
+                "fxChain": {
+                },
+                "volumeDb": -12
+            },
+            "partId": "999",
+            "soloMuteState": {
+                "mute": false,
+                "solo": false
+            }
+        },
+        {
+            "in": {
+                "resourceMeta": {
+                    "attributes": {
+                        "museCategory": "Muse Guitars Vol 1",
+                        "museName": "Electric Bass",
+                        "museUID": "13013",
+                        "playbackSetupData": "strings.bass_guitar.plucked:electric"
+                    },
+                    "hasNativeEditorSupport": false,
+                    "id": "Muse Guitars Vol 1\\Electric Bass\\13013",
+                    "type": "muse_sampler_sound_pack",
+                    "vendor": "Muse Guitars Vol. 1"
+                },
+                "unitConfiguration": {
+                }
+            },
+            "instrumentId": "electric-bass",
+            "out": {
+                "auxSends": [
+                    {
+                        "active": true,
+                        "signalAmount": 0.30000001192092896
+                    },
+                    {
+                        "active": true,
+                        "signalAmount": 0.30000001192092896
+                    }
+                ],
+                "balance": 0,
+                "fxChain": {
+                },
+                "volumeDb": 0
+            },
+            "partId": "1",
+            "soloMuteState": {
+                "mute": false,
+                "solo": false
+            }
+        }
+    ]
+}

@@ -57,6 +57,7 @@
         </StaffType>
         <defaultConcertClef>F8vb</defaultConcertClef>
         <defaultTransposingClef>F</defaultTransposingClef>
+        <isStaffVisible>0</isStaffVisible>
       </Staff>
       <trackName>Electric Bass</trackName>
       <Instrument id="electric-bass">
@@ -118,7 +119,7 @@ XXEXTRAXX</text>
         <Text>
           <eid>171798691846</eid>
           <style>user_1</style>
-          <text>XXSUBTITLEXX</text>
+          <text>XXALBUM_NAMEXX</text>
         </Text>
       </VBox>
       <Measure>
