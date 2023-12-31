@@ -129,6 +129,7 @@ XXEXTRAXX</text>
             <concertKey>XXKEY_SIGNATUREXX</concertKey>
           </KeySig>
           <TimeSig>
+            XXTIME_SIG_SUBTYPEXX
             <eid>25769803800</eid>
             <sigN>XXTIME_SIG_TOPXX</sigN>
             <sigD>XXTIME_SIG_BTMXX</sigD>
