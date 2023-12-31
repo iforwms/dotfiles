@@ -118,7 +118,7 @@ echo "Creating temp directory structure."
 mkdir -p $output_dir/$filename/{META-INF,Thumbnails}
 
 echo "Copying audio file."
-cp -v "$audio_file_path" "${output_dir}/${filename}/"
+cp -v "$audio_file_path" "${output_dir}/${filename}/audiosettings.json"
 
 echo "Creating container file."
 echo $meta_inf > "${output_dir}/${filename}/META-INF/container.xml"
@@ -127,7 +127,7 @@ echo "Creating view settings file."
 echo $view_settings > "${output_dir}/${filename}/viewsettings.json"
 
 echo "Copying style file."
-cp -v "$style_file_path" "${output_dir}/${filename}/"
+cp -v "$style_file_path" "${output_dir}/${filename}/score_style.mss"
 
 echo "Generating faux thumbnail."
 convert -size "181x256" canvas:white "${output_dir}/${filename}/Thumbnails/thumbnail.png"
