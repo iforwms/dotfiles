@@ -35,7 +35,7 @@
       <Staff id="2">
         <linkedTo>1</linkedTo>
         <StaffType group="tablature">
-          <name>tab4StrCommon</name>
+          <name>tab4StrSimple</name>
           <lines>4</lines>
           <lineDistance>1.5</lineDistance>
           <durations>0</durations>
