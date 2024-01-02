@@ -14,7 +14,19 @@ fi
 
 if [[ $# -gt 1 ]]; then
   echo "Handling tab only, score only or both"
-  exit 0
+  if [[ $2 == 'all' ]]; then
+    # echo "Showing staff"
+    unzip -p $filepath "${filename}.mscx" \
+      | sed 's:<isStaffVisible>0</isStaffVisible>:<isStaffVisible>1</isStaffVisible>:' \
+      > "${filename}.mscx"
+  else
+    # echo "Hiding staff"
+    unzip -p $filepath "${filename}.mscx" \
+      | sed 's:<isStaffVisible>1</isStaffVisible>:<isStaffVisible>0</isStaffVisible>:' \
+      > "${filename}.mscx"
+  fi
+  zip $filepath "${filename}.mscx"
+  rm -v "${filename}.mscx"
 fi
 
 echo "[${name}] Converting to PDF."
