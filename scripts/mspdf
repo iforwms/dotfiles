@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+name="MuseScore PDF"
+ms_dir="/Users/ifor/Documents/MuseScore4"
+output_dir="/Users/ifor/Downloads"
+filepath="$1"
+filename="${filepath##*/}"
+filename="${filename%.*}"
+
+if [[ ! -r "$filepath" ]]; then
+  echo "Unable to read file, aborting."
+  exit 1
+fi
+
+if [[ $# -gt 1 ]]; then
+  echo "Handling tab only, score only or both"
+  exit 0
+fi
+
+echo "[${name}] Converting to PDF."
+/Applications/MuseScore\ 4.app/Contents/MacOS/mscore -o "${output_dir}/${filename}.pdf" -S "${ms_dir}/Styles/my_style.mss" "$filepath"
+
+open "${output_dir}/${filename}.pdf"
+
+echo "[${name}] All done!"
+exit 0
