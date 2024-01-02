@@ -218,7 +218,7 @@ echo "Generating compressed mscz file."
 (cd ${output_dir}/${filename} && zip -r - .) > "${output_dir}/${filename}.mscz"
 
 echo "Removing temp directory."
-rm -rf "${output_dir}/${filename}"
+rm -vrf "${output_dir}/${filename}"
 
 echo -e "${green}[${name}] All done!${nc}"
 
