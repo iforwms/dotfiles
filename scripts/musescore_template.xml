@@ -38,6 +38,9 @@
           <name>tab4StrSimple</name>
           <lines>4</lines>
           <lineDistance>1.5</lineDistance>
+          <slashStyle>1</slashStyle>
+          <stemless>1</stemless>
+          <timesig>0</timesig>
           <durations>0</durations>
           <durationFontName>MuseScore Tab Modern</durationFontName>
           <durationFontSize>15</durationFontSize>
@@ -46,13 +49,12 @@
           <fretFontSize>9</fretFontSize>
           <fretFontY>0</fretFontY>
           <linesThrough>0</linesThrough>
-          <minimStyle>1</minimStyle>
+          <minimStyle>0</minimStyle>
           <onLines>1</onLines>
-          <showRests>1</showRests>
+          <showRests>0</showRests>
           <stemsDown>1</stemsDown>
           <stemsThrough>0</stemsThrough>
           <upsideDown>0</upsideDown>
-          <showTabFingering>1</showTabFingering>
           <useNumbers>1</useNumbers>
         </StaffType>
         <defaultConcertClef>F8vb</defaultConcertClef>
