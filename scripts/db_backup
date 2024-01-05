@@ -1,10 +1,16 @@
 #!/bin/bash
 
+password_file="/home/ifor/mysql_pass"
+if [[ ! -r "$password_file" ]]; then
+  echo "Cannot find MySQL password file, aborting."
+  exit 1
+fi
+
 backup_dir=/home/ifor/backups
 user=${1:-root}
 hostname="127.0.0.1"
 now=$(date +"%F")
-password=$(cat /home/ifor/mysql_pass)
+password=$(cat "$password_file")
 
 databases=$(mysql -h $hostname -u $user -p$password -s -N -e "SHOW DATABASES;" | grep -v "information_schema\|mysql\|performance_schema\|sys")
 
