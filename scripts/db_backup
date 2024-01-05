@@ -8,11 +8,14 @@ fi
 
 backup_dir="${HOME}/backups"
 user=${1:-root}
+databases="$2"
 hostname="127.0.0.1"
 now=$(date +"%F")
 password=$(cat "$password_file")
 
-databases=$(mysql -h $hostname -u $user -p$password -s -N -e "SHOW DATABASES;" | grep -v "information_schema\|mysql\|performance_schema\|sys")
+if [[ -z "$databases" ]]; then
+  databases=$(mysql -h $hostname -u $user -p$password -s -N -e "SHOW DATABASES;" | grep -v "information_schema\|mysql\|performance_schema\|sys")
+fi
 
 [ ! -d $backup_dir ] && mkdir -p $backup_dir
 
