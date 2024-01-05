@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+
+blue=$(tput setaf 4)
+orange=$(tput setaf 3)
+green=$(tput setaf 2)
+normal=$(tput sgr0)
+
+name="iReal Random"
+
+usage="./ireal_random [chord quality] [time signature]"
+supported_chords="5, 2, add9, +, o, h, sus, ^, -, ^7, -7, 7, 7sus, h7, o7, ^9, ^13, 6, 69, ^7#11, ^9#11, ^7#5, -6, -69, -^7, -^9, -9, -11, -7b5, h9, -b6, -#5, 9, 7b9, 7#9, 7#11, 7b5, 7#5, 9#11, 9b5, 9#5, 7b13, 7#9#5, 7#9b5, 7#9#11, 7b9#11, 7b9b5, 7b9#5, 7b9#9, 7b9b13, 7alt, 13, 13#11, 13b9, 13#9, 7b9sus, 7susadd3, 9sus, 13sus, 7b13sus, 11"
+supported_time="T44 T34 T24 T54 T64 T74 T22 T32 T58 T68 T78 T98 T12"
+
+if [[ $1 == '--help' ]]; then
+    printf "${green}usage: %s\n${orange}Supported chord types${orange}: %s\n${blue}Supported time signatures:${blue} %s\n" "$usage" "$supported_chords" "$supported_time"
+    exit 0
+fi
+
+keys="C Db D Eb E F F# G Ab A Bb B"
+random_keys="$(shuf -e $keys)"
+
+artist="iReal Chord Generator"
+style="Practice"
+key="C"
+
+# TODO: Select time signature
+time_signature="${2:-44}"
+chord_quality="$1" # Empty is major, common alternatives: -, 7, ^, -7, -7b5, o, +
+case $chord_quality in
+  '')
+    chord_quality_name="major"
+    ;;
+  '-')
+    chord_quality_name="minor"
+    ;;
+  '7')
+    chord_quality_name="dom 7"
+    ;;
+  '^')
+    chord_quality_name="maj 7"
+    ;;
+  '-7')
+    chord_quality_name="min 7"
+    ;;
+  'o')
+    chord_quality_name="dim"
+    ;;
+  '+')
+    chord_quality_name="aug"
+    ;;
+  *)
+    chord_quality_name="$chord_quality"
+    ;;
+esac
+
+title="Practice (${chord_quality_name}) $(date '+%Y/%m/%d %H:%M:%S')"
+
+music=""
+for chord in $random_keys; do
+    music+="|${chord}${chord_quality}   "
+done
+music+="Z"
+echo "${orange}Music string: ${music}"
+
+# Possible settings for making a playlist and/or song with comp_style, bpm and number of repeats
+# comp_style="Jazz/Medium Swing"
+# bpm="100"
+# no_of_repeats="12"
+# comp_style="${comp_style/\//%2D}"
+# song_string="${title}=${artist}=${style}=${key}==T${time_signature}${music}=${comp_style}=${bpm}=${no_of_repeats}"
+# song_string+="===${title}=${artist}=${style}=${key}==T${time_signature}${music}=${comp_style}=${bpm}=${no_of_repeats}"
+song_string="${title}=${artist}=${style}=${key}=n=T${time_signature}${music}"
+url="irealbook://${song_string}"
+
+# echo "${blue}Raw URL: ${url}"
+echo -n "${green}Import URL: "
+echo "$url" | sed 's/ /%20/g;s/{/%7B/g;s/}/%7D/g;s/|/%7C/g;s/\[/%5B/g;s/]/%5D/g;s/</%3C/g;s/>/%3E/g;s/\^/%5E/g;'
+
+exit 0
+
