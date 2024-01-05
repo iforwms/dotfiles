@@ -1,12 +1,12 @@
 #!/bin/bash
 
-password_file="/home/ifor/mysql_pass"
+password_file="${HOME}/mysql_pass"
 if [[ ! -r "$password_file" ]]; then
   echo "Cannot find MySQL password file, aborting."
   exit 1
 fi
 
-backup_dir=/home/ifor/backups
+backup_dir="${HOME}/backups"
 user=${1:-root}
 hostname="127.0.0.1"
 now=$(date +"%F")
