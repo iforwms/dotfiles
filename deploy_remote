@@ -2,12 +2,18 @@
 
 base_dir="/home/ifor/.dotfiles"
 
-echo "Running git pull..."
+echo "Updating clients server."
 ssh clients "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa' && git -C ${base_dir} pull"
+
+echo "Updating personal server."
 ssh me "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa' && git -C ${base_dir} pull"
+
+echo "Updating exped server."
 ssh exped "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/ifor_wmai' && git -C ${base_dir} pull"
 
 base_dir="/home/cors/.dotfiles"
+echo "Updating cors server."
 ssh cors "git -C ${base_dir} config core.sshCommand 'ssh -i /home/cors/.ssh/ifor_github' && git -C ${base_dir} pull"
 
 echo "Deploy complete!"
+exit 0
