@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+name="Remove Watermark"
+watermark=$1
+inbound=$2
+outbound=$3
+
+if [[ $# -lt 3 ]]; then
+    echo "Missing required arguments."
+    echo "usage: ./pdf-remove-watermark <watermark> <input_file> <output_file>"
+    exit 1
+fi
+
+uncompressed=$(mktemp --dry-run 'uncompressed-XXXXXXXXXX.pdf')
+fixed=$(mktemp --dry-run 'fixed-XXXXXXXXXX.pdf')
+unmarked=$(mktemp --dry-run 'unmarked-XXXXXXXXXX.pdf')
+
+echo "[${name}] Uncompressing PDF."
+qpdf --stream-data=uncompress "$inbound" "$uncompressed"
+
+echo "[${name}] Removing watermark."
+sed -e "s/${watermark}//g" < "$uncompressed" > "$fixed"
+
+echo "[${name}] Repairing PDF."
+pdftk "$fixed" output "$unmarked"
+
+echo "[${name}] Compressing PDF."
+qpdf --stream-data=compress "$unmarked" "$outbound"
+
+echo "[${name}] Removing temporary files."
+# rm -v "$uncompressed" "$fixed" "$unmarked"
+
+echo "[${name}] All done!"
+exit 0
