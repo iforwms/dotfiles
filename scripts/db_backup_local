@@ -1,8 +1,8 @@
 #!/bin/bash
 
-scp -r "clients:/home/ifor/backups/*" "$HOME/Documents/backup/db"
-scp -r "me:/home/ifor/backups/*" "$HOME/Documents/backup/db"
-scp -r "cors:/home/cors/backups/*" "$HOME/Documents/backup/db"
+scp -r "clients:/home/ifor/backups/*" "/Users/ifor/Documents/backup/db"
+scp -r "me:/home/ifor/backups/*" "/Users/ifor/Documents/backup/db"
+scp -r "cors:/home/cors/backups/*" "/Users/ifor/Documents/backup/db"
 
 success_msg="DB backup success!"
 osascript -e "display notification \"${success_msg}\" sound name \"Blow\""

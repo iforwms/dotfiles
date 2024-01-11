@@ -1,6 +1,6 @@
 #!/bin/bash
 
-destination="/Users/ifor/Documents/backup"
+destination="/Users/ifor/Documents/backup/db_json"
 
 echo "Backing up pool stats..."
 filename="backup_pool_stats_$(date +%Y-%m-%d)"
@@ -20,5 +20,5 @@ base_dir="/var/www/basketball_shooting_log"
 scp "me:${base_dir}/bbsl.json" "${destination}/${filename}.json"
 
 echo "Backing up pedalboard settings..."
-scp -r me:/var/www/pedalboard/db/* "$destination/pedbalboard/"
+scp -r me:/var/www/pedalboard/db/* "${destination}/pedbalboard"
 
