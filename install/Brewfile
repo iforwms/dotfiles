@@ -11,8 +11,8 @@ tap 'homebrew/cask-fonts'
 tap 'homebrew/cask-versions'
 
 # Binaries
-brew 'awscli'
 brew 'arduino-cli'
+brew 'awscli'
 brew 'binwalk'
 brew 'cash-cli' # currency rates
 brew 'cmus' # terminal player
@@ -33,11 +33,13 @@ brew 'grep'
 brew 'httpie'
 brew 'mackup'
 brew 'mas' # Mac App Store manager
+brew 'ncdu'
 brew 'pandoc'
 brew 'parallels'
 brew 'pass'
 brew 'pinentry-mac'
 brew 'pkg-config' # https://github.com/driesvints/dotfiles/issues/20
+brew 'qpdf'
 brew 'reattach-to-user-namespace' # Required for tmux copy paste
 brew 'shellcheck'
 brew 'trash' # Manage the Trash bin
