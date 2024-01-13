@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+input_file="$1"
+output_file="$2"
+
+if [[ ! -e "$input_file" ]]; then
+    echo "Unable to read file, aborting."
+    exit 1
+fi
+
+# if [[ ! -w "$output_file" ]]; then
+#     echo "Unable to write file, aborting."
+#     exit 1
+# fi
+
+echo "Extracting audio..."
+ffmpeg -i "$input_file" -q:a 0 -map a "$output_file"
+
+echo "All done!"
+exit 0
