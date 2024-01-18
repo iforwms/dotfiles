@@ -120,7 +120,6 @@ with open(file_path) as fp:
 
             data.append({"text": question, "answer": answer, "category": category, "option_1": option_1, "option_2": option_2, "option_3": option_3, "option_4": option_4})
 
-
 print(json.dumps(data[:1], sort_keys=True, indent=2))
 timestamp = datetime.now().replace(microsecond=0)
 # print(f'[{timestamp}] [INFO] [{category}] Writing to file.')
