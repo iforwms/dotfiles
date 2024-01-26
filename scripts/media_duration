@@ -18,6 +18,21 @@ if [[ -z "$1" ]]; then
   exit 0
 fi
 
+if [[ 'summary' -eq "$q" ]]; then
+  for f in *; do
+    echo "${f} - " $(
+    ffprobe \
+      -i "$f" \
+      -show_entries format=duration \
+      -v quiet \
+      -of csv='p=0' \
+      -sexagesimal \
+      | cut -d. -f1
+    )
+    done
+    exit 0
+fi
+
 ffprobe \
   -i "$1" \
   -show_entries format=duration \
