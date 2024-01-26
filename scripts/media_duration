@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+if [[ -z "$1" ]]; then
+  echo "No filename selected, summing all media durations."
+  duration=$(
+    for f in *; do
+      ffprobe \
+        -i "$f" \
+        -show_entries format=duration \
+        -v quiet \
+        -of csv='p=0';
+        done \
+        | awk '{sum += $1}; END{print sum}'
+  )
+
+  printf '%02d:%02d:%.0f\n' $(echo -e "${duration}/3600\n${duration}%3600/60\n${duration}%60" | bc)
+
+  exit 0
+fi
+
+ffprobe \
+  -i "$1" \
+  -show_entries format=duration \
+  -v quiet \
+  -of csv='p=0' \
+  -sexagesimal \
+  | cut -d. -f1
+
+exit 0
+
