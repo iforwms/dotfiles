@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+usage="split_audio <input_file> [number_of_stems default: 2]"
+
+input_file="$1"
+number_of_stems="${2:-2}"
+
+if [[ ! -r "$input_file" ]]; then
+    echo "Unable to read input file, aborting..."
+    exit 1
+fi
+
+spleeter separate \
+    -o "${HOME}/Downloads/spleeter" \
+    -p "spleeter:${number_of_stems}stems" \
+    -f {foldername}/{filename}_{instrument}.{codec} \
+    "$input_file"
