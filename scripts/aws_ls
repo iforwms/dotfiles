@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+remote_path="$1"
+
+usage="usage: aws_ls <remote_path>"
+
+if [[ -z "$remote_path" ]]; then
+    echo "Please supply a remote path."
+    echo "$usage"
+    exit 1
+fi
+
+aws s3 ls \
+    --summarize \
+    --human-readable \
+    --recursive \
+    "s3://${remote_path}"
+
+exit 0
+

@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+remote_path="$1"
+local_path="$2"
+file_type="${3:-*}"
+
+usage="usage: aws_cp <remote_path> <local_path> [file_type]"
+
+if [[ $# -lt 2 ]]; then
+    echo "Please supply a remote and local paths."
+    echo "$usage"
+    exit 1
+fi
+
+aws s3 cp \
+    --no-sign-request \
+    --recursive \
+     --exclude "*" \
+     --include "$file_type" \
+    "s3://${remote_path}" \
+    "$local_path"
+
+echo "All done!"
+exit 0
+
