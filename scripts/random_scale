@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+modes=(Ionian Dorian Phrygian Lydian Mixolydian Aeolian Locrian)
+notes=(C 'C#' Db D 'D#' Eb E F 'F#' Gb G 'G#' Ab A 'A#' Bb B)
+
+echo "${notes[RANDOM%${#notes[@]}]} ${modes[RANDOM%${#modes[@]}]}"
+
