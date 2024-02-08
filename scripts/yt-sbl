@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+if [[ $# -ne 5 ]]; then
+    echo "Missing required arguments."
+    echo "usage: yt-sbl <episode> <season> <course> <lesson> <url>"
+    exit 1
+fi
+
+printf -v episode "%02d" "$1"
+printf -v season "%02d" "$2"
+
+course="$3"
+subtitle="$4"
+url="$5"
+
+output_dir="${HOME}/Downloads/${course}/video"
+mkdir -p "$output_dir"
+
+/usr/local/bin/yt-dlp -o "${output_dir}/${course}.s${season}e${episode}.${subtitle}.%(ext)s" "${url/master.json/master.mpd}"
+
+echo "Add done!"
+
+exit 0
