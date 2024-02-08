@@ -3,5 +3,6 @@
 # To bind, type the following command in cmus
 # :bind -f common u shell ~/.dotfiles/scripts/update-cmus-library.sh
 cmus-remote -C clear
-cmus-remote -C "add $HOME/Music/local"
+cmus-remote -C "add $HOME/Music/to_sort"
+cmus-remote -C "add $HOME/Music/library"
 cmus-remote -C "update-cache -f"
