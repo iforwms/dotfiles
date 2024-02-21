@@ -11,6 +11,7 @@ if [[ -z "$remote_path" ]]; then
 fi
 
 aws s3 ls \
+    --no-sign-request \
     --summarize \
     --human-readable \
     --recursive \
