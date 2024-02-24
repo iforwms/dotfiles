@@ -15,6 +15,7 @@ aws s3 ls \
     --summarize \
     --human-readable \
     --recursive \
+    $2 \
     "s3://${remote_path}"
 
 exit 0
