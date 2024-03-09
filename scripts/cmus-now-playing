@@ -7,5 +7,5 @@ if [[ -z "$is_playing" ]]; then
     exit
 fi
 
-now_playing=$(/usr/local/bin/cmus-remote -C 'format_print %A\ -\ %l\ -\ %n\ -\ %t\ (%{position}/%d)')
+now_playing=$(/usr/local/bin/cmus-remote -C 'format_print %A\ -\ %l\ -\ %n.\ %t\ (%{position}/%d)')
 echo -e "$now_playing"
