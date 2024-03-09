@@ -7,5 +7,9 @@ if [[ -z "$is_playing" ]]; then
     exit
 fi
 
-now_playing=$(/usr/local/bin/cmus-remote -C 'format_print %A\ -\ %l\ -\ %n.\ %t\ (%{position}/%d)')
-echo -e "$now_playing"
+track=$(/usr/local/bin/cmus-remote -C "format_print %t")
+track_formatted=$(echo "$track" | awk -v len=30 '{ if (length($0) > len) print substr($0, 1, len-3) "..."; else print; }')
+played=$(/usr/local/bin/cmus-remote -C 'format_print (%{position}/%d)')
+now_playing=$(/usr/local/bin/cmus-remote -C 'format_print %A\ -\ %l\ -\ %n.\ ')
+
+echo "${now_playing} ${track_formatted} ${played}"
