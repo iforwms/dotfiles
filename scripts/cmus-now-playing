@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+is_playing=$(/usr/local/bin/cmus-remote --query | grep 'status playing')
+
+if [[ -z "$is_playing" ]]; then
+    echo "CMUS Paused"
+    exit
+fi
+
+now_playing=$(/usr/local/bin/cmus-remote -C 'format_print %A\ -\ %l\ -\ %t\ (%{position}/%d)')
+echo -e "$now_playing"
