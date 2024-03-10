@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
-is_playing=$(/usr/local/bin/cmus-remote --query | grep 'status playing')
+is_playing=$(/usr/local/bin/cmus-remote --query | grep status)
 
-if [[ -z "$is_playing" ]]; then
+if [[ "$is_playing" == 'status paused' ]]; then
     echo "CMUS Paused"
+    exit
+elif [[ "$is_playing" == 'status stopped' ]]; then
+    echo "CMUS Stopped"
     exit
 fi
 
