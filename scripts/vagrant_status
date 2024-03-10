@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+status=$(/usr/local/bin/vagrant status f9ed162 --machine-readable | grep state, | cut -d, -f4)
+if [[ "$status" == "poweroff" ]]; then
+    echo {\"text\":\"HS OFF\", \"font_color\": \"255, 72, 72,255\"}
+else
+    echo {\"text\":\"HS ON\", \"font_color\": \"101, 232, 134,255\"}
+fi
+
