@@ -7,6 +7,7 @@ filename="backup_jukebox_$(date +%Y-%m-%d)"
 base_dir="/var/www/jukebox"
 scp -r "me:${base_dir}/mb_db/*" "${destination}/jukebox/mb_db"
 scp -r "me:${base_dir}/histories/*" "${destination}/jukebox/histories"
+scp -r "me:${base_dir}/upcoming/*" "${destination}/jukebox/upcoming"
 scp "me:${base_dir}/albums.json" "${destination}/jukebox"
 
 echo "Backing up pool stats..."
