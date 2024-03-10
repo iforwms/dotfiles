@@ -7,9 +7,11 @@ if [[ -z "$is_playing" ]]; then
     exit
 fi
 
-track=$(/usr/local/bin/cmus-remote -C "format_print %t")
+ffmpeg -i "$(/usr/local/bin/cmus-remote -C 'format_print %f')" -an -c:v copy /tmp/current_album_art.jpg
+
+track=$(/usr/local/bin/cmus-remote -C "format_print %n.\ %t")
 track_formatted=$(echo "$track" | awk -v len=30 '{ if (length($0) > len) print substr($0, 1, len-3) "..."; else print; }')
 played=$(/usr/local/bin/cmus-remote -C 'format_print (%{position}/%d)')
-now_playing=$(/usr/local/bin/cmus-remote -C 'format_print %A\ -\ %l\ -\ %n.\ ')
+now_playing=$(/usr/local/bin/cmus-remote -C 'format_print %A\ -\ %l')
 
-echo "${now_playing} ${track_formatted} ${played}"
+echo "{'text':'${track_formatted} ${played}\n${now_playing}', 'icon_path':'/tmp/current_album_art.jpg', 'font_size': 10}"
