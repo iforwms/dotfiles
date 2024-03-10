@@ -7,11 +7,17 @@ if [[ -z "$is_playing" ]]; then
     exit
 fi
 
-ffmpeg -i "$(/usr/local/bin/cmus-remote -C 'format_print %f')" -an -c:v copy /tmp/current_album_art.jpg
+filepath=$(/usr/local/bin/cmus-remote -C 'format_print %f')
+album_name=$(/usr/local/bin/cmus-remote -C 'format_print %l')
+album_art="/tmp/${album_name}.jpg"
+
+if [[ ! -e "$album_art" ]]; then
+    /usr/local/bin/ffmpeg -y -i "$filepath" -an -c:v copy "${album_art}"
+fi
 
 track=$(/usr/local/bin/cmus-remote -C "format_print %n.\ %t")
 track_formatted=$(echo "$track" | awk -v len=30 '{ if (length($0) > len) print substr($0, 1, len-3) "..."; else print; }')
 played=$(/usr/local/bin/cmus-remote -C 'format_print (%{position}/%d)')
 now_playing=$(/usr/local/bin/cmus-remote -C 'format_print %A\ -\ %l')
 
-echo "{'text':'${track_formatted} ${played}\n${now_playing}', 'icon_path':'/tmp/current_album_art.jpg', 'font_size': 10}"
+echo "{'text':'${track_formatted} ${played}\n${now_playing}', 'icon_path':'${album_art}', 'font_size': 10}"
