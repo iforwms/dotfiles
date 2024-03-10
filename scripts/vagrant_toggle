@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+osascript -e "display notification \"Checking virtual machine status...\" with title \"VirtualBox\""
+
+status=$(/usr/local/bin/vagrant status f9ed162 --machine-readable | grep state, | cut -d, -f4)
+if [[ "$status" == "poweroff" ]]; then
+    osascript -e "display notification \"Virtual machine is booting up...\" with title \"VirtualBox\""
+    /usr/local/bin/vagrant up f9ed162
+else
+    osascript -e "display notification \"Virtual machine is shutting down...\" with title \"VirtualBox\""
+    /usr/local/bin/vagrant halt f9ed162
+fi
+
