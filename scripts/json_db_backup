@@ -9,6 +9,7 @@ scp -r "me:${base_dir}/mb_db/*" "${destination}/jukebox/mb_db"
 scp -r "me:${base_dir}/histories/*" "${destination}/jukebox/histories"
 scp -r "me:${base_dir}/upcoming/*" "${destination}/jukebox/upcoming"
 scp "me:${base_dir}/albums.json" "${destination}/jukebox"
+scp "me:${base_dir}/artists.json" "${destination}/jukebox"
 
 echo "Backing up pool stats..."
 filename="backup_pool_stats_$(date +%Y-%m-%d)"
