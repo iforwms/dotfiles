@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+data=$(ps -arcwwwxo "command pid %cpu %mem" | awk 'NR == 1 || NR > 11 {next} {print $0}') # { printf "%s (%s) %s%% %s%%\n", $0,$2,$3,$4}')
+
+echo "$data" | while read line; do
+    echo "$line" | awk '{ printf "%s (%s) %s%% %s%% | ", $1,$2,$3,$4}'
+    #echo -n $process #"{'text':'$process', 'background_color': '255,85,100,255', 'font_color': '100,200,100,255', 'font_size': 10} "
+done

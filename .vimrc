@@ -526,6 +526,7 @@ inoremap <leader>iww Ifor Waldo Williams
 
 "Make file executable.
 nnoremap <leader>mx :! chmod +x %<Return>
+nnoremap <leader>rf :!%<Return>
 
 " inoremap <leader>em ifor@cors.tech
 " inoremap <leader>nn iforwms
