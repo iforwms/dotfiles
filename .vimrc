@@ -523,6 +523,10 @@ nnoremap <leader>pgn :-1read $HOME/.vim/templates/pgn<CR>:3<CR>ci"<C-r>=strftime
 "inoremap <SPACE><SPACE> <ESC>/<++><Enter>"_c4l
 nnoremap <leader>ev :tabe $MYVIMRC<CR>
 inoremap <leader>iww Ifor Waldo Williams
+
+"Make file executable.
+nnoremap <leader>mx :! chmod +x %<Return>
+
 " inoremap <leader>em ifor@cors.tech
 " inoremap <leader>nn iforwms
 
