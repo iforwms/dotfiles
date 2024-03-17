@@ -1,8 +1,87 @@
 #!/bin/bash
 
+base_dir="/Users/ifor/code"
+repo_name="$1"
+repo_path="${base_dir}/${repo_name}"
+
+if [[ -z "$repo_name" ]]; then
+    echo "Missing repo name, aborting..."
+    exit 1
+fi
+
 echo "Creating repo..."
-mkdir $1
-git -C "./$1" init
-gh repo create $1 --private --source=./$1 --remote=upstream
+mkdir -p "$repo_path"/{src,assets}
+touch "$repo_path"/{src,assets}/.gitkeep
+git -C "$repo_path" init
+gh repo create "$repo_name" --private --source="$repo_path" --remote=upstream
+
+touch "${repo_path}/LOCAL_MACHINE"
+
+echo "Creating .gitignore file..."
+cat >"${repo_path}/.gitignore" <<EOL
+.DS_store
+LOCAL_MACHINE
+assets/output.css
+node_modules/
+tags
+vendor/
+*.log
+EOL
+
+echo "Creating deploy script..."
+cat >"${repo_path}/deploy" <<EOL
+#!/usr/bin/env bash
+
+echo "All done!"
+exit 0
+EOL
+chmod +x "${repo_path}/deploy"
+
+read -p "Do you wish to install tailwindcss? (y/n) " -n 1 -r install_tailwind
+echo
+if [[ $install_tailwind =~ ^[Yy]$ ]]; then
+  echo "Installing tailwind..."
+
+  npm install --prefix "$repo_path" -D tailwindcss
+  npm exec --prefix "$repo_path" tailwind init
+
+  rm -rf "${repo_path}/.tailwind.config.js"
+  cat >"${repo_path}/.tailwind.config.js" <<EOL
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ["./src/**/*.{html,js}"],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+EOL
+
+  cat >"${repo_path}/assets/input.css" <<EOL
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+EOL
+fi
+
+read -p "Do you wish to install PHP helpers? (y/n) " -n 1 -r install_php
+echo
+if [[ $install_php =~ ^[Yy]$ ]]; then
+  echo "TODO"
+fi
+
+echo "Finalising git setup and creating initial commit."
+git -C "$repo_path" add --all
+git -C "$repo_path" commit -m "Initial commit."
+git -C "$repo_path" branch -m main
+git -C "$repo_path" push --set-upstream upstream main
+
+echo "All done!"
+
+if [[ $install_tailwind =~ ^[Yy]$ ]]; then
+  echo
+  echo "To recompile tailwind run the following command:"
+  echo "npx tailwindcss -i ./assets/input.css -o ./assets/output.css --watch"
+fi
 
 exit 0

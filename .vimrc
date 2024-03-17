@@ -245,8 +245,8 @@ let g:tmux_navigator_disable_when_zoomed = 1        "Disable tmux navigator when
 set foldcolumn=2                                    "Display folds beside line numbers.
 
 "--------Spaces and Tabs--------"
-set shiftwidth=4                                    "Set indenting to  space.
-set tabstop=4                                       "Set tab width to 4.
+set shiftwidth=2                                    "Set indenting to  space.
+set tabstop=2                                       "Set tab width to 4.
 set softtabstop=0                                   "Number of spaces for a tab - force using spaces.
 set expandtab                                       "Use spaces instead of tabs.
 
