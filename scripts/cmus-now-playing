@@ -4,10 +4,13 @@ is_playing=$(/usr/local/bin/cmus-remote --query | grep status)
 
 if [[ "$is_playing" == 'status paused' ]]; then
     echo "CMUS Paused"
-    exit
+    exit 0
 elif [[ "$is_playing" == 'status stopped' ]]; then
     echo "CMUS Stopped"
-    exit
+    exit 0
+else
+    echo "CMUS not running"
+    exit 0
 fi
 
 filepath=$(/usr/local/bin/cmus-remote -C 'format_print %f')
@@ -24,3 +27,4 @@ played=$(/usr/local/bin/cmus-remote -C 'format_print (%{position}/%d)')
 now_playing=$(/usr/local/bin/cmus-remote -C 'format_print %A\ -\ %l')
 
 echo "{'text':'${track_formatted} ${played}\n${now_playing}', 'icon_path':'${album_art}', 'font_size': 10}"
+exit 0
