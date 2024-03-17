@@ -8,7 +8,7 @@ if [[ "$is_playing" == 'status paused' ]]; then
 elif [[ "$is_playing" == 'status stopped' ]]; then
     echo "CMUS Stopped"
     exit 0
-else
+elif [[ "$is_playing" != 'status playing' ]]; then
     echo "CMUS not running"
     exit 0
 fi
