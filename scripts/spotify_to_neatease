@@ -1,0 +1,26 @@
+#!/usr/bin/env python3.10
+
+from bs4 import BeautifulSoup
+import requests
+
+print("Fetching playlist HTML...")
+
+# URL = "https://open.spotify.com/playlist/1msLQtHxZokAl1CqW2D8dd?si=vrVJA1PbSj-ZKHQqQ5dQ3g&pi=u-ELtFWTd6Rv-x&nd=1&utm_medium=organic&product=open&%24full_url=https%3A%2F%2Fopen.spotify.com%2Fplaylist%2F1msLQtHxZokAl1CqW2D8dd%3Fsi%3DvrVJA1PbSj-ZKHQqQ5dQ3g%26pi%3Du-ELtFWTd6Rv-x&feature=organic&_branch_match_id=1285532493400324917&_branch_referrer=H4sIAAAAAAAAA8WOywqCQBiFn2bcqaglEUhIJlEusqLATYyOl8k%2FZ5xL1Ns3Bj1DcBaH8%2FHB6ZTicum6kjNFm7eDOXeADr274oIRXamI8XqwkD9rNMBNC4i6SUFBjPzUZMLOz67Yw0wc8BuoVKZ6D5nlavsqWB%2BDtx6vfrIgBAWppChInuKyi71DebrbxX6bj%2Fmc5EGL%2FJBPVNubTKXXMwmPT%2Fv1vYABSlz1f7xh1sGIiWc1NVZa1BETLR5o9QEjR2fBSQEAAA%3D%3D"
+# page = requests.get(URL)
+# soup = BeautifulSoup(page.content, "html.parser")
+
+URL = "/Users/ifor/Downloads/spotify_playlist.html"
+with open(URL) as fp:
+    soup = BeautifulSoup(fp, 'html.parser')
+
+tracks = soup.find_all('div', attrs={'data-testid' : 'tracklist-row'})
+
+print(tracks[0])
+exit
+track_number = 1
+for track in tracks:
+    pars = track.find_all('a')
+    print(track_number, pars[0].text, pars[1].text)
+    track_number += 1
+
+exit
