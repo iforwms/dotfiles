@@ -26,5 +26,5 @@ track_formatted=$(echo "$track" | awk -v len=30 '{ if (length($0) > len) print s
 played=$(/usr/local/bin/cmus-remote -C 'format_print (%{position}/%d)')
 now_playing=$(/usr/local/bin/cmus-remote -C 'format_print %A\ -\ %l')
 
-echo "{'text':'${track_formatted} ${played}\n${now_playing}', 'icon_path':'${album_art}', 'font_size': 10}"
+echo "{'text':\"${track_formatted} ${played}\n${now_playing}\", 'icon_path':'${album_art}', 'font_size': 10}"
 exit 0
