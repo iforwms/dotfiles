@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+read -r -d '' applescriptCode <<'EOF'
+   set dialogText to text returned of (display dialog "Song tuning in Hz?" default answer "")
+   return dialogText
+EOF
+
+dialogText=$(osascript -e "$applescriptCode");
+
+$DOTFILES/scripts/tuning-to-cents $dialogText
