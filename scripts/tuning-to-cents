@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+tuning="$1"
+
+if [[ -z "$tuning" ]]; then
+  echo "Missing song tuning, aborting."
+  exit 1
+fi
+
+cent_difference=$(echo "1200 * l(440 / ${tuning}) / l(2)" | bc -l)
+
+printf "%.2f\n" "$cent_difference"
