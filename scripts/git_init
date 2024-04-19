@@ -45,8 +45,8 @@ if [[ $install_tailwind =~ ^[Yy]$ ]]; then
   npm install --prefix "$repo_path" -D tailwindcss
   npm exec --prefix "$repo_path" tailwind init
 
-  rm -rf "${repo_path}/.tailwind.config.js"
-  cat >"${repo_path}/.tailwind.config.js" <<EOL
+  rm -rf "${repo_path}/tailwind.config.js"
+  cat >"${repo_path}/tailwind.config.js" <<EOL
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{html,js}"],
