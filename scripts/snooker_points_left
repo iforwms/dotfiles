@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
 
-no_of_reds=${1:-0}
+no_of_reds=${1:-15}
+player_1=${2:-0}
+player_2=${3:-0}
 
-echo "${no_of_reds} * 8 + 27" | bc
+if [[ $# -lt 3 ]]; then
+    echo "usage: snooker_points_left <reds on table> <player 1 score> <player 2 score>"
+    exit 0
+fi
+
+points_available=$(echo "${no_of_reds} * 8 + 27" | bc)
+points_ahead=$(echo "abs(${player_1} - ${player_2})" | bc)
+
+echo "${points_ahead} ahead, ${points_available} remaining"
