@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+no_of_reds=${1:-0}
+
+echo "${no_of_reds} * 8 + 27" | bc
