@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+base_dir="/Users/ifor/Movies/darts-analysis"
+
+function convertToMp4() {
+  src="$1"
+  base_dir="/Users/ifor/Movies/darts-analysis/"
+  filename=${src/$base_dir/}
+  filename=${filename//-/}
+  filename=${filename/.mkv/}
+  filename="${filename/ /-}-darts.analysis.mp4"
+  output_filename="${base_dir}${filename}"
+
+  if [[ -e "$output_filename" ]]; then
+    echo -e "\e[33m${filename} already exists, skipping.\e[0m"
+    exit 0
+  fi
+
+  echo -e "\e[32mConverting ${filename}\e[0m"
+  ffmpeg -loglevel quiet -i "$src" -codec copy "$output_filename"
+}
+
+export -f convertToMp4
+
+find "${base_dir}" -type f -name "*.mkv" -print0 | \
+  xargs -0 -I {} bash -c "convertToMp4 '{}'"
