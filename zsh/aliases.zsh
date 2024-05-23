@@ -310,6 +310,7 @@ alias tcs=$DOTFILES/scripts/tmux_sessions
 alias md2pdf=$DOTFILES/scripts/markdown2pdf
 # alias ytd=$DOTFILES/scripts/youtube-dl
 alias yt='yt-dlp'
+alias ytmp3='yt-dlp -x'
 
 # Given a tmux session name, add suffixes until it is unique
 function _tmux_get_unique_id() {
