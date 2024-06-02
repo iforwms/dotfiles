@@ -526,6 +526,11 @@ inoremap <leader>iww Ifor Waldo Williams
 
 "Make file executable.
 nnoremap <leader>mx :! chmod +x %<Return>
+
+"Clear buffer list.
+nnoremap <leader>db :%bd\|e#\|bd#<cr>
+
+"Run current file.
 nnoremap <leader>rf :!%<Return>
 
 " inoremap <leader>em ifor@cors.tech
