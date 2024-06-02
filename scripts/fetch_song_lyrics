@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.11
 
 from bs4 import BeautifulSoup
 import re, sys, requests
