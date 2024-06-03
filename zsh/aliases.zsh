@@ -298,6 +298,9 @@ alias lon='lproxy && ssht'
 alias don='dproxy && ssht'
 alias pc='proxychains4'
 
+alias nse='cd /etc/nginx/sites-enabled'
+alias nsa='cd /etc/nginx/sites-available'
+
 # Tmux
 alias t="tmux"
 alias ta="tmux a||tmux"
