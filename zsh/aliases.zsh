@@ -79,7 +79,7 @@ alias dom="cd $HOME/code/domino"
 alias exp="cd $HOME/code/expednet"
 alias obs="cd $HOME/obsidian"
 alias kim="cd $HOME/code/kim"
-alias dl="cd $HOME/Downloads"
+alias dl="cd $HOME/downloads"
 alias docs="cd $HOME/Documents"
 
 alias le="python3 $DOTFILES/scripts/logic_stem_export.py"
