@@ -21,6 +21,7 @@ function clean() {
         s/\.-\./-/g;
         s/ /\./g;
         s/\.\././g;
+        s/NA-NA\.//;
         s/^XXXX/\.\//
     ")
     dest="${dest,,}"
