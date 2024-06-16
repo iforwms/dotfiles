@@ -21,14 +21,14 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
       ffmpeg -i "$f" -vcodec libx265 -crf 28 "${f/.${input_filetype}/.opt.${output_filetype}}"
     done
     echo "All done!"
-    osascript -e "display notification \"${success_msg}\" with title \"Video Conversion Complete\" sound name \"Blow\""
+    osascript -e "display notification \"${success_msg}\" with title \"Conversion Complete\" sound name \"Blow\""
     exit 0
   elif [[ $conversion_type = 'audio' ]]; then
     for f in *."${input_filetype}"; do
       ffmpeg -i "$f" -vn -ar 44100 -ac 2 -b:a 192k "${f/${input_filetype}/${output_filetype}}"
     done
     echo "All done!"
-    osascript -e "display notification \"${success_msg}\" with title \"Video Conversion Complete\" sound name \"Blow\""
+    osascript -e "display notification \"${success_msg}\" with title \"Conversion Complete\" sound name \"Blow\""
     exit 0
   else
     echo "Unrecognised conversion type, currently supported types: audio, video."
