@@ -517,6 +517,7 @@ let g:netrw_list_hide.=',\(^\|\s\s)\zs\.\S+'        "Hide additional files.
 
 "--------Snippets--------"
 inoremap <leader>dd echo "<pre>"; var_dump(); echo "</pre>"; exit;<ESC>F(a
+inoremap <leader>cl console.log();<ESC>F(a
 
 nnoremap <leader>html :-1read $HOME/.vim/.skeleton.html<CR>4jf>a
 nnoremap <leader>pgn :-1read $HOME/.vim/templates/pgn<CR>:3<CR>ci"<C-r>=strftime('%F')<CR><ESC>:12<CR>ci"<C-r>=strftime('%H:%M')<CR><ESC>
