@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+file=$1
+
+if [[ -z "$file" ]]; then
+  echo "[video-for-tv] usage: video-for-tv <path-to-file>"
+  exit 1
+fi
+
+extension=${file##*.}
+
+ffmpeg -i "$file" -acodec mp3 -vcodec copy "${file/.${extension}/-mp3.${extension}}"
+
+echo "[video-for-tv] All done!"
+
+exit 0
