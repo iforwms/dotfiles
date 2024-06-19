@@ -10,7 +10,7 @@ fi
 
 echo "Moving Reddit downloads to own folder..."
 
-mv "${dl_folder}/RDT_*" "$reddit_folder"
+mv "$dl_folder"/RDT_* "$reddit_folder"
 
 echo "All done!"
 exit 0
