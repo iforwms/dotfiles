@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+dl_folder="${HOME}/storage/downloads"
+reddit_folder="${dl_folder}/reddit"
+
+if ! [[ -e "$dl_folder" ]]; then
+  echo "Android downloads folder not found, aborting..."
+  exit 1
+fi
+
+echo "Moving Reddit downloads to own folder..."
+
+mv "${dl_folder}/RDT_*" "$reddit_folder"
+
+echo "All done!"
+exit 0
