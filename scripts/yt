@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 
-script_name="YT"
+script_name="yt"
 url="$1"
 
 if [[ -z "$url" ]]; then
   echo "[${script_name}] usage: yt <url>";
   exit 1
 fi
-
-output_filename=$(basename "$(yt-dlp --get-filename "$url")")
 
 options=(
   "Normal Download"
@@ -25,13 +23,15 @@ do
     case $opt in
         "Normal Download")
             echo "[${script_name}] Downloading file to default directory..."
+            output_filename=$(basename "$(yt-dlp --get-filename "$url")")
             yt-dlp $url
             exit 0
             ;;
         "Download MP3 to current directory")
             echo "[${script_name}] Downloading file and extracting audio to current directory..."
+            output_filename=$(basename "$(yt-dlp --get-filename "$url")")
             yt-dlp -x --audio-format mp3 -P . $url
-            # ffmpeg -i "$output_filetype" -vn -ar 44100 -ac 2 -b:a 192k "${output_filetype}"
+            $DOTFILES/scripts/sbl_cleanup_filename "${output_filename/.mkv/.mp3}" FORCE
             exit 0
             ;;
         "Quit")
