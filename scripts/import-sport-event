@@ -86,9 +86,8 @@ UID:{$uid}
 DTSTAMP:20220101T000000Z
 TRANSP:TRANSPARENT
 SUMMARY:{$name}
-DTSTART;VALUE=DATE:{$timestamps[0]}
-DTEND;VALUE=DATE:{$timestamps[1]}
-{$ics_no_alarm}
+DTSTART:{$timestamps[0]}
+DTEND:{$timestamps[1]}
 END:VEVENT
 ICS;
 }
