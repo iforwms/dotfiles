@@ -44,5 +44,9 @@ done
 # referenced in my aliases.zsh file directly.
 #export PATH="$(brew --prefix coreutils)/libexec/gnubin:$PATH"
 
+if [ -n "${PATH##*${snap_bin_path}}" ] && [ -n "${PATH##*${snap_bin_path}:*}" ]; then
+    export PATH="$PATH:${snap_bin_path}"
+fi
+
 export PATH="$DOTFILES/scripts:$DOTFILES/scripts/server:$PATH"
 
