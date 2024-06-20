@@ -4,7 +4,14 @@ DEBUG=1
 declare -x DEBUG
 
 file_type="${1:-*}"
-file_depth="${2:-1}"
+force=0
+
+if [[ $2 -eq 'FORCE' ]]; then
+    file_depth=1
+    force=1
+else
+    file_depth="${2:-1}"
+fi
 
 function clean() {
     LANG=C
@@ -43,9 +50,20 @@ find . \
     xargs -0 -I {} bash -c "clean \"{}\""
 
 echo
-read -p "Do you want to rename these files? (y/n) " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
+if [[ $force -eq 0 ]]; then
+    read -p "Do you want to rename these files? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        DEBUG=0
+        echo
+        find . \
+            -maxdepth "$file_depth" \
+            -type f \
+            -name "$file_type" \
+            -print0 | \
+            xargs -0 -I {} bash -c "clean \"{}\""
+    fi
+else
     DEBUG=0
     echo
     find . \

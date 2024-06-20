@@ -312,11 +312,6 @@ alias tcs=$DOTFILES/scripts/tmux_sessions
 # Create PDF from markdown
 alias md2pdf=$DOTFILES/scripts/markdown2pdf
 
-# YouTube Downloader
-alias yt='yt-dlp'
-alias yta='yt-dlp -x'
-alias yth='yt-dlp -P .'
-
 # Given a tmux session name, add suffixes until it is unique
 function _tmux_get_unique_id() {
     local _id=$(tmux list-sessions|grep "^$1"|wc -l)

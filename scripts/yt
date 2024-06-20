@@ -1,0 +1,36 @@
+!#/usr/bin/env bash
+
+# 1 normal download
+# 2 mp3 only
+# 3 download here
+# 4 download here and rename
+# 5 download here and convert to mp3 video
+
+echo "Select downloads type:"
+
+for opt in "$options[@]"; do
+  echo $opt
+done
+exit
+
+echo
+read entry
+echo
+case $entry in
+1)
+echo "Enumeration"
+break
+;;
+2)
+echo "General"
+break
+;;
+3)
+echo "Web-Recon"
+break
+;;
+default)
+echo "Default Action"
+break
+;;
+esac
