@@ -1,0 +1,104 @@
+#!/usr/bin/env php
+
+<?php
+
+$prefix = $argv[2] ?? "";
+$import_filepath = $argv[1];
+$duration = $argv[3] ?? 120;
+$output_filepath = "{$import_filepath}." . date("U") . ".ics";
+
+if(!file_exists($import_filepath)) {
+  exit ("File specified does not exist, aborting...");
+}
+
+function uuid4()
+{
+  $data = random_bytes(16);
+
+  $data[6] = chr((ord($data[6]) & 0x0f) | 0x40); // set version to 0100
+  $data[8] = chr((ord($data[8]) & 0x3f) | 0x80); // set bits 6-7 to 10
+
+  return vsprintf("%s%s-%s-%s-%s-%s%s%s", str_split(bin2hex($data), 4));
+}
+
+function parse_date($string, $duration_in_mins = 120)
+{
+  $start_date_arr = explode(" ", $string);
+  $time = $start_date_arr[1];
+  $start_date = array_values(array_filter(explode(".", $start_date_arr[0])));
+
+  $date_string = date("Y") . "-{$start_date[0]}-{$start_date[1]} {$time}";
+  $start_date_obj = date_create_from_format("Y-d-m H:i", $date_string);
+  $start_date_obj->modify("-8 hours");
+
+  $start_date_string =
+    $start_date_obj->format("Ymd") .
+    "T" .
+    $start_date_obj->format("Hi") .
+    "00Z";
+
+  $end_date_obj = $start_date_obj->modify("+{$duration_in_mins} minutes");
+
+  $end_date_string =
+    $end_date_obj->format("Ymd") . "T" . $end_date_obj->format("Hi") . "00Z";
+
+  return [$start_date_string, $end_date_string];
+}
+
+$ics_header = <<<ICS
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//iforwms//Event Generator//EN
+ICS;
+$ics_footer = <<<ICS
+
+END:VCALENDAR
+ICS;
+$ics_no_alarm = <<<ICS
+BEGIN:VALARM
+ACTION:NONE
+TRIGGER;VALUE=DATE-TIME:19760401T005545Z
+END:VALARM
+ICS;
+$ics_string = $ics_header;
+
+$contents = file_get_contents($import_filepath);
+$lines = explode("\n", $contents);
+$prefix = $prefix ? "{$prefix} " : "";
+
+for ($i = 0; $i < count($lines); $i++) {
+  if ($i % 3 !== 0 || !$lines[$i]) {
+    continue;
+  }
+
+  $uid = uuid4();
+
+  $team_1 = $lines[$i + 1];
+  $team_2 = $lines[$i + 2];
+
+  $timestamps = parse_date($lines[$i], 180);
+  $name = trim("{$prefix}{$team_1} - {$team_2}");
+
+  $ics_string .= <<<ICS
+
+BEGIN:VEVENT
+UID:{$uid}
+DTSTAMP:20220101T000000Z
+TRANSP:TRANSPARENT
+SUMMARY:{$name}
+DTSTART;VALUE=DATE:{$timestamps[0]}
+DTEND;VALUE=DATE:{$timestamps[1]}
+{$ics_no_alarm}
+END:VEVENT
+ICS;
+}
+
+$ics_string .= $ics_footer;
+$ics_string = str_replace("  ", "", $ics_string);
+$ics_string = str_replace("\n", "\r\n", $ics_string);
+
+file_put_contents($output_filepath, $ics_string);
+
+echo "All done!" . PHP_EOL;
+
+#
