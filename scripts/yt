@@ -1,36 +1,47 @@
-!#/usr/bin/env bash
+#!/usr/bin/env bash
 
-# 1 normal download
-# 2 mp3 only
-# 3 download here
-# 4 download here and rename
-# 5 download here and convert to mp3 video
+script_name="YT"
+url="$1"
 
-echo "Select downloads type:"
+if [[ -z "$url" ]]; then
+  echo "[${script_name}] usage: yt <url>";
+  exit 1
+fi
 
-for opt in "$options[@]"; do
-  echo $opt
+output_filename=$(basename "$(yt-dlp --get-filename "$url")")
+
+options=(
+  "Normal Download"
+  "Download MP3 to current directory"
+  "Download to current directory"
+  "Download to current directory and clean up filename"
+  "Download to current directory and convert video audio to MP3"
+  "Quit"
+)
+
+echo "[${script_name}] Select download type:"
+select opt in "${options[@]}"
+do
+    case $opt in
+        "Normal Download")
+            echo "[${script_name}] Downloading file to default directory..."
+            yt-dlp $url
+            exit 0
+            ;;
+        "Download MP3 to current directory")
+            echo "[${script_name}] Downloading file and extracting audio to current directory..."
+            yt-dlp -x --audio-format mp3 -P . $url
+            # ffmpeg -i "$output_filetype" -vn -ar 44100 -ac 2 -b:a 192k "${output_filetype}"
+            exit 0
+            ;;
+        "Quit")
+            echo "[${script_name}] Exiting..."
+            exit 0
+            ;;
+        *)
+          echo "[${script_name}] Invalid option ${REPLY}. Aborting..."
+          echo "[${script_name}] usage: yt <url>";
+          exit 1
+         ;;
+    esac
 done
-exit
-
-echo
-read entry
-echo
-case $entry in
-1)
-echo "Enumeration"
-break
-;;
-2)
-echo "General"
-break
-;;
-3)
-echo "Web-Recon"
-break
-;;
-default)
-echo "Default Action"
-break
-;;
-esac
