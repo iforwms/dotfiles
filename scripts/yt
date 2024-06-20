@@ -11,7 +11,6 @@ fi
 options=(
   "Download to default directory"
   "Download MP3 to current directory"
-  "Download to current directory"
   "Download to current directory and clean up filename"
   "Download to current directory and convert video audio to MP3"
   "Quit"
@@ -20,27 +19,43 @@ options=(
 echo "[${script_name}] Select download type:"
 select opt in "${options[@]}"
 do
-    case $opt in
-        "Download to default directory")
-            echo "[${script_name}] Downloading file to default directory..."
-            yt-dlp $url
-            exit 0
-            ;;
-        "Download MP3 to current directory")
-            echo "[${script_name}] Downloading file and extracting audio to current directory..."
-            output_filename=$(basename "$(yt-dlp --get-filename "$url")")
-            yt-dlp -x --audio-format mp3 -P . $url
-            $DOTFILES/scripts/sbl_cleanup_filename "${output_filename/.mkv/.mp3}" FORCE
-            exit 0
-            ;;
-        "Quit")
-            echo "[${script_name}] Exiting..."
-            exit 0
-            ;;
-        *)
-          echo "[${script_name}] Invalid option ${REPLY}. Aborting..."
-          echo "[${script_name}] usage: yt <url>";
-          exit 1
-         ;;
-    esac
+  case $opt in
+    "Download to default directory")
+      echo "[${script_name}] Downloading file to default directory..."
+      yt-dlp $url
+      exit 0
+      ;;
+    "Download MP3 to current directory")
+      echo "[${script_name}] Downloading file and extracting audio to current directory..."
+      output_filename=$(basename "$(yt-dlp --get-filename "$url")")
+      yt-dlp -x --audio-format mp3 -P . $url
+      $DOTFILES/scripts/sbl_cleanup_filename "${output_filename/.mkv/.mp3}" FORCE
+      exit 0
+      ;;
+    "Download to current directory and clean up filename")
+      echo "[${script_name}] Downloading file to current directory..."
+      output_filename=$(basename "$(yt-dlp --get-filename "$url")")
+      yt-dlp -P . $url
+      $DOTFILES/scripts/sbl_cleanup_filename "$output_filename" FORCE
+      exit 0
+      ;;
+    "Download to current directory and convert video audio to MP3")
+      echo "[${script_name}] Downloading file to current directory and converting video audio to MP3..."
+      output_filename=$(basename "$(yt-dlp --get-filename "$url")")
+      yt-dlp -P . $url
+      ffmpeg -i "$output_filename" -acodec mp3 -vcodec copy "${output_filename/.mkv/-mp3.mp4}"
+      $DOTFILES/scripts/sbl_cleanup_filename "${output_filename/.mkv/-mp3.mp4}" FORCE
+      rm "$output_filename"
+      exit 0
+      ;;
+    "Quit")
+      echo "[${script_name}] Exiting..."
+      exit 0
+      ;;
+    *)
+      echo "[${script_name}] Invalid option ${REPLY}. Aborting..."
+      echo "[${script_name}] usage: yt <url>";
+      exit 1
+      ;;
+  esac
 done

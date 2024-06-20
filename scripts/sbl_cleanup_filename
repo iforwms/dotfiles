@@ -7,71 +7,72 @@ declare -x FORCE
 
 file_type="${1:-*}"
 
-if [[ $2 -eq 'FORCE' ]]; then
-    file_depth=1
-    FORCE=1
+if [[ $2 == 'FORCE' ]]; then
+  file_depth=1
+  FORCE=1
 else
-    file_depth="${2:-1}"
+  file_depth="${2:-1}"
 fi
 
 function clean() {
-    LANG=C
+  LANG=C
 
-    src="$1"
-    dest=$(echo $src | sed "
-        s/^\.\//XXXX/;
-        s/^\.\/\./XXXX/;
-        s/\+/\./g;
-        s/[^[:alnum:]_\/\ \.-]//g;
-        s/_/\./g;
-        s/  / /g;
-        s/ - /-/g;
-        s/\.-\./-/g;
-        s/ /\./g;
-        s/\.\././g;
-        s/NA-NA\.//;
-        s/^XXXX/\.\//
+  src="$1"
+  dest=$(echo $src | sed "
+    s/^\.\//XXXX/;
+    s/^\.\/\./XXXX/;
+    s/\+/\./g;
+    s/[^[:alnum:]_\/\ \.-]//g;
+    s/_/\./g;
+    s/  / /g;
+    s/ - /-/g;
+    s/\.-\./-/g;
+    s/ /\./g;
+    s/\.\././g;
+    s/\.-/-/g;
+    s/NA-NA\.//;
+    s/^XXXX/\.\//
     ")
-    dest="${dest,,}"
+  dest="${dest,,}"
 
-    if [[ $DEBUG != 1 ]]; then
-        mv "${src}" "${dest}"
-    fi
+  if [[ $DEBUG != 1 ]]; then
+    mv "${src}" "${dest}"
+  fi
 
-    if [[ $FORCE != 1 ]]; then
-        echo "[cleanup filename] ${src}" "--->" "${dest}"
-    fi
+  if [[ $FORCE != 1 ]]; then
+    echo "[cleanup filename] ${src}" "--->" "${dest}"
+  fi
 }
 
 export -f clean
 
 find . \
+  -maxdepth "$file_depth" \
+  -type f \
+  -name "$file_type" \
+  -print0 | \
+  xargs -0 -I {} bash -c "clean \"{}\""
+
+if [[ $FORCE -eq 0 ]]; then
+  read -p "[cleanup filename] Do you want to rename these files? (y/n) " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    DEBUG=0
+    echo
+    find . \
+      -maxdepth "$file_depth" \
+      -type f \
+      -name "$file_type" \
+      -print0 | \
+      xargs -0 -I {} bash -c "clean \"{}\""
+  fi
+else
+  DEBUG=0
+  find . \
     -maxdepth "$file_depth" \
     -type f \
     -name "$file_type" \
     -print0 | \
     xargs -0 -I {} bash -c "clean \"{}\""
-
-if [[ $FORCE -eq 0 ]]; then
-    read -p "[cleanup filename] Do you want to rename these files? (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        DEBUG=0
-        echo
-        find . \
-            -maxdepth "$file_depth" \
-            -type f \
-            -name "$file_type" \
-            -print0 | \
-            xargs -0 -I {} bash -c "clean \"{}\""
-    fi
-else
-    DEBUG=0
-    find . \
-        -maxdepth "$file_depth" \
-        -type f \
-        -name "$file_type" \
-        -print0 | \
-        xargs -0 -I {} bash -c "clean \"{}\""
 fi
 
