@@ -9,7 +9,7 @@ if [[ -z "$url" ]]; then
 fi
 
 options=(
-  "Normal Download"
+  "Download to default directory"
   "Download MP3 to current directory"
   "Download to current directory"
   "Download to current directory and clean up filename"
@@ -21,9 +21,8 @@ echo "[${script_name}] Select download type:"
 select opt in "${options[@]}"
 do
     case $opt in
-        "Normal Download")
+        "Download to default directory")
             echo "[${script_name}] Downloading file to default directory..."
-            output_filename=$(basename "$(yt-dlp --get-filename "$url")")
             yt-dlp $url
             exit 0
             ;;
