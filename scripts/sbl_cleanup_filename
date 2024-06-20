@@ -2,13 +2,14 @@
 
 DEBUG=1
 declare -x DEBUG
+FORCE=0
+declare -x FORCE
 
 file_type="${1:-*}"
-force=0
 
 if [[ $2 -eq 'FORCE' ]]; then
     file_depth=1
-    force=1
+    FORCE=1
 else
     file_depth="${2:-1}"
 fi
@@ -37,7 +38,9 @@ function clean() {
         mv "${src}" "${dest}"
     fi
 
-    echo "${src}" "--->" "${dest}"
+    if [[ $FORCE != 1 ]]; then
+        echo "[cleanup filename] ${src}" "--->" "${dest}"
+    fi
 }
 
 export -f clean
@@ -49,9 +52,8 @@ find . \
     -print0 | \
     xargs -0 -I {} bash -c "clean \"{}\""
 
-echo
-if [[ $force -eq 0 ]]; then
-    read -p "Do you want to rename these files? (y/n) " -n 1 -r
+if [[ $FORCE -eq 0 ]]; then
+    read -p "[cleanup filename] Do you want to rename these files? (y/n) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         DEBUG=0
@@ -65,7 +67,6 @@ if [[ $force -eq 0 ]]; then
     fi
 else
     DEBUG=0
-    echo
     find . \
         -maxdepth "$file_depth" \
         -type f \
