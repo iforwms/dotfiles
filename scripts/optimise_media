@@ -3,13 +3,13 @@
 conversion_type="${1:-video}"
 input_filetype="${2:-mp4}"
 output_filetype="${3:-$input_filetype}"
+script_name=optimise_media
+success_msg="[${script_name}] All ${conversion_type} in $(pwd) successfully converted from ${input_filetype} to ${output_filetype}."
 
-success_msg="All videos in $(pwd) successfully converted from ${input_filetype} to ${output_filetype}."
-
-read -p "Files to be converted:
+read -p "[${script_name}] Files to be converted:
 $(ls -- *."${input_filetype}")
 
-Are you sure you want to optimise all ${input_filetype} ${conversion_type} files to ${output_filetype}? (y/n) " -n 1 -r
+[${script_name}] Are you sure you want to optimise all ${input_filetype} ${conversion_type} files to ${output_filetype}? (y/n) " -n 1 -r
 echo
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -20,25 +20,27 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
       # fi
       ffmpeg -i "$f" -vcodec libx265 -crf 28 "${f/.${input_filetype}/.opt.${output_filetype}}"
     done
-    echo "All done!"
-    osascript -e "display notification \"${success_msg}\" with title \"Conversion Complete\" sound name \"Blow\""
-    exit 0
   elif [[ $conversion_type = 'audio' ]]; then
     for f in *."${input_filetype}"; do
       ffmpeg -i "$f" -vn -ar 44100 -ac 2 -b:a 320k "${f/${input_filetype}/${output_filetype}}"
     done
-    echo "All done!"
-    osascript -e "display notification \"${success_msg}\" with title \"Conversion Complete\" sound name \"Blow\""
-    exit 0
   elif [[ $conversion_type = 'image' ]]; then
     for f in *."${input_filetype}"; do
       mogrify -interlace plane "$f"
     done
-    echo "All done!"
-    osascript -e "display notification \"${success_msg}\" with title \"Conversion Complete\" sound name \"Blow\""
-    exit 0
   else
-    echo "Unrecognised conversion type, currently supported types: audio, video."
+    echo "[${script_name}] Unrecognised conversion type, currently supported types: audio, video, image."
     exit 1
   fi
+
+  if [[ $(command -v osascript) ]]; then
+    osascript -e "display notification \"${success_msg}\" with title \"Conversion Complete\" sound name \"Blow\""
+  fi
+
+  echo "[${script_name}] All done!"
+else
+  echo "[${script_name}] Exiting..."
 fi
+
+exit 0
+
