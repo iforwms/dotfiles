@@ -32,7 +32,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     exit 0
   elif [[ $conversion_type = 'image' ]]; then
     for f in *."${input_filetype}"; do
-      convert "$f" -interlace plane "${f/${input_filetype}/.opt.${output_filetype}}"
+      mogrify -interlace plane "$f"
     done
     echo "All done!"
     osascript -e "display notification \"${success_msg}\" with title \"Conversion Complete\" sound name \"Blow\""
