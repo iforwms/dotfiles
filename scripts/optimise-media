@@ -13,18 +13,18 @@ $(ls -- *."${input_filetype}")
 echo
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-  if [[ $conversion_type = 'video' ]]; then
+  if [[ $conversion_type == 'video' ]]; then
     for f in *."${input_filetype}"; do
       # if [[ "$f" == *".opt."* ]]; then
       #   continue
       # fi
       ffmpeg -i "$f" -acodec mp3 -vcodec libx265 -crf 28 "${f/.${input_filetype}/.opt.${output_filetype}}"
     done
-  elif [[ $conversion_type = 'audio' ]]; then
+  elif [[ $conversion_type == 'audio' ]]; then
     for f in *."${input_filetype}"; do
       ffmpeg -i "$f" -vn -ar 44100 -ac 2 -b:a 320k "${f/${input_filetype}/${output_filetype}}"
     done
-  elif [[ $conversion_type = 'image' ]]; then
+  elif [[ $conversion_type == 'image' ]]; then
     for f in *."${input_filetype}"; do
       mogrify -interlace plane "$f"
     done
