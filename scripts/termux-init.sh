@@ -28,7 +28,7 @@ pkg upgrade
 
 echo "[${script_name}] Installing required apps..."
 for f in "${packages_to_install[@]}"; do
-  pgk install "$f"
+  pkg install "$f"
 done
 
 pip install --upgrade pip
