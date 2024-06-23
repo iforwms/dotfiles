@@ -5,7 +5,7 @@ script_name=dotfiles
 server=me
 
 echo "[${script_name}] Updating termux-init."
-rsync --verbose --no-times --compress ./scripts/termux-init.sh "${server}:/var/www/downloads"
+rsync --verbose --no-times --compress "${base_dir}/scripts/termux-init.sh" "${server}:/var/www/downloads"
 
 echo "[${script_name}] Updating clients server."
 ssh clients "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa' && git -C ${base_dir} pull"
