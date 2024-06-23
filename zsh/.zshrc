@@ -164,7 +164,7 @@ export NVM_DIR="$HOME/.nvm"
 
 source $DOTFILES/zsh/path.zsh
 
-$DOTFILES/scripts/clean-reddit-dls 2>&1 /dev/null
+$DOTFILES/scripts/clean-reddit-dls 1> /dev/null 2> /dev/null
 
 dl_folder="${HOME}/storage/downloads"
 if [[ -e "$dl_folder" ]]; then
