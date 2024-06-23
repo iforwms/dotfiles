@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# TODO: `termux`: `pkg update` 0 no mirror or group mirror selected
+# Make sh-compatible
+# Install all packages at once
+
 script_name="termux-init"
 packages_to_install=(
   "ffmpeg"
@@ -31,8 +35,8 @@ for f in "${packages_to_install[@]}"; do
   pkg install "$f"
 done
 
-echo "[${script_name}] Upgrading pip..."
-pip install --upgrade pip
+# echo "[${script_name}] Upgrading pip..."
+# pip install --upgrade pip
 
 echo "[${script_name}] Creating symlinks..."
 termux-setup-storage
@@ -44,7 +48,7 @@ chsh -s zsh
 # sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
 echo "[${script_name}] Downloading iforwms yt script..."
-curl https://dl/iforwms.com/downloads/yt > "${HOME}/yt"
+curl -fsSL https://dl.iforwms.com/downloads/yt > "${HOME}/yt"
 chmod +x "${HOME}/yt"
 
 echo "[${script_name}] All done!"
