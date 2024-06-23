@@ -1,23 +1,27 @@
 #!/bin/bash
 
-base_dir="/home/ifor/.dotfiles"
-name="dotfiles"
+base_dir=/home/ifor/.dotfiles
+script_name=dotfiles
+server=me
 
-echo "[${name}] Updating clients server."
+echo "[${script_name}] Updating clients server."
 ssh clients "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa' && git -C ${base_dir} pull"
 
-echo "[${name}] Updating personal server."
+echo "[${script_name}] Updating personal server."
 ssh me "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa' && git -C ${base_dir} pull"
 
-echo "[${name}] Updating tt server."
+echo "[${script_name}] Updating tt server."
 ssh tt "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/ifor_tt' && git -C ${base_dir} pull"
 
-echo "[${name}] Updating exped server."
+echo "[${script_name}] Updating exped server."
 ssh exped "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/ifor_wmai' && git -C ${base_dir} pull"
 
-base_dir="/home/cors/.dotfiles"
-echo "[${name}] Updating cors server."
+base_dir=/home/cors/.dotfiles
+echo "[${script_name}] Updating cors server."
 ssh cors "git -C ${base_dir} config core.sshCommand 'ssh -i /home/cors/.ssh/ifor_github' && git -C ${base_dir} pull"
 
-echo "[${name}] Deploy complete!"
+echo "[${script_name}] Updating termux-init."
+rsync --verbose --no-times --compress "./scripts/termux-init.sh" "${server}:${base_dir}/assets"
+
+echo "[${script_name}] Deploy complete!"
 exit 0
