@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-echo "Backing up Application folder apps list."
-/bin/ls -1v /Applications | sed 's/.app//' > /Users/ifor/Documents/backup/installed_applications.txt
-
-echo "Backing up brew installed apps list/."
-brew leaves | xargs brew desc --eval-all > /Users/ifor/Documents/backup/installed_brew_apps.txt
