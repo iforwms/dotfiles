@@ -31,8 +31,10 @@ for f in "${packages_to_install[@]}"; do
   pkg install "$f"
 done
 
+echo "[${script_name}] Upgrading pip..."
 pip install --upgrade pip
 
+echo "[${script_name}] Creating symlinks..."
 termux-setup-storage
 
 # echo "[${script_name}] Setting ZSH as default shell..."
