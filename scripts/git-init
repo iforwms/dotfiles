@@ -29,13 +29,13 @@ vendor/
 EOL
 
 echo "Creating deploy script..."
-cat >"${repo_path}/deploy_remote" <<EOL
+cat >"${repo_path}/deploy-remote" <<EOL
 #!/usr/bin/env bash
 
 echo "All done!"
 exit 0
 EOL
-chmod +x "${repo_path}/deploy_remote"
+chmod +x "${repo_path}/deploy-remote"
 
 read -p "Do you wish to install tailwindcss? (y/n) " -n 1 -r install_tailwind
 echo
