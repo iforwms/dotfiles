@@ -37,12 +37,15 @@ pip install --upgrade pip
 echo "[${script_name}] Creating symlinks..."
 termux-setup-storage
 
-# echo "[${script_name}] Setting ZSH as default shell..."
-# chsh -s zsh
+echo "[${script_name}] Setting ZSH as default shell..."
+chsh -s zsh
+
+# echo "[${script_name}] Installing OMZ..."
 # sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
-# curl https://raw.githubusercontent.com/iforwms/dotfiles/master/scripts/yt > "${HOME}/yt"
-# chmod +x "${HOME}/yt"
+echo "[${script_name}] Downloading iforwms yt script..."
+curl https://dl/iforwms.com/downloads/yt > "${HOME}/yt"
+chmod +x "${HOME}/yt"
 
 echo "[${script_name}] All done!"
 exit 0
