@@ -163,3 +163,11 @@ export NVM_DIR="$HOME/.nvm"
 # !!      repeat the previous line
 
 source $DOTFILES/zsh/path.zsh
+
+$DOTFILES/scripts/clean-reddit-dls 2>/dev/null
+
+dl_folder="${HOME}/storage/downloads"
+if [[ -e "$dl_folder" ]]; then
+  cd "$dl_folder"
+fi
+

@@ -2,15 +2,15 @@
 
 dl_folder="${HOME}/storage/downloads"
 reddit_folder="${dl_folder}/reddit"
+script_name="clean-reddit-dls"
 
 if ! [[ -e "$dl_folder" ]]; then
-  echo "Android downloads folder not found, aborting..."
+  echo "[${script_name}] Android downloads folder not found, aborting..."
   exit 1
 fi
 
-echo "Moving Reddit downloads to own folder..."
-
+echo "[${script_name}] Moving Reddit downloads to own folder..."
 mv -v "$dl_folder"/RDT_* "$reddit_folder"
 
-echo "All done!"
+echo "[${script_name}] All done!"
 exit 0
