@@ -35,13 +35,12 @@ pip install --upgrade pip
 
 termux-setup-storage
 
-echo "[${script_name}] Setting ZSH as default shell..."
-chsh -s zsh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+# echo "[${script_name}] Setting ZSH as default shell..."
+# chsh -s zsh
+# sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
-curl https://raw.githubusercontent.com/iforwms/dotfiles/master/scripts/yt > "${HOME}/yt"
-chmod +x "${HOME}/yt"
-
+# curl https://raw.githubusercontent.com/iforwms/dotfiles/master/scripts/yt > "${HOME}/yt"
+# chmod +x "${HOME}/yt"
 
 echo "[${script_name}] All done!"
 exit 0
