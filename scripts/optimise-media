@@ -18,7 +18,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
       # if [[ "$f" == *".opt."* ]]; then
       #   continue
       # fi
-      ffmpeg -i "$f" -vcodec libx265 -crf 28 "${f/.${input_filetype}/.opt.${output_filetype}}"
+      ffmpeg -i "$f" -acodec mp3 -vcodec libx265 -crf 28 "${f/.${input_filetype}/.opt.${output_filetype}}"
     done
   elif [[ $conversion_type = 'audio' ]]; then
     for f in *."${input_filetype}"; do

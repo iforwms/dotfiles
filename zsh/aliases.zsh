@@ -42,11 +42,11 @@ if command -v ggrep &> /dev/null; then
   alias grep='ggrep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox}'
 fi
 
-alias randpw="$DOTFILES/scripts/random_password"
+alias randpw="$DOTFILES/scripts/random-password"
 
 # Git commit short cuts
-alias gcobs="$DOTFILES/scripts/git_commit ~/obsidian"
-alias gcdot="$DOTFILES/scripts/git_commit ~/.dotfiles"
+alias gcobs="$DOTFILES/scripts/git-commit ~/obsidian"
+alias gcdot="$DOTFILES/scripts/git-commit ~/.dotfiles"
 
 alias npmzh="npm config set registry https://registry.npm.taobao.org/"
 alias npmus="npm config set registry https://registry.npmjs.org/"
@@ -82,9 +82,9 @@ alias kim="cd $HOME/code/kim"
 alias dl="cd $HOME/downloads 2>/dev/null || cd $HOME/storage/downloads"
 alias docs="cd $HOME/Documents"
 
-alias le="python3 $DOTFILES/scripts/logic_stem_export.py"
+alias le="python3 $DOTFILES/scripts/logic-stem-export.py"
 
-alias knot=$DOTFILES/scripts/animated_knots
+alias knot=$DOTFILES/scripts/animated-knots
 
 alias dnsReset="sudo killall -HUP mDNSResponder"
 alias a="php artisan"
@@ -164,8 +164,8 @@ alias yrs='yarn start'
 # alias p="python"
 # alias sv="source venv/bin/activate"
 
-alias inv="${DOTFILES}/scripts/inventory_lookup"
-alias dict="${DOTFILES}/scripts/dictionary_lookup"
+alias inv="${DOTFILES}/scripts/inventory-lookup"
+alias dict="${DOTFILES}/scripts/dictionary-lookup"
 
 # Git
 alias gau='echo - "a\n*\nq\n" | git add -i > /dev/null'
@@ -175,13 +175,13 @@ alias glb="git log --simplify-by-decoration --all --color --graph --pretty=forma
 # alias glb='git log --graph --simplify-by-decoration --pretty=format:'%d' --all'
 alias gs='git status'
 alias gc='git commit -m'
-alias gcl="${DOTFILES}/scripts/git_clone"
+alias gcl="${DOTFILES}/scripts/git-clone"
 alias gad='git add $(git diff --name-only --cached)'
 alias gco='git checkout'
 alias gca='git commit -am'
 alias gcam='git commit --amend'
 alias gps='git push'
-alias gpd='git push && ./deploy_remote'
+alias gpd='git push && ./deploy-remote'
 alias gpl='git pull'
 alias ga='git add'
 alias gaa='git add .'
@@ -193,7 +193,7 @@ function gq() {
   git add .
   git commit -m "Quick commit - $(date '+%Y/%m/%d %H:%M')"
   git push
-  ./deploy_remote
+  ./deploy-remote
 }
 
 # alias apgi='git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached'
@@ -307,7 +307,7 @@ alias ta="tmux a||tmux"
 alias tat="tmux a -t"
 alias tls="tmux list-sessions"
 alias tkl="tmux kill-session -t"
-alias tcs=$DOTFILES/scripts/tmux_sessions
+alias tcs=$DOTFILES/scripts/tmux-sessions
 
 # Create PDF from markdown
 alias md2pdf=$DOTFILES/scripts/markdown2pdf

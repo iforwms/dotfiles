@@ -3,49 +3,119 @@
 script_name="yt"
 url="$1"
 
+function clean() {
+  LANG=C
+
+  src="$1"
+  dest=$(echo $src | sed "
+    s/^\.\//XXXX/;
+    s/^\.\/\./XXXX/;
+    s/\+/\./g;
+    s/[^[:alnum:]_\/\ \.-]//g;
+    s/_/\./g;
+    s/  / /g;
+    s/ - /-/g;
+    s/\.-\./-/g;
+    s/ /\./g;
+    s/\.\././g;
+    s/\.-/-/g;
+    s/NA-NA\.//;
+    s/^XXXX/\.\//
+    ")
+  dest="${dest,,}"
+  mv -v "${src}" "${dest}"
+  echo "[${script_name}] All done!"
+}
+export -f clean
+
 if [[ -z "$url" ]]; then
   echo "[${script_name}] usage: yt <url>";
   exit 1
 fi
 
+is_local_file=0
+if [[ -e "${url}" ]]; then
+  is_local_file=1
+fi
+
 options=(
   "Default directory"
-  "MP3 to current directory"
+  "Audio only to current directory"
   "Current directory and clean up filename"
-  "Current directory and convert video audio to MP3"
+  "Current directory and optimise audio (for TV)"
+  "Current directory and optimise audio and video (slow)"
   "Quit"
 )
 
-echo "[${script_name}] Select download type:"
+echo "[${script_name}] Select action:"
 select opt in "${options[@]}"
 do
   case $opt in
     "Default directory")
+      if [[ "$is_local_file" == "1" ]]; then
+        echo "[${script_name}] File is already downloaded. Exiting..."
+        exit 0
+      fi
+
       echo "[${script_name}] Downloading file to default directory..."
       yt-dlp $url
       exit 0
       ;;
-    "MP3 to current directory")
+    "Audio only to current directory")
       echo "[${script_name}] Downloading file and extracting audio to current directory..."
+
+      if [[ "$is_local_file" == "1" ]]; then
+        echo "[${script_name}] Attempting to convert ${url} to MP3..."
+        ffmpeg -i "$url" -q:a 0 -map a "${url}.mp3"
+        clean "${url}.mp3"
+        exit 0
+      fi
+
       output_filename=$(basename "$(yt-dlp --get-filename "$url")")
       yt-dlp -x --audio-format mp3 -P . $url
-      $DOTFILES/scripts/sbl_cleanup_filename "${output_filename/.mkv/.mp3}" FORCE
+      clean "${output_filename/.mkv/.mp3}"
       exit 0
       ;;
     "Current directory and clean up filename")
+      if [[ "$is_local_file" == "1" ]]; then
+        echo "[${script_name}] File is already downloaded. Exiting..."
+        exit 0
+      fi
+
       echo "[${script_name}] Downloading file to current directory..."
       output_filename=$(basename "$(yt-dlp --get-filename "$url")")
       yt-dlp -P . $url
-      $DOTFILES/scripts/sbl_cleanup_filename "$output_filename" FORCE
+      clean "$output_filename"
       exit 0
       ;;
-    "Current directory and convert video audio to MP3")
+    "Current directory and optimise audio (for TV)")
       echo "[${script_name}] Downloading file to current directory and converting video audio to MP3..."
-      output_filename=$(basename "$(yt-dlp --get-filename "$url")")
-      yt-dlp -P . $url
-      ffmpeg -i "$output_filename" -acodec mp3 -vcodec copy "${output_filename/.mkv/-mp3.mp4}"
-      $DOTFILES/scripts/sbl_cleanup_filename "${output_filename/.mkv/-mp3.mp4}" FORCE
-      rm "$output_filename"
+
+      if [[ "$is_local_file" == "0" ]]; then
+        output_filename=$(basename "$(yt-dlp --get-filename "$url")")
+        yt-dlp -P . $url
+      else
+        output_filename="$url"
+      fi
+
+      output_extension="${output_filename##*.}"
+      ffmpeg -i "$output_filename" -acodec mp3 -vcodec copy "${output_filename/.${output_extension}/-mp3.mp4}"
+      clean "${output_filename/.${output_extension}/-mp3.mp4}"
+      exit 0
+      ;;
+    "Current directory and optimise audio and video (slow)")
+      echo "[${script_name}] Downloading file to current directory and converting video audio to MP3..."
+
+      if [[ "$is_local_file" == "0" ]]; then
+        output_filename=$(basename "$(yt-dlp --get-filename "$url")")
+        yt-dlp -P . $url
+      else
+        output_filename="$url"
+      fi
+
+      output_extension="${output_filename##*.}"
+      ffmpeg -i "$output_filename" -acodec mp3 -vcodec libx265 -crf 28 "${output_filename/.${output_extension}/-mp3.mp4}"
+      clean "${output_filename/.${output_extension}/-mp3.mp4}"
       exit 0
       ;;
     "Quit")
