@@ -31,7 +31,7 @@ echo "[${script_name}] Updating repos..."
 pkg update
 
 echo "[${script_name}] Upgrading apps..."
-pkg upgrade
+pkg upgrade -y
 
 echo "[${script_name}] Installing required apps..."
 for f in $packages_to_install; do
