@@ -31,12 +31,9 @@ echo "[${script_name}] Upgrading apps..."
 pkg upgrade
 
 echo "[${script_name}] Installing required apps..."
-# for f in $packages_to_install; do
-   pkg install -y "$packages_to_install"
-# done
-# for f in "${packages_to_install[@]}"; do
-#   pkg install "$f"
-# done
+for f in $packages_to_install; do
+   pkg install -y "$f"
+done
 
 echo "[${script_name}] Creating symlinks..."
 termux-setup-storage
