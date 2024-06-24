@@ -47,6 +47,8 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -lah'
 
+alias dl="cd ${HOME}/downloads 2>/dev/null || cd ${HOME}/storage/downloads"
+
 set show-mode-in-prompt on
 
 shopt -s checkwinsize
