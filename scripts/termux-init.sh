@@ -51,7 +51,7 @@ yt_filepath=/data/data/com.termux/files/usr/bin/yt
 curl -fsSL https://dl.iforwms.com/termux/yt > "$yt_filepath" && chmod +x "$yt_filepath"
 
 echo -e "${GREEN}[${script_name}] Updating .bashrc...${NC}"
-curl -fsSL https://dl.iforwms.com/termux/.bashrc > "$HOME"
+curl -fsSL https://dl.iforwms.com/termux/.bashrc > "${HOME}/.bashrc"
 
 echo -e "${GREEN}[${script_name}] Updating termux properties...${NC}"
 mkdir "${HOME}/.termux" 2>/dev/null
