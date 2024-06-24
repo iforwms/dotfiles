@@ -66,7 +66,5 @@ echo "set vi-cmd-mode-string \\1\\e[2 q\\2" >> "${HOME}/.inputrc"
 
 echo "${GREEN}[${script_name}] Sourcing .bashrc...${NC}"
 
-. "${HOME}/.bashrc"
-
 echo "${GREEN}[${script_name}] All done!${NC}"
 exit 0
