@@ -12,6 +12,7 @@ rsync --verbose --no-times --compress \
   "${DOTFILES}/scripts/termux-init.sh" \
   "${DOTFILES}/scripts/yt" \
   "${DOTFILES}/bash/.bashrc" \
+  "${DOTFILES}/termux/termux.properties" \
   "${server}:/var/www/downloads"
 
 echo -e "${GREEN}[${script_name}] Updating clients server.${NC}"
