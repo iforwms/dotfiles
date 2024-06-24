@@ -1,9 +1,3 @@
-if [[ "$(id -u)" -eq 0 ]]; then
-  PS1='# '
-else
-  PS1='$ '
-fi
-
 HISTCONTROL=ignoreboth
 shopt -s histappend
 HISTSIZE=1000
@@ -20,20 +14,9 @@ if [ -n "$force_color_prompt" ]; then
     fi
 fi
 
-if [[ "$(id -u)" -eq 0 ]]; then
-  PS1='# '
-else
-  PS1='$ '
-fi
-unset color_prompt force_color_prompt
+PS1='\W $ '
 
-case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
-esac
+unset color_prompt force_color_prompt
 
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
