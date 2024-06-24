@@ -51,5 +51,8 @@ echo "[${script_name}] Downloading iforwms yt script..."
 yt_filepath=/data/data/com.termux/files/usr/bin/yt
 curl -fsSL https://dl.iforwms.com/yt > "$yt_filepath" && chmod +x "$yt_filepath"
 
+echo "[${script_name}] Updating .bashrc..."
+curl -fsSL https://dl.iforwms.com/yt > "$HOME"
+
 echo "[${script_name}] All done!"
 exit 0
