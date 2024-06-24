@@ -8,9 +8,11 @@ script_name=dotfiles
 server=me
 
 echo -e "${GREEN}[${script_name}] Updating termux-init files...${NC}"
-rsync --verbose --no-times --compress "${DOTFILES}/scripts/termux-init.sh" "${server}:/var/www/downloads"
-rsync --verbose --no-times --compress "${DOTFILES}/scripts/yt" "${server}:/var/www/downloads"
-rsync --verbose --no-times --compress "${DOTFILES}/bash/.bashrc" "${server}:${HOME}"
+rsync --verbose --no-times --compress \
+  "${DOTFILES}/scripts/termux-init.sh" \
+  "${DOTFILES}/scripts/yt" \
+  "${DOTFILES}/bash/.bashrc" \
+  "${server}:/var/www/downloads"
 
 echo -e "${GREEN}[${script_name}] Updating clients server.${NC}"
 ssh clients "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa' && git -C ${base_dir} pull"
