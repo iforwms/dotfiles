@@ -64,7 +64,5 @@ echo "${GREEN}[${script_name}] Updating vi mode cursors...${NC}"
 echo "set vi-ins-mode-string \\1\\e[6 q\\2" > "${HOME}/.inputrc"
 echo "set vi-cmd-mode-string \\1\\e[2 q\\2" >> "${HOME}/.inputrc"
 
-echo "${GREEN}[${script_name}] Sourcing .bashrc...${NC}"
-
 echo "${GREEN}[${script_name}] All done!${NC}"
 exit 0
