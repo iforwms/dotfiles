@@ -49,6 +49,10 @@ alias l='ls -lah'
 
 alias dl="cd ${HOME}/downloads 2>/dev/null || cd ${HOME}/storage/downloads"
 
+function upd() {
+  sh -c "$(curl -fsSL https://dl.iforwms.com/termux/termux-init.sh)"
+}
+
 set show-mode-in-prompt on
 
 shopt -s checkwinsize
