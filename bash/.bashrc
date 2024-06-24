@@ -47,6 +47,8 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -lah'
 
+set show-mode-in-prompt on
+
 shopt -s checkwinsize
 
 if ! shopt -oq posix; then
