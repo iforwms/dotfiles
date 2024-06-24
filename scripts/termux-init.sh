@@ -49,10 +49,14 @@ termux-setup-storage
 
 echo "[${script_name}] Downloading iforwms yt script..."
 yt_filepath=/data/data/com.termux/files/usr/bin/yt
-curl -fsSL https://dl.iforwms.com/yt > "$yt_filepath" && chmod +x "$yt_filepath"
+curl -fsSL https://dl.iforwms.com/termux/yt > "$yt_filepath" && chmod +x "$yt_filepath"
 
 echo "[${script_name}] Updating .bashrc..."
-curl -fsSL https://dl.iforwms.com/yt > "$HOME"
+curl -fsSL https://dl.iforwms.com/termux/.bashrc > "$HOME"
+
+echo "[${script_name}] Updating termux properties..."
+mkdir "${HOME}/.termux" 2>/dev/null
+curl -fsSL https://dl.iforwms.com/termux/termux.properties > "${HOME}/.termux/termux.properties"
 
 echo "[${script_name}] All done!"
 exit 0
