@@ -20,10 +20,12 @@ packages_to_install="
   vim
 "
 
-if ! command -v pkg &> /dev/null; then
-  echo "[${script_name}] This file must be run in Termux. Exiting..."
-  exit 1
-fi
+command -v pkg >/dev/null 2>&1 || { echo >&2 "[${script_name}] This file must be run in Termux. Exiting..."; exit 1; }
+
+# if ! command -v pkg &> /dev/null; then
+#   echo "[${script_name}] This file must be run in Termux. Exiting..."
+#   exit 1
+# fi
 
 echo "[${script_name}] Updating repos..."
 pkg update
