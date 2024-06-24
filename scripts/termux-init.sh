@@ -19,7 +19,8 @@ packages_to_install="
   jq
   vim
 "
-if ! [[ -x "$(command -v pkg)" ]]; then
+
+if ! command -v pkg &> /dev/null; then
   echo "[${script_name}] This file must be run in Termux. Exiting..."
   exit 1
 fi
