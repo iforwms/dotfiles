@@ -1,28 +1,32 @@
 #!/bin/bash
 
+GREEN='\033[0;32m'
+NC='\033[0m'
+
 base_dir=/home/ifor/.dotfiles
 script_name=dotfiles
 server=me
 
-echo "[${script_name}] Updating termux-init."
+echo -e "${GREEN}[${script_name}] Updating termux-init files...${NC}"
 rsync --verbose --no-times --compress "${DOTFILES}/scripts/termux-init.sh" "${server}:/var/www/downloads"
 rsync --verbose --no-times --compress "${DOTFILES}/scripts/yt" "${server}:/var/www/downloads"
+rsync --verbose --no-times --compress "${DOTFILES}/bash/.bashrc" "${server}:${HOME}"
 
-echo "[${script_name}] Updating clients server."
+echo -e "${GREEN}[${script_name}] Updating clients server.${NC}"
 ssh clients "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa' && git -C ${base_dir} pull"
 
-echo "[${script_name}] Updating personal server."
+echo -e "${GREEN}[${script_name}] Updating personal server.${NC}"
 ssh me "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa' && git -C ${base_dir} pull"
 
-echo "[${script_name}] Updating tt server."
+echo -e "${GREEN}[${script_name}] Updating tt server.${NC}"
 ssh tt "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/ifor_tt' && git -C ${base_dir} pull"
 
-echo "[${script_name}] Updating exped server."
+echo -e "${GREEN}[${script_name}] Updating exped server.${NC}"
 ssh exped "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/ifor_wmai' && git -C ${base_dir} pull"
 
 base_dir=/home/cors/.dotfiles
-echo "[${script_name}] Updating cors server."
+echo -e "${GREEN}[${script_name}] Updating cors server.${NC}"
 ssh cors "git -C ${base_dir} config core.sshCommand 'ssh -i /home/cors/.ssh/ifor_github' && git -C ${base_dir} pull"
 
-echo "[${script_name}] Deploy complete!"
+echo -e "${GREEN}[${script_name}] Deploy complete!${NC}"
 exit 0
