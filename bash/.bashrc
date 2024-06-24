@@ -63,6 +63,10 @@ export VISUAL=vim
 export EDITOR="$VISUAL"
 
 set -o vi
+set editing-mode vi
+set show-mode-in-prompt on
+set vi-ins-mode-string \1\e[6 q\2
+set vi-cmd-mode-string \1\e[2 q\2
 
 dl_folder="${HOME}/storage/downloads"
 if [[ -e "$dl_folder" ]]; then
