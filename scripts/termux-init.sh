@@ -40,6 +40,9 @@ done
 echo "${GREEN}[${script_name}] Creating symlinks...${NC}"
 termux-setup-storage
 
+echo "${GREEN}[${script_name}] Installing yt-dlp...${NC}"
+pip install -U --no-deps yt-dlp
+
 # echo "${GREEN}[${script_name}] Setting ZSH as default shell...${NC}"
 # chsh -s zsh
 
