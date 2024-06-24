@@ -22,40 +22,40 @@ packages_to_install="
 command -v pkg >/dev/null 2>&1 || { echo >&2 "[${script_name}] This file must be run in Termux. Exiting..."; exit 1; }
 
 # if ! command -v pkg &> /dev/null; then
-#   echo -e "${GREEN}[${script_name}] This file must be run in Termux. Exiting...${NC}"
+#   echo"${GREEN}[${script_name}] This file must be run in Termux. Exiting...${NC}"
 #   exit 1
 # fi
 
-echo -e "${GREEN}[${script_name}] Updating repos...${NC}"
+echo"${GREEN}[${script_name}] Updating repos...${NC}"
 pkg update
 
-echo -e "${GREEN}[${script_name}] Upgrading apps...${NC}"
+echo"${GREEN}[${script_name}] Upgrading apps...${NC}"
 pkg upgrade -y
 
-echo -e "${GREEN}[${script_name}] Installing required apps...${NC}"
+echo"${GREEN}[${script_name}] Installing required apps...${NC}"
 for f in $packages_to_install; do
    pkg install -y "$f"
 done
 
-echo -e "${GREEN}[${script_name}] Creating symlinks...${NC}"
+echo"${GREEN}[${script_name}] Creating symlinks...${NC}"
 termux-setup-storage
 
-# echo -e "${GREEN}[${script_name}] Setting ZSH as default shell...${NC}"
+# echo"${GREEN}[${script_name}] Setting ZSH as default shell...${NC}"
 # chsh -s zsh
 
-# echo -e "${GREEN}[${script_name}] Installing OMZ...${NC}"
+# echo"${GREEN}[${script_name}] Installing OMZ...${NC}"
 # sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
-echo -e "${GREEN}[${script_name}] Downloading iforwms yt script...${NC}"
+echo"${GREEN}[${script_name}] Downloading iforwms yt script...${NC}"
 yt_filepath=/data/data/com.termux/files/usr/bin/yt
 curl -fsSL https://dl.iforwms.com/termux/yt > "$yt_filepath" && chmod +x "$yt_filepath"
 
-echo -e "${GREEN}[${script_name}] Updating .bashrc...${NC}"
+echo"${GREEN}[${script_name}] Updating .bashrc...${NC}"
 curl -fsSL https://dl.iforwms.com/termux/.bashrc > "${HOME}/.bashrc"
 
-echo -e "${GREEN}[${script_name}] Updating termux properties...${NC}"
+echo"${GREEN}[${script_name}] Updating termux properties...${NC}"
 mkdir "${HOME}/.termux" 2>/dev/null
 curl -fsSL https://dl.iforwms.com/termux/termux.properties > "${HOME}/.termux/termux.properties"
 
-echo -e "${GREEN}[${script_name}] All done!${NC}"
+echo"${GREEN}[${script_name}] All done!${NC}"
 exit 0
