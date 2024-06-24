@@ -13,7 +13,7 @@ rsync --verbose --no-times --compress \
   "${DOTFILES}/scripts/yt" \
   "${DOTFILES}/bash/.bashrc" \
   "${DOTFILES}/termux/termux.properties" \
-  "${server}:/var/www/downloads"
+  "${server}:/var/www/downloads/termux"
 
 echo -e "${GREEN}[${script_name}] Updating clients server.${NC}"
 ssh clients "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa' && git -C ${base_dir} pull"
