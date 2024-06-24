@@ -78,4 +78,3 @@ dl_folder="${HOME}/storage/downloads"
 if [[ -e "$dl_folder" ]]; then
   cd "$dl_folder"
 fi
-
