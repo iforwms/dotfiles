@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+script_name=backup-hdd
+album_path=$1
+
+if [[ -z "$album_path" ]]; then
+    echo -e "${RED}[${script_name}] Missing album path. Usage: fix-album-year <path>${NC}"
+    exit 1
+fi
+
+album_name=$(basename "$album_path")
+album_year=$(echo "$album_name" | sed 's/\[\([0-9]\+\).*/\1/')
+
+echo -e "${GREEN}[${script_name}] Updating '${album_name}' year to ${album_year}...${NC}"
+mp3info -y "${album_year}" "${album_path}"/*.mp3
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
