@@ -1,48 +1,6 @@
 #!/usr/bin/env bash
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-NC='\033[0m'
-script_name=backup-music
-
-# Backup Music Library to HDD
-#
-# a - Archive move; ensure common metadata is copied over
-# h - Human readable numbers are output instead of bytes
-# v - Increase verbosity of the output
-# A - Preserve ACLs; also implies p (preserve permissions)
-# E - Preserve executability
-# delete - Delete file on the destination that don't exist on source; clean up deleted files in backup
-# stats - Give some file-transfer stats
-
 SOURCE=/Users/ifor/Music/library
 DEST=/Volumes/IFOR2T/music/library
 
-if [ ! -d $SOURCE ]; then
-    echo -e "${RED}[${script_name}] Source drive not found, aborting...${NC}"
-    exit 1
-fi
-
-if [ ! -d $DEST ]; then
-    echo -e "${RED}[${script_name}] Destination drive not found, aborting...${NC}"
-    exit 1
-fi
-
-echo -e "${GREEN}[${script_name}] ########### HDD backup starting at $(date) ###########${NC}"
-
-rsync --dry-run -ahvAE --delete --stats --ignore-errors "${SOURCE}/" "${DEST}" 2>&1 | tee /Users/ifor/backup-music.log
-
-if [ "$?" -eq 0 ];
-then
-    echo
-    echo -e "${GREEN}[${script_name}] ########### HDD backup completed at $(date) ###########${NC}"
-    echo
-    exit 0
-else
-    echo
-    echo -e "${RED}[${script_name}] HDD backup failed.${NC}"
-    echo
-    exit 1
-fi
-
-
+/Users/ifor/.dotfiles/scripts/backup-hdd "$SOURCE" "$DEST"

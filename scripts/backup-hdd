@@ -10,12 +10,13 @@
 # delete - Delete file on the destination that don't exist on source; clean up deleted files in backup
 # stats - Give some file-transfer stats
 
-SOURCE=/Volumes/IFOR2T
-DEST=/Volumes/IFOR2T_BACKUP
-
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
+
+SOURCE="${1:-/Volumes/IFOR2T}"
+DEST="${2:-/Volumes/IFOR2T_BACKUP}"
+
 script_name=backup-hdd
 
 if [ ! -d $SOURCE ]; then
