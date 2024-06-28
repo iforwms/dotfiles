@@ -25,7 +25,7 @@ rsync \
     --archive \
     --human-readable \
     --verbose \
-    --executiability \
+    --executability \
     --acls \
     --delete \
     --stats \
