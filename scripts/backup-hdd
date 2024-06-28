@@ -30,7 +30,13 @@ rsync \
     --acls \
     --stats \
     --ignore-errors \
-    --exclude={'.Trashes','.TemporaryItems','.Spotlight-V100','.fseventsd','.DocumentRevisions-V100','.DocumentRevisions-V100'} \
+    --exclude={
+        '.DS_Store',
+        '.Trashes',
+        '.fseventsd',
+        '.TemporaryItems',
+        '.Spotlight-V100',
+        '.DocumentRevisions-V100'} \
     "${SOURCE}/" \
     "${DEST}" \
     2>&1 | tee /Users/ifor/backup-hdd.log
