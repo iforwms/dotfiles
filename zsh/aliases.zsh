@@ -193,7 +193,7 @@ function gq() {
   git add .
   git commit -m "Quick commit - $(date '+%Y/%m/%d %H:%M')"
   git push
-  ./deploy-remote
+  ./deploy-remote $1
 }
 
 # alias apgi='git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached'

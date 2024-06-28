@@ -1,15 +1,5 @@
 #!/usr/bin/env bash
 
-# Backup HDD contents from one disk to another
-#
-# a - Archive move; ensure common metadata is copied over
-# h - Human readable numbers are output instead of bytes
-# v - Increase verbosity of the output
-# A - Preserve ACLs; also implies p (preserve permissions)
-# E - Preserve executability
-# delete - Delete file on the destination that don't exist on source; clean up deleted files in backup
-# stats - Give some file-transfer stats
-
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
@@ -19,30 +9,37 @@ DEST="${2:-/Volumes/IFOR2T_BACKUP}"
 
 script_name=backup-hdd
 
-if [ ! -d $SOURCE ]; then
+if ! [[ -d "$SOURCE" ]]; then
     echo -e "${RED}[${script_name}] Source drive not found, aborting...${NC}"
     exit 1
 fi
 
-if [ ! -d $DEST ]; then
+if ! [[ -d "$DEST" ]]; then
     echo -e "${RED}[${script_name}] Destination drive not found, aborting...${NC}"
     exit 1
 fi
 
-echo -e "${GREEN}[${script_name}] ########### HDD backup starting at $(date) ###########${NC}"
+echo -e "${GREEN}[${script_name}] HDD backup starting at $(date)${NC}"
 
-rsync -ahvAE --delete --stats --ignore-errors "${SOURCE}/" "${DEST}" 2>&1 | tee /Users/ifor/backup-hdd.log
+rsync \
+    --archive \
+    --human-readable \
+    --verbose \
+    --executiability \
+    --acls \
+    --delete \
+    --stats \
+    --ignore-errors \
+    --exclude={'.Trashes','.TemporaryItems','.Spotlight-V100','.fseventsd','.DocumentRevisions-V100','.DocumentRevisions-V100'}
+    "${SOURCE}/" \
+    "${DEST}" \
+    2>&1 | tee /Users/ifor/backup-hdd.log
 
-if [ "$?" -eq 0 ];
-then
-    echo
-    echo -e "${GREEN}[${script_name}] ########### HDD backup completed at $(date) ###########${NC}"
-    echo
+if [[ "$?" -eq 0 ]]; then
+    echo -e "${GREEN}[${script_name}] HDD backup completed at $(date)${NC}"
     exit 0
 else
-    echo
     echo -e "${RED}[${script_name}] HDD backup failed.${NC}"
-    echo
     exit 1
 fi
 
