@@ -23,14 +23,14 @@ echo -e "${GREEN}[${script_name}] HDD backup starting at $(date)${NC}"
 
 rsync \
     --archive \
-    --human-readable \
+    --delete \
     --verbose \
+    --human-readable \
     --executability \
     --acls \
-    --delete \
     --stats \
     --ignore-errors \
-    --exclude={'.Trashes','.TemporaryItems','.Spotlight-V100','.fseventsd','.DocumentRevisions-V100','.DocumentRevisions-V100'}
+    --exclude={'.Trashes','.TemporaryItems','.Spotlight-V100','.fseventsd','.DocumentRevisions-V100','.DocumentRevisions-V100'} \
     "${SOURCE}/" \
     "${DEST}" \
     2>&1 | tee /Users/ifor/backup-hdd.log
