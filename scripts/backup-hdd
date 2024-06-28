@@ -39,10 +39,10 @@ rsync \
   --acls \
   --stats \
   --ignore-errors \
-  --exclude={${exclude_list[@]}} \
+  "${exclude_list[@]/#/--exclude=}" \
   "${src}/" \
   "${dest}" \
-  2>&1 | tee /Users/ifor/backup-hdd.log
+  2>&1 | tee /Users/ifor/logs/backup-hdd.log
 
 if [[ "$?" -eq 0 ]]; then
   echo -e "${GREEN}[${script_name}] HDD backup completed at $(date)${NC}"
