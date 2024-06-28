@@ -4,48 +4,51 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-SOURCE="${1:-/Volumes/IFOR2T}"
-DEST="${2:-/Volumes/IFOR2T_BACKUP}"
+src="${1:-/Volumes/IFOR2T}"
+dest="${2:-/Volumes/IFOR2T_BACKUP}"
 
 script_name=backup-hdd
 
-if ! [[ -d "$SOURCE" ]]; then
-    echo -e "${RED}[${script_name}] Source drive not found, aborting...${NC}"
-    exit 1
+exclude_list=(
+  '.DS_Store'
+  '.Trashes'
+  '.fseventsd'
+  '.TemporaryItems'
+  '.Spotlight-V100'
+  '.DocumentRevisions-V100'
+)
+
+if ! [[ -d "$src" ]]; then
+  echo -e "${RED}[${script_name}] Source drive not found, aborting...${NC}"
+  exit 1
 fi
 
-if ! [[ -d "$DEST" ]]; then
-    echo -e "${RED}[${script_name}] Destination drive not found, aborting...${NC}"
-    exit 1
+if ! [[ -d "$dest" ]]; then
+  echo -e "${RED}[${script_name}] Destination drive not found, aborting...${NC}"
+  exit 1
 fi
 
 echo -e "${GREEN}[${script_name}] HDD backup starting at $(date)${NC}"
 
 rsync \
-    --archive \
-    --delete \
-    --verbose \
-    --human-readable \
-    --executability \
-    --acls \
-    --stats \
-    --ignore-errors \
-    --exclude={
-        '.DS_Store',
-        '.Trashes',
-        '.fseventsd',
-        '.TemporaryItems',
-        '.Spotlight-V100',
-        '.DocumentRevisions-V100'} \
-    "${SOURCE}/" \
-    "${DEST}" \
-    2>&1 | tee /Users/ifor/backup-hdd.log
+  --archive \
+  --delete \
+  --verbose \
+  --human-readable \
+  --executability \
+  --acls \
+  --stats \
+  --ignore-errors \
+  --exclude={${exclude_list[@]}} \
+  "${src}/" \
+  "${dest}" \
+  2>&1 | tee /Users/ifor/backup-hdd.log
 
 if [[ "$?" -eq 0 ]]; then
-    echo -e "${GREEN}[${script_name}] HDD backup completed at $(date)${NC}"
-    exit 0
+  echo -e "${GREEN}[${script_name}] HDD backup completed at $(date)${NC}"
+  exit 0
 else
-    echo -e "${RED}[${script_name}] HDD backup failed.${NC}"
-    exit 1
+  echo -e "${RED}[${script_name}] HDD backup failed.${NC}"
+  exit 1
 fi
 
