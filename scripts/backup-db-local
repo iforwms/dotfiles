@@ -1,9 +1,32 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-scp -r "clients:/home/ifor/backups/*" "/Users/ifor/Documents/backup/db"
-scp -r "me:/home/ifor/backups/*" "/Users/ifor/Documents/backup/db"
-scp -r "cors:/home/cors/backups/*" "/Users/ifor/Documents/backup/db"
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+script_name=jukebox
+base_dir=/var/www/jukebox
+server=me
+
+remote_list=(
+  "clients:/home/ifor/backups/*"
+  "me:/home/ifor/backups/*"
+  "cors:/home/cors/backups/*"
+)
+
+for remote in "${remote_list[@]}"; do
+  echo -e "${GREEN}[${script_name}] Downloading backups from ${remote}...${NC}"
+  rsync \
+    --recursive \
+    --verbose \
+    --no-times \
+    --compress \
+    "$remote" \
+    "/Users/ifor/Documents/backup/db"
+done
 
 success_msg="DB backup success!"
 osascript -e "display notification \"${success_msg}\" sound name \"Blow\""
 
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0

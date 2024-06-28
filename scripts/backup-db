@@ -1,8 +1,14 @@
 #!/bin/bash
 
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+script_name=backup-db
+
 password_file="${HOME}/mysql_pass"
 if [[ ! -r "$password_file" ]]; then
-  echo "Cannot find MySQL password file, aborting."
+  echo -e "${RED}[${script_name}] Cannot find MySQL password file, aborting.${NC}"
   exit 1
 fi
 
@@ -14,12 +20,13 @@ now=$(date +"%F")
 password=$(cat "$password_file")
 
 if [[ -z "$databases" ]]; then
-  databases=$(mysql -h $hostname -u $user -p$password -s -N -e "SHOW DATABASES;" | grep -v "information_schema\|mysql\|performance_schema\|sys")
+  databases=$(mysql -h $hostname -u $user -p$password -s -N -e "SHOW DATABASES;" | \
+    grep -v "information_schema\|mysql\|performance_schema\|sys")
 fi
 
-[ ! -d $backup_dir ] && mkdir -p $backup_dir
+mkdir -p $backup_dir 2>/dev/null
 
-echo 'Backing up databases...'
+echo -e "${GREEN}[${script_name}] Backing up databases...${NC}"
 
 for db in $databases; do
   file="${backup_dir}/${db}.sql.gz"
@@ -27,12 +34,20 @@ for db in $databases; do
 
   [ -f "$file" ] && filedate=$(date -r "$file" +"%F")
   [ "$filedate" == "$now" ] && [[ -z $1 ]] && continue
-
   [ -f "$file" ] && mv "$file" "${file}.old"
 
-  mysqldump --single-transaction --routines --quick -h $hostname -u $user -p$password -B "$db" | gzip > "$file"
+  mysqldump \
+    --single-transaction \
+    --routines \
+    --quick \
+    -h $hostname \
+    -u $user \
+    -p$password \
+    -B "$db" | \
+    gzip > "$file"
 
   rm -f "${file}.old"
 done
 
-echo 'Backup success!'
+echo -e "${GREEN}[${script_name}] Backup success!${NC}"
+exit 0

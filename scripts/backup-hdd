@@ -6,9 +6,7 @@ NC='\033[0m'
 
 src="${1:-/Volumes/IFOR2T}"
 dest="${2:-/Volumes/IFOR2T_BACKUP}"
-
 script_name=backup-hdd
-
 exclude_list=(
   '.DS_Store'
   '.Trashes'
