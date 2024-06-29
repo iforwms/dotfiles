@@ -40,7 +40,7 @@ rsync \
   --stats \
   --compress \
   --ignore-errors \
-  --log-file=/home/ifor/logs/backup-hdd.log
+  --log-file="${HOME}/logs/backup-hdd.log"
   "${exclude_list[@]/#/--exclude=}" \
   "${src}/" \
   "${dest}"
