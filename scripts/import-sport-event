@@ -1,7 +1,5 @@
 #!/usr/bin/env php
-
 <?php
-
 /**
   Input file template
   -------------------
@@ -16,13 +14,21 @@
 
  **/
 
+$RED = "\033[01;31m";
+$GREEN = "\033[01;32m";
+$NC = "\033[0m";
+
+$script_name = "import-sport-event";
 $prefix = $argv[2] ?? "";
-$import_filepath = $argv[1];
+$import_filepath = $argv[1] ?? "";
 $duration = $argv[3] ?? 120;
 $output_filepath = "{$import_filepath}." . date("U") . ".ics";
 
-if(!file_exists($import_filepath)) {
-  exit ("File specified does not exist, aborting...");
+if (!file_exists($import_filepath)) {
+  echo "{$RED}File specified does not exist." . PHP_EOL . $NC;
+  echo "{$GREEN}Usage: import-sport-event <path-to-file> <prefix> <duration>{$NC}" .
+    PHP_EOL;
+  exit();
 }
 
 function uuid4()
@@ -90,7 +96,7 @@ for ($i = 0; $i < count($lines); $i++) {
   $team_1 = $lines[$i + 1];
   $team_2 = $lines[$i + 2];
 
-  $timestamps = parse_date($lines[$i], 180);
+  $timestamps = parse_date($lines[$i], $duration);
   $name = trim("{$prefix}{$team_1} - {$team_2}");
 
   $ics_string .= <<<ICS
@@ -110,7 +116,9 @@ $ics_string .= $ics_footer;
 $ics_string = str_replace("  ", "", $ics_string);
 $ics_string = str_replace("\n", "\r\n", $ics_string);
 
+echo "{$GREEN}Writing to file: {$output_filepath}" . PHP_EOL . $NC;
 file_put_contents($output_filepath, $ics_string);
 
-echo "All done!" . PHP_EOL;
+echo "{$GREEN}All done!" . PHP_EOL . $NC;
+exit();
 
