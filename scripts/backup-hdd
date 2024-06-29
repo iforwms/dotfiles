@@ -29,12 +29,10 @@ fi
 echo -e "${GREEN}[${script_name}] HDD backup starting at $(date)${NC}"
 
 /usr/local/bin/rsync \
-  --recursive \
-  --links \
-  --times \
-  --group \
-  --devices \
-  --owner \
+  --archive \
+  --no-perms \
+  --no-owner \
+  --no-group \
   --delete \
   --verbose \
   --human-readable \
