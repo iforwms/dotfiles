@@ -28,7 +28,7 @@ fi
 
 echo -e "${GREEN}[${script_name}] HDD backup starting at $(date)${NC}"
 
-rsync \
+/usr/local/bin/rsync \
   --archive \
   --no-perms \
   --no-owner \
@@ -40,7 +40,7 @@ rsync \
   --stats \
   --compress \
   --ignore-errors \
-  --log-file="${HOME}/logs/backup-hdd.log"
+  --log-file=/Users/ifor/logs/backup-hdd.log
   "${exclude_list[@]/#/--exclude=}" \
   "${src}/" \
   "${dest}"
