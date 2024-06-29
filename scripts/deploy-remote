@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [[ -n $DEBUG ]]; then
     set -x
@@ -46,4 +46,5 @@ rsync \
     "${include_opts[@]}" \
     "${exclude_opts[@]}" \
     --delete \
-    "${local_dir}" "${remote_dir}"
+    "${local_dir}" \
+    "${remote_dir}"
