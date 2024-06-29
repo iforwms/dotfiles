@@ -28,7 +28,7 @@ fi
 
 echo -e "${GREEN}[${script_name}] HDD backup starting at $(date)${NC}"
 
-rsync \
+/usr/local/bin/rsync \
   --archive \
   --delete \
   --verbose \
