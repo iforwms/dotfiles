@@ -5,11 +5,11 @@ repo_name="$1"
 repo_path="${base_dir}/${repo_name}"
 
 if [[ -z "$repo_name" ]]; then
-    echo "Missing repo name, aborting..."
+    echo -e "${RED}[${script_name}] Missing repo name, aborting...${NC}"
     exit 1
 fi
 
-echo "Creating repo..."
+echo -e "${GREEN}[${script_name}] Creating repo...${NC}"
 mkdir -p "$repo_path"/{src,assets}
 touch "$repo_path"/{src,assets}/.gitkeep
 git -C "$repo_path" init
@@ -17,7 +17,7 @@ gh repo create "$repo_name" --private --source="$repo_path" --remote=upstream
 
 touch "${repo_path}/LOCAL_MACHINE"
 
-echo "Creating .gitignore file..."
+echo -e "${GREEN}[${script_name}] Creating .gitignore file...${NC}"
 cat >"${repo_path}/.gitignore" <<EOL
 .DS_store
 LOCAL_MACHINE
@@ -28,11 +28,17 @@ vendor/
 *.log
 EOL
 
-echo "Creating deploy script..."
+echo -e "${GREEN}[${script_name}] Creating deploy script...${NC}"
 cat >"${repo_path}/deploy-remote" <<EOL
 #!/usr/bin/env bash
 
-echo "All done!"
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+script_name=TODO
+
+echo -e "\${GREEN}[\${script_name}] All done!\${NC}"
 exit 0
 EOL
 chmod +x "${repo_path}/deploy-remote"
@@ -40,7 +46,7 @@ chmod +x "${repo_path}/deploy-remote"
 read -p "Do you wish to install tailwindcss? (y/n) " -n 1 -r install_tailwind
 echo
 if [[ $install_tailwind =~ ^[Yy]$ ]]; then
-  echo "Installing tailwind..."
+  echo -e "${GREEN}[${script_name}] Installing tailwind...${NC}"
 
   npm install --prefix "$repo_path" -D tailwindcss
   npm exec --prefix "$repo_path" tailwind init
@@ -67,21 +73,21 @@ fi
 read -p "Do you wish to install PHP helpers? (y/n) " -n 1 -r install_php
 echo
 if [[ $install_php =~ ^[Yy]$ ]]; then
-  echo "TODO"
+  echo -e "${GREEN}[${script_name}] TODO${NC}"
 fi
 
-echo "Finalising git setup and creating initial commit."
+echo -e "${GREEN}[${script_name}] Finalising git setup and creating initial commit.${NC}"
 git -C "$repo_path" add --all
 git -C "$repo_path" commit -m "Initial commit."
 git -C "$repo_path" branch -m main
 git -C "$repo_path" push --set-upstream upstream main
 
-echo "All done!"
+echo -e "${GREEN}[${script_name}] All done!${NC}"
 
 if [[ $install_tailwind =~ ^[Yy]$ ]]; then
   echo
-  echo "To recompile tailwind run the following command:"
-  echo "npx tailwindcss -i ./assets/input.css -o ./assets/output.css --watch"
+  echo -e "${GREEN}[${script_name}] To recompile tailwind run the following command:${NC}"
+  echo -e "${GREEN}[${script_name}] npx tailwindcss -i ./assets/input.css -o ./assets/output.css --watch${NC}"
 fi
 
 exit 0
