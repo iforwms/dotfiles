@@ -61,27 +61,28 @@ brew 'evince'
 
 # Apps
 cask 'alfred'
-cask 'android-file-transfer'
-cask 'android-studio'
+# cask 'android-file-transfer'
+# cask 'android-studio'
 cask 'arduino'
-cask 'balsamiq-wireframes'
+# cask 'balsamiq-wireframes'
 cask 'bartender'
-cask 'clippy'
-cask 'coda'
+# cask 'clippy'
+# cask 'coda'
 cask 'docker'
 cask 'firefox'
 cask 'github'
 cask 'google-chrome'
 cask 'handbrake'
-cask 'insomnia'
+# cask 'insomnia'
 cask 'iterm2'
 cask 'java'
 cask 'lilypond'
 cask 'machoview'
 cask 'midi-monitor'
-cask 'moom'
+# cask 'moom'
 cask 'ngrok'
 cask 'obsidian'
+cask 'openmtp'
 cask 'pinta' # Paint.NET copy
 cask 'postman'
 cask 'qlvideo'
@@ -90,7 +91,7 @@ cask 'tableplus'
 cask 'the-unarchiver'
 cask 'tinkerwell'
 cask 'tomatobar'
-cask 'transmission'
+# cask 'transmission'
 cask 'vagrant'
 cask 'virtualbox' # Might need to allow access in Security settings
 cask 'virtualbox-extension-pack'
@@ -113,8 +114,8 @@ cask 'font-roboto'
 mas 'Bandwidth+', id: 490461369
 mas 'Clocker', id: 1056643111
 mas 'Microsoft Excel', id: 462058435
-mas 'Microsoft PowerPoint', id: 462062816
+# mas 'Microsoft PowerPoint', id: 462062816
 # mas 'Microsoft Word', id: 462054704
 mas 'Trello', id: 1278508951
 mas 'WeChat', id: 836500024
-mas 'Wunderlist', id: 410628904
+# mas 'Wunderlist', id: 410628904
