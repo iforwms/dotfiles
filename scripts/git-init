@@ -26,6 +26,7 @@ node_modules/
 tags
 vendor/
 *.log
+cache_buster
 EOL
 
 echo -e "${GREEN}[${script_name}] Creating deploy script...${NC}"
