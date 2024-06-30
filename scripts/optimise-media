@@ -1,35 +1,37 @@
 #!/bin/bash
 
-conversion_type="${1:-video}"
-input_filetype="${2:-mp4}"
-output_filetype="${3:-$input_filetype}"
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
 script_name=optimise_media
+
+conversion_type="${1:-video}"
+export input_filetype="${2:-mp4}"
+export output_filetype="${3:-$input_filetype}"
+max_depth=${4:-1}
+
 success_msg="[${script_name}] All ${conversion_type} in $(pwd) successfully converted from ${input_filetype} to ${output_filetype}."
 
+echo -en "$GREEN"
 read -p "[${script_name}] Files to be converted:
-$(ls -- *."${input_filetype}")
-
+$(find . -maxdepth "$max_depth" -type f -name "*.${input_filetype}")
 [${script_name}] Are you sure you want to optimise all ${input_filetype} ${conversion_type} files to ${output_filetype}? (y/n) " -n 1 -r
+echo -en "$NC"
 echo
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   if [[ $conversion_type == 'video' ]]; then
-    for f in *."${input_filetype}"; do
-      # if [[ "$f" == *".opt."* ]]; then
-      #   continue
-      # fi
-      ffmpeg -i "$f" -acodec mp3 -vcodec libx265 -crf 28 "${f/.${input_filetype}/.opt.${output_filetype}}"
-    done
+    find . -maxdepth "$max_depth" -type f -name "*.${input_filetype}" -print0 | \
+      xargs -0 -i bash -c 'ffmpeg -i "$1" -acodec mp3 -vcodec libx265 -crf 28 "${1/.${input_filetype}/.opt.${output_filetype}}"' - '{}'
   elif [[ $conversion_type == 'audio' ]]; then
-    for f in *."${input_filetype}"; do
-      ffmpeg -i "$f" -vn -ar 44100 -ac 2 -b:a 320k "${f/${input_filetype}/${output_filetype}}"
-    done
+    find . -maxdepth "$max_depth" -type f -name "*.${input_filetype}" -print0 | \
+      xargs -0 -i bash -c 'ffmpeg -i "$1" -vn -ar 44100 -ac 2 -b:a 320k "${1/.${input_filetype}/.${output_filetype}}"' - '{}'
   elif [[ $conversion_type == 'image' ]]; then
-    for f in *."${input_filetype}"; do
-      mogrify -interlace plane "$f"
-    done
+    find . -maxdepth "$max_depth" -type f -name "*.${input_filetype}" -print0 | \
+      xargs -0 -I{} mogrify -interlace plane '{}'
   else
-    echo "[${script_name}] Unrecognised conversion type, currently supported types: audio, video, image."
+    echo -e "${RED}[${script_name}] Unrecognised conversion type, currently supported types: audio, video, image.${NC}"
     exit 1
   fi
 
@@ -37,9 +39,9 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     osascript -e "display notification \"${success_msg}\" with title \"Conversion Complete\" sound name \"Blow\""
   fi
 
-  echo "[${script_name}] All done!"
+  echo -e "${GREEN}[${script_name}] All done!${NC}"
 else
-  echo "[${script_name}] Exiting..."
+  echo -e "${RED}[${script_name}] Exiting...${NC}"
 fi
 
 exit 0
