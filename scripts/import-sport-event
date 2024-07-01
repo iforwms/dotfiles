@@ -23,6 +23,8 @@ $prefix = $argv[3] ?? "";
 $import_filepath = $argv[1] ?? "";
 $duration = $argv[2] ?? 120;
 $output_filepath = "{$import_filepath}." . date("U") . ".ics";
+@touch($output_filepath);
+$output_filepath_full = realpath($output_filepath);
 
 if (!file_exists($import_filepath)) {
   echo "{$RED}File specified does not exist." . PHP_EOL . $NC;
@@ -116,7 +118,7 @@ $ics_string .= $ics_footer;
 $ics_string = str_replace("  ", "", $ics_string);
 $ics_string = str_replace("\n", "\r\n", $ics_string);
 
-echo "{$GREEN}Writing to file: {$output_filepath}" . PHP_EOL . $NC;
+echo "{$GREEN}Writing to file: {$output_filepath_full}" . PHP_EOL . $NC;
 file_put_contents($output_filepath, $ics_string);
 
 echo "{$GREEN}All done!" . PHP_EOL . $NC;
