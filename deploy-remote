@@ -15,20 +15,20 @@ rsync --verbose --no-times --compress \
   "${DOTFILES}/termux/termux.properties" \
   "${server}:/var/www/downloads/termux"
 
-echo -e "${GREEN}[${script_name}] Updating clients server.${NC}"
+echo -e "${GREEN}[${script_name}] Updating clients server...${NC}"
 ssh clients "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa' && git -C ${base_dir} pull"
 
-echo -e "${GREEN}[${script_name}] Updating personal server.${NC}"
+echo -e "${GREEN}[${script_name}] Updating personal server...${NC}"
 ssh me "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa' && git -C ${base_dir} pull"
 
-echo -e "${GREEN}[${script_name}] Updating tt server.${NC}"
+echo -e "${GREEN}[${script_name}] Updating tt server...${NC}"
 ssh tt "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/ifor_tt' && git -C ${base_dir} pull"
 
-echo -e "${GREEN}[${script_name}] Updating exped server.${NC}"
+echo -e "${GREEN}[${script_name}] Updating exped server...${NC}"
 ssh exped "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/ifor_wmai' && git -C ${base_dir} pull"
 
 base_dir=/home/cors/.dotfiles
-echo -e "${GREEN}[${script_name}] Updating cors server.${NC}"
+echo -e "${GREEN}[${script_name}] Updating cors server...${NC}"
 ssh cors "git -C ${base_dir} config core.sshCommand 'ssh -i /home/cors/.ssh/ifor_github' && git -C ${base_dir} pull"
 
 echo -e "${GREEN}[${script_name}] Deploy complete!${NC}"
