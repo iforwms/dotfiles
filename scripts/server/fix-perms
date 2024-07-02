@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+echo -e "${GREEN}[${script_name}] Updating code directory permissions${NC}"
+sudo chmod -R g+w /var/www
+sudo chown -R :www-data /var/www
+
+echo -e "${GREEN}[${script_name}] Permissions updated!${NC}"
+exit 0
