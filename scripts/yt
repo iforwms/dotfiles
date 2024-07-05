@@ -58,7 +58,7 @@ do
       fi
 
       echo "[${script_name}] Downloading file to default directory..."
-      yt-dlp $url
+      yt-dlp -f 'bestvideo[height<=1080]+bestaudio/best[height<=1080]' $url
       exit 0
       ;;
     "Audio only to current directory")
@@ -84,7 +84,7 @@ do
 
       echo "[${script_name}] Downloading file to current directory..."
       output_filename=$(basename "$(yt-dlp --get-filename "$url")")
-      yt-dlp -P . $url
+      yt-dlp -f 'bestvideo[height<=1080]+bestaudio/best[height<=1080]' -P . $url
       clean "$output_filename"
       exit 0
       ;;
@@ -93,7 +93,7 @@ do
 
       if [[ "$is_local_file" == "0" ]]; then
         output_filename=$(basename "$(yt-dlp --get-filename "$url")")
-        yt-dlp -P . $url
+        yt-dlp -f 'bestvideo[height<=1080]+bestaudio/best[height<=1080]' -P . $url
       else
         output_filename="$url"
       fi
@@ -108,7 +108,7 @@ do
 
       if [[ "$is_local_file" == "0" ]]; then
         output_filename=$(basename "$(yt-dlp --get-filename "$url")")
-        yt-dlp -P . $url
+        yt-dlp -f 'bestvideo[height<=1080]+bestaudio/best[height<=1080]' -P . $url
       else
         output_filename="$url"
       fi
