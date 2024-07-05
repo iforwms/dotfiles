@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+script_name=android-mirror
+device_ip="$1"
+port="${1:-5555}"
+
+if [[ -z "$device_ip" ]]; then
+  echo -e "${RED}[${script_name}] Device IP cannot be empty.${NC}"
+  echo -e "${GREEN}[${script_name}] Usage: android-mirror <device_ip> [port]${NC}"
+  exit 1
+fi
+
+echo -en "${GREEN}"
+read -p "[${script_name}] Is your Android device connected via USB and USB debugging enabled? (y/n) " -n 1 -r
+echo -e "$NC"
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  device_connected=$(adb devices | grep "\<device\>")
+  if [[ -z "$device_connected" ]]; then
+    echo -e "${RED}[${script_name}] Unable to find device."
+    echo -e "[${script_name}] 'adb devices' output:"
+    adb devices
+    echo -en "$NC"
+    exit 1
+  fi
+
+  echo -e "${GREEN}[${script_name}] Setting adb port to ${port}...${NC}"
+  adb tcpip "$port"
+  echo -e "${GREEN}[${script_name}] Connecting to ${device_ip}...${NC}"
+  adb connect "${device_ip}:5555"
+
+  echo -en "${GREEN}"
+  read -p "[${script_name}] If the device connected, unplug the USB cable and unlock the phone, then and press 'y' to continue. " -n 1 -r
+  echo -e "$NC"
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    scrcpy
+  fi
+fi
+
+echo -e "${RED}[${script_name}] Aborting...${NC}"
+exit 1

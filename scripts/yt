@@ -89,7 +89,7 @@ do
       exit 0
       ;;
     "Current directory and optimise audio (for TV)")
-      echo "[${script_name}] Downloading file to current directory and converting video audio to MP3..."
+      echo "[${script_name}] Downloading file to current directory and converting video audio to AAC..."
 
       if [[ "$is_local_file" == "0" ]]; then
         output_filename=$(basename "$(yt-dlp --get-filename "$url")")
@@ -99,12 +99,12 @@ do
       fi
 
       output_extension="${output_filename##*.}"
-      ffmpeg -i "$output_filename" -acodec mp3 -vcodec copy "${output_filename/.${output_extension}/-mp3.mp4}"
-      clean "${output_filename/.${output_extension}/-mp3.mp4}"
+      ffmpeg -i "$output_filename" -acodec aac -vcodec copy "${output_filename/.${output_extension}/-aac.mp4}"
+      clean "${output_filename/.${output_extension}/-aac.mp4}"
       exit 0
       ;;
     "Current directory and optimise audio and video (slow)")
-      echo "[${script_name}] Downloading file to current directory and converting video audio to MP3..."
+      echo "[${script_name}] Downloading file to current directory and converting video audio to AAC..."
 
       if [[ "$is_local_file" == "0" ]]; then
         output_filename=$(basename "$(yt-dlp --get-filename "$url")")
@@ -114,8 +114,8 @@ do
       fi
 
       output_extension="${output_filename##*.}"
-      ffmpeg -i "$output_filename" -acodec mp3 -vcodec libx265 -crf 28 "${output_filename/.${output_extension}/-mp3.mp4}"
-      clean "${output_filename/.${output_extension}/-mp3.mp4}"
+      ffmpeg -i "$output_filename" -acodec aac -vcodec libx265 -crf 28 "${output_filename/.${output_extension}/-aac.mp4}"
+      clean "${output_filename/.${output_extension}/-aac.mp4}"
       exit 0
       ;;
     "Quit")
