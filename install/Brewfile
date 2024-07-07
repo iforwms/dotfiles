@@ -52,6 +52,7 @@ brew 'zlib' # Needed for Memcached
 brew 'gifsicle'
 brew 'jpegoptim'
 brew 'mkcert'
+brew 'opencv' # web cam streaming
 brew 'optipng'
 brew 'phpunit'
 brew 'pngquant'
