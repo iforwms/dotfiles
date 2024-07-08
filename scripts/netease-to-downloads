@@ -4,7 +4,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-script_name=/netease-to-downloads
+script_name=netease-to-downloads
 last_n_days="${1:-1}"
 
 local_dl_dir=/storage/emulated/0/Download
