@@ -213,6 +213,7 @@ function ggs() {
 }
 
 function ggp() {
+    pass git push
     pass git pull
 
     $HOME/.dotfiles/scripts/globalGitPull $HOME/.dotfiles
