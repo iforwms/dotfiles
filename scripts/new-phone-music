@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+script_name=new-phone-music
+last_n_days="${1:-1}"
+
+local_dir=/Users/ifor/Downloads
+local_music_dir="${local_dir}/new-music"
+remote_dir=/storage/emulated/0/Download
+
+echo -e "${GREEN}[${script_name}] Removing ~/Downloads/new-music directory...${NC}"
+rm -rfv "${local_dir}/new-music" 2>/dev/null
+
+echo -e "${GREEN}[${script_name}] Copying backup script to phone...${NC}"
+adb push $DOTFILES/scripts/netease-to-downloads "$remote_dir"
+
+echo -e "${GREEN}[${script_name}] Running script on phone...${NC}"
+adb shell sh "${remote_dir}/netease-to-downloads" "$last_n_days"
+
+echo -e "${GREEN}[${script_name}] Copying new songs from phone...${NC}"
+adb pull "${remote_dir}/new-music" "$local_dir"
+
+echo -e "${GREEN}[${script_name}] Cleaning up phone files...${NC}"
+adb shell sh rm -v "${remote_dir}/netease-to-downloads"
+adb shell sh rm -rfv "${remote_dir}/new-music"
+
+echo -e "${GREEN}[${script_name}] Converting ncm files...${NC}"
+ncmc "$local_music_dir"
+
+echo -e "${GREEN}[${script_name}] Removing ncm files...${NC}"
+rm -v "${local_music_dir}/"*.ncm
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
+

@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+script_name=/netease-to-downloads
+last_n_days="${1:-1}"
+
+local_dl_dir=/storage/emulated/0/Download
+local_temp_dir="${local_dl_dir}/new-music"
+
+echo -e "${GREEN}[${script_name}] Removing ~/Download/new-music...${NC}"
+rm -rf "$local_temp_dir" 2>/dev/null
+
+echo -e "${GREEN}[${script_name}] Copying new music to ~/Download/new-music...${NC}"
+mkdir -p "$local_temp_dir" 2>/dev/null
+find \
+  "${local_dl_dir}/netease/cloudmusic/Music" \
+  -name '*.*' \
+  -type f \
+  -mtime -"$last_n_days" \
+  -exec cp -v {} "$local_temp_dir" \;
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
