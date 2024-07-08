@@ -12,7 +12,7 @@ local_music_dir="${local_dir}/new-music"
 remote_dir=/storage/emulated/0/Download
 
 echo -e "${GREEN}[${script_name}] Removing ~/Downloads/new-music directory...${NC}"
-rm -rfv "${local_dir}/new-music" 2>/dev/null
+rm -rf "${local_dir}/new-music" 2>/dev/null
 
 echo -e "${GREEN}[${script_name}] Copying backup script to phone...${NC}"
 adb push $DOTFILES/scripts/netease-to-downloads "$remote_dir"
@@ -24,14 +24,18 @@ echo -e "${GREEN}[${script_name}] Copying new songs from phone...${NC}"
 adb pull "${remote_dir}/new-music" "$local_dir"
 
 echo -e "${GREEN}[${script_name}] Cleaning up phone files...${NC}"
-adb shell sh rm -v "${remote_dir}/netease-to-downloads"
-adb shell sh rm -rfv "${remote_dir}/new-music"
+adb shell rm "${remote_dir}/netease-to-downloads"
+adb shell rm -rf "${remote_dir}/new-music"
 
 echo -e "${GREEN}[${script_name}] Converting ncm files...${NC}"
 ncmc "$local_music_dir"
 
 echo -e "${GREEN}[${script_name}] Removing ncm files...${NC}"
-rm -v "${local_music_dir}/"*.ncm
+rm "${local_music_dir}/"*.ncm 2>/dev/null
+
+echo -e "${GREEN}[${script_name}] Opening new-music directory and Picard...${NC}"
+open -a "MusicBrainz Picard"
+open "$local_music_dir"
 
 echo -e "${GREEN}[${script_name}] All done!${NC}"
 exit 0
