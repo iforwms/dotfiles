@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+cmus_window=$(tmux list-windows -F '#I "#W"' | awk '$2 ~ /"cmus"/ { print $1 }')
+if [[ -z "$cmus_window" ]]; then
+  tmux new-window -d -n 'cmus'
+  cmus_window=$(tmux list-windows -F '#I "#W"' | awk '$2 ~ /"cmus"/ { print $1 }')
+fi
+
+if [[ "$cmus_window" -ne 0 ]]; then
+  tmux move-window -d -s "$cmus_window" -t 0
+fi
+
+cmus_status=$(/usr/local/bin/cmus-remote --query | grep status)
+if [[ "$cmus_status" != 'status stopped' && "$cmus_status" != 'status playing' ]]; then
+  tmux send-keys -t 0 -l 'cmus'
+  tmux send-keys -t 0 Enter
+fi
+
+tmux select-window -t 0
+
+exit 0

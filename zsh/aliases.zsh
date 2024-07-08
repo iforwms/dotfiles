@@ -309,6 +309,8 @@ alias tls="tmux list-sessions"
 alias tkl="tmux kill-session -t"
 alias tcs=$DOTFILES/scripts/tmux-sessions
 
+alias cmi=$DOTFILES/scripts/cmus-init
+
 # Create PDF from markdown
 alias md2pdf=$DOTFILES/scripts/markdown2pdf
 
