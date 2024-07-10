@@ -6,8 +6,8 @@ remote_dir="/var/www/jukebox/album_art"
 echo "Optimising images."
 for f in "$base_dir"/*.jpg; do
   cp -v "$f" "${f/.jpg/_orig.jpg}"
-  magick -quality 75 -geometry 1200x\> "${f/.jpg/_orig.jpg}" "${f/_orig.jpg/.jpg}"
-  magick -quality 75 -geometry 240x\> "${f/.jpg/_orig.jpg}" "${f/.jpg/_thumb.jpg}"
+  magick convert -quality 75 -geometry 1200x\> "${f/.jpg/_orig.jpg}" "${f/_orig.jpg/.jpg}"
+  magick convert -quality 75 -geometry 240x\> "${f/.jpg/_orig.jpg}" "${f/.jpg/_thumb.jpg}"
   rm -v "${f/.jpg/_orig.jpg}"
 done
 
