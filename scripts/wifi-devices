@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 
-RED='\033[0;31m'
+# RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-script_name=wifi-devices
+# script_name=wifi-devices
 
-echo -e "Connected devices (Name|IP|MAC)${GREEN}"
-curl \
+router_reponse=$(
+  curl \
     --silent 'http://192.168.1.1/web/cmcc/gch/status_terminal_info_gch.gch' \
-    -H 'Cookie: USER_LOG_TOKEN=A4967909593760471; ADMIN_LOG_TOKEN=A9599088703776728' \
+    -H 'Cookie: USER_LOG_TOKEN=A4967909593760471; ADMIN_LOG_TOKEN=A9599088703776728'
+)
+devices=$(
+  echo "$router_reponse" \
     | sed 's/></\n/g' \
     | grep 'devName\|ipAddr\|macAddr' \
     | sed '
@@ -24,7 +27,10 @@ curl \
     ' \
     | paste -d'|' - - - \
     | sort --ignore-case
-echo -en "${NC}"
+)
+device_count=$(echo "$devices" | wc -l)
+echo -e "Connected devices (${device_count}) [Name|IP|MAC]"
+echo -e "${GREEN}${devices}${NC}"
 
 exit 0
 
