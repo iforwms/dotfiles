@@ -19,10 +19,11 @@ devices=$(
       s/.*>\(.*\)<.*/\1/;
       s/iMac-Ifor/IforiMac/;
       s/Macbook-Ifor/IforMacbook/;
-      s/WLZ-AN00/IforPhone/;
+      s/KKG-AN70/IforPhone/;
+      s/WLZ-AN00/WLZ-AN00/;
       s/nova_6_(5G)-919b263c8cc38/MeilingPhone/;
       s/WGRR-W19/MiaPad/;
-      s/XTC_XXX/MiaWatch/;
+      s/XTC_D2/MiaWatchNew/;
       s/XTC_Z5q/MiaWatchOld/;
       s/MiTV4-ANSM0-1cdda1ed3b579347/MiTV/;
       s/Z6/NoaWatch/
