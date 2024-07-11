@@ -1,3 +1,30 @@
 #!/usr/bin/env bash
 
-/Users/ifor/Documents/scripts/wifi-devices
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+script_name=wifi-devices
+
+echo -e "Connected devices (Name|IP|MAC)${GREEN}"
+curl \
+    --silent 'http://192.168.1.1/web/cmcc/gch/status_terminal_info_gch.gch' \
+    -H 'Cookie: USER_LOG_TOKEN=A4967909593760471; ADMIN_LOG_TOKEN=A9599088703776728' \
+    | sed 's/></\n/g' \
+    | grep 'devName\|ipAddr\|macAddr' \
+    | sed '
+      s/.*>\(.*\)<.*/\1/;
+      s/iMac-Ifor/IforiMac/;
+      s/WLZ-AN00/IforPhone/;
+      s/nova_6_(5G)-919b263c8cc38/MeilingPhone/;
+      s/WGRR-W19/MiaPad/;
+      s/XTC_Z5q/MiaWatchOld/;
+      s/MiTV4-ANSM0-1cdda1ed3b579347/MiTV/;
+      s/Z6/NoaWatch/
+    ' \
+    | paste -d'|' - - - \
+    | sort --ignore-case
+echo -en "${NC}"
+
+exit 0
+
