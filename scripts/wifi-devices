@@ -33,6 +33,11 @@ devices=$(
 )
 device_count=$(echo "$devices" | wc -l)
 
+if [[ -n "$1" ]]; then
+  echo "$devices" | sed 1d | sed 's/\[0;32m//' | cut -d\| -f1 | sort -u
+  exit 0
+fi
+
 echo -e "Connected devices (${device_count}) [User|Device|IP|MAC]"
 echo -e "${GREEN}${devices}${NC}"
 
