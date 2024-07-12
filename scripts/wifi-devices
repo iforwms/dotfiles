@@ -17,23 +17,23 @@ devices=$(
     | grep 'devName\|ipAddr\|macAddr' \
     | sed '
       s/.*>\(.*\)<.*/\1/;
-      s/iMac-Ifor/IforiMac/;
-      s/Macbook-Ifor/IforMacbook/;
-      s/KKG-AN70/IforPhone/;
+      s/iMac-Ifor/Ifor\|iMac/;
+      s/Macbook-Ifor/Ifor\|Macbook/;
+      s/KKG-AN70/Ifor\|Phone/;
       s/WLZ-AN00/WLZ-AN00/;
-      s/nova_6_(5G)-919b263c8cc38/MeilingPhone/;
-      s/WGRR-W19/MiaPad/;
-      s/XTC_D2/MiaWatchNew/;
-      s/XTC_Z5q/MiaWatchOld/;
-      s/MiTV4-ANSM0-1cdda1ed3b579347/MiTV/;
-      s/Z6/NoaWatch/
+      s/nova_6_(5G)-919b263c8cc38/Meiling\|Phone/;
+      s/WGRR-W19/Mia\|Pad/;
+      s/XTC_D2/Mia\|Watch-New/;
+      s/XTC_Z5q/Mia\|Watch-Old/;
+      s/MiTV4-ANSM0-1cdda1ed3b579347/-\|MiTV/;
+      s/Z6/Noa\|Watch/
     ' \
     | paste -d'|' - - - \
     | sort --ignore-case
 )
 device_count=$(echo "$devices" | wc -l)
 
-echo -e "Connected devices (${device_count}) [Name|IP|MAC]"
+echo -e "Connected devices (${device_count}) [User|Device|IP|MAC]"
 echo -e "${GREEN}${devices}${NC}"
 
 exit 0
