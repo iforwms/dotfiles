@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+script_name=video-cut
+input_file="$1"
+
+if [[ -z "$input_file" ]]; then
+  echo -e "${RED}[${script_name}] File not found, aborting...${NC}"
+  echo -e "${GREEN}[${script_name}] usage: video-cut <input-file> <start-seconds,end-seconds> [start-seconds,end-seconds]...${NC}"
+  exit 1
+fi
+
+file_extension="${input_file##*.}"
+new_filename="${input_file/.${file_extension}/-cut.${file_extension}}"
+
+between_string=""
+
+for var in "${@:2}"
+do
+  between_string+="between(t,${var})+"
+done
+between_string=${between_string::-1}
+
+ffmpeg -i "$input_file" \
+  -vf "select='${between_string}', setpts=N/FRAME_RATE/TB" \
+  -af "aselect='${between_string}', asetpts=N/SR/TB" \
+  "${new_filename}"
+
+exit 0
+
