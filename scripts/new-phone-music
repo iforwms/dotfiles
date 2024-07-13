@@ -11,6 +11,12 @@ local_dir=/Users/ifor/Downloads
 local_music_dir="${local_dir}/new-music"
 remote_dir=/storage/emulated/0/Download
 
+device_connected=$(adb devices | grep device$)
+if [[ -z "$device_connected" ]]; then
+    echo -e "${RED}[${script_name}] Device not connected. Is USB Debugging enabled? Exiting..."
+    exit 1
+fi
+
 echo -e "${GREEN}[${script_name}] Removing ~/Downloads/new-music directory...${NC}"
 rm -rf "${local_dir}/new-music" 2>/dev/null
 
