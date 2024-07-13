@@ -13,16 +13,22 @@ if [[ -z "$input_file" ]]; then
   exit 1
 fi
 
+if [[ -r "$2" ]]; then
+  timestamps=$(cat "$2" | paste -d"," - -)
+else
+  timestamps="${@:2}"
+fi
+
 file_extension="${input_file##*.}"
 new_filename="${input_file/.${file_extension}/-cut.${file_extension}}"
 
 between_string=""
-
-for var in "${@:2}"
+for var in $timestamps
 do
   between_string+="between(t,${var})+"
 done
 between_string=${between_string::-1}
+echo $between_string
 
 ffmpeg -i "$input_file" \
   -vf "select='${between_string}', setpts=N/FRAME_RATE/TB" \
