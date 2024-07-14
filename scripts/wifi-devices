@@ -20,7 +20,7 @@ devices=$(
       s/iMac-Ifor/Ifor\|iMac/;
       s/Macbook-Ifor/Ifor\|Macbook/;
       s/KKG-AN70/Ifor\|Phone/;
-      s/WLZ-AN00/WLZ-AN00/;
+      s/WLZ-AN00/Meiling\|Phone/;
       s/nova_6_(5G)-919b263c8cc38/Meiling\|Phone/;
       s/WGRR-W19/Mia\|Pad/;
       s/XTC_D2/Mia\|Watch-New/;
