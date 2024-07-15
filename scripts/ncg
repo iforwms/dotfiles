@@ -3,22 +3,3 @@
 cd /Users/ifor/code/ncg
 php -S localhost:4999
 open -a firefox -g http://localhost:4999
-#
-# RED='\033[0;31m'
-# GREEN='\033[0;32m'
-# NC='\033[0m'
-
-# script_name=TODO
-
-# base_dir=TODO
-# server=TODO
-# dir=TODO
-
-# if ! [[ -d "$dir" ]]; then
-#   echo -e "${RED}[${script_name}] Directory not found, aborting...${NC}"
-#   exit 1
-# fi
-
-# echo -e "${GREEN}[${script_name}] All done!${NC}"
-# exit 0
-
