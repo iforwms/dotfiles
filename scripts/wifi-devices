@@ -34,7 +34,14 @@ devices=$(
 device_count=$(echo "$devices" | wc -l)
 
 if [[ -n "$1" ]]; then
-  echo "$devices" | sed 1d | sed 's/\[0;32m//' | cut -d\| -f1 | sort -u
+  users=$(echo "$devices" | sed 1d | grep -v 'Watch-Old' | sed 's/\[0;32m//' | cut -d\| -f1 | sort -u)
+
+  if [[ -z "$users" ]]; then
+    echo "No one home..."
+  else
+    echo "$users"
+  fi
+
   exit 0
 fi
 
