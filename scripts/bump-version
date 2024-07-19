@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+script_name=bump-version
+filepath="$1"
+
+if ! [[ -r "$filepath" ]]; then
+  echo -e "${RED}[${script_name}] Can't read input file, aborting...${NC}"
+  exit 1
+fi
+
+new_version=$(sed -n 's:// @version\s\+\(.*\)$:\1:p' "$filepath" | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)
+sed -i 's:// @version\s\+\(.*\)$:// @version      '$new_version':' "$filepath"
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
+
