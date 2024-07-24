@@ -5,13 +5,12 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
-script_name=TODO
+script_name=sync-darts-audio
 
-base_dir=TODO
-server=TODO
-dir=TODO
+remote_dir=/Volumes/IFOR2T/darts/en-GB-Russ-Male-v1
+local_dir=/Users/ifor/darts-hub/darts-caller-media/en-GB-Russ-Male-v1
 
-if ! [[ -d "$dir" ]]; then
+if ! [[ -d "$remote_dir" ]] || ! [[ -d "$local_dir" ]]; then
   echo -e "${RED}[${script_name}] Directory not found, aborting...${NC}"
   exit 1
 fi
