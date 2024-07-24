@@ -16,7 +16,7 @@ if ! [[ -d "$remote_dir" ]] || ! [[ -d "$local_dir" ]]; then
 fi
 
 echo -e "${GREEN}[${script_name}] Syncing audio files...${NC}"
-rsync --archive --verbose --recursive --compress "$remote_dir" "$local_dir"
+rsync --archive --verbose --compress "${remote_dir}/" "$local_dir"
 
 echo -e "${GREEN}[${script_name}] All done!${NC}"
 exit 0
