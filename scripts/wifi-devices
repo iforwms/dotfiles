@@ -26,7 +26,7 @@ devices=$(
       s/WGRR-W19/Mia\|Pad/;
       s/XTC_D2/Mia\|Watch-New/;
       s/XTC_Z5q/Mia\|Watch-Old/;
-      s/MiTV4-ANSM0-1cdda1ed3b579347/-\|MiTV/;
+      s/MiTV4-ANSM0-1cdda1ed3b579347/- \|MiTV/;
       s/Z6/Noa\|Watch/
     ' \
     | paste -d'|' - - - \
