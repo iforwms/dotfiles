@@ -21,6 +21,7 @@ devices=$(
       s/Macbook-Ifor/Ifor\|Macbook/;
       s/KKG-AN70/Ifor\|Phone/;
       s/MIMAX3-MiFor/Ifor\|Phone-XiaoMi/;
+      s/Pixel/Ifor\|Phone-Pixel/;
       s/WLZ-AN00/Meiling\|Phone/;
       s/nova_6_(5G)-919b263c8cc38/Meiling\|Phone/;
       s/WGRR-W19/Mia\|Pad/;
