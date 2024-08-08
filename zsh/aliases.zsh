@@ -35,8 +35,10 @@ alias vimgolf='docker run --rm -it -e "key=4ff4186b1f258b4dd2755c104835abeb" kra
 alias deploy='sudo -u www-data ./deploy'
 alias l='ls -vlAh --color=auto --time-style="+%Y %b %d %H:%M"'
 alias ls='ls -vA --color=auto --time-style="+%Y %b %d %H:%M"'
-alias sagi='sudo apt-get install'
-alias sagu='sudo apt-get update'
+
+# Apt
+alias iap='sudo apt install'
+alias uap='sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y'
 
 if command -v ggrep &> /dev/null; then
   alias grep='ggrep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox}'
