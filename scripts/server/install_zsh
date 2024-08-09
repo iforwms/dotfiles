@@ -1,28 +1,34 @@
 #!/usr/bin/env bash
 
-name=ZSH
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+script_name="install-zsh"
+home=/home/${SUDO_USER}
+
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
-    echo "[${name}] This script must be run as root (or sudo). Exiting."
+    echo -e "${RED}[${script_name}] This script must be run as root (or sudo). Exiting.${NC}"
     exit 1
 fi
 
-home=/home/${SUDO_USER}
 
-echo "[${name}] Installing zsh."
+echo -e "${GREEN}[${script_name}] Installing zsh...${NC}"
 apt install -y zsh
 
-echo "[${name}] Installing oh-my-zsh."
+echo -e "${GREEN}[${script_name}] Installing oh-my-zsh...${NC}"
 sudo -u $SUDO_USER sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
-echo "[${name}] Installing zsh plugins."
+echo -e "${GREEN}[${script_name}] Installing zsh plugins...${NC}"
 rm -rf $home/.dotfiles/zsh/plugins/zsh-autosuggestions;
 rm -rf $home/.dotfiles/zsh/plugins/zsh-syntax-highlighting;
 git clone --depth 1 https://github.com/zsh-users/zsh-autosuggestions $home/.dotfiles/zsh/plugins/zsh-autosuggestions;
 git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting.git $home/.dotfiles/zsh/plugins/zsh-syntax-highlighting
 
-echo "[${name}] Replacing default .zshrc with custom one."
+echo -e "${GREEN}[${script_name}] Replacing default .zshrc with custom one...${NC}"
 rm -rf $home/.zshrc
 ln -s $home/.dotfiles/zsh/.zshrc $home
 
-echo "[${name}] All done!"
+echo -e "${GREEN}[${script_name}] All done!${NC}"
 exit 0
