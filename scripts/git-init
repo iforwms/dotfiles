@@ -35,6 +35,7 @@ cat >"${repo_path}/deploy-remote" <<EOL
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
 NC='\033[0m'
 
 script_name=TODO
@@ -74,10 +75,10 @@ fi
 read -p "Do you wish to install PHP helpers? (y/n) " -n 1 -r install_php
 echo
 if [[ $install_php =~ ^[Yy]$ ]]; then
-  echo -e "${GREEN}[${script_name}] TODO${NC}"
+  echo -e "${GREEN}[${script_name}] Installing PHP helpers - TODO${NC}"
 fi
 
-echo -e "${GREEN}[${script_name}] Finalising git setup and creating initial commit.${NC}"
+echo -e "${GREEN}[${script_name}] Finalising git setup and creating initial commit...${NC}"
 git -C "$repo_path" add --all
 git -C "$repo_path" commit -m "Initial commit."
 git -C "$repo_path" branch -m main
