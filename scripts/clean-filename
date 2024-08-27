@@ -31,7 +31,8 @@ function clean() {
     s/\.\././g;
     s/\.-/-/g;
     s/NA-NA\.//;
-    s/^XXXX/\.\//
+    s/^XXXX/\.\//;
+    s/\.\././g
     ")
   dest="${dest,,}"
 
@@ -48,7 +49,6 @@ export -f clean
 
 find . \
   -maxdepth "$file_depth" \
-  -type f \
   -name "$file_type" \
   -print0 | \
   xargs -0 -I {} bash -c "clean \"{}\""
@@ -61,7 +61,6 @@ if [[ $FORCE -eq 0 ]]; then
     echo
     find . \
       -maxdepth "$file_depth" \
-      -type f \
       -name "$file_type" \
       -print0 | \
       xargs -0 -I {} bash -c "clean \"{}\""
@@ -70,7 +69,6 @@ else
   DEBUG=0
   find . \
     -maxdepth "$file_depth" \
-    -type f \
     -name "$file_type" \
     -print0 | \
     xargs -0 -I {} bash -c "clean \"{}\""

@@ -110,6 +110,10 @@ alias cda="composer dump-autoload -o"
 alias cchina="composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/"
 alias cintl="composer config -g --unset repos.packagist"
 
+# Yarn
+alias ychina="yarn config set registry https://registry.yarnpkg.com"
+alias yintl="yarn config set registry https://registry.npm.taobao.org"
+
 # Cargo
 alias cab="cargo build"
 alias cabr="cargo build --release"
