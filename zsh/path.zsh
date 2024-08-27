@@ -50,4 +50,5 @@ if [ -n "${PATH##*${snap_bin_path}}" ] && [ -n "${PATH##*${snap_bin_path}:*}" ];
 fi
 
 export PATH="$DOTFILES/scripts:$DOTFILES/scripts/server:$PATH"
+export PATH="/bin/stty:$PATH"
 
