@@ -24,6 +24,7 @@ devices=$(
       s/Pixel/Ifor\|Phone-Pixel/;
       s/WLZ-AN00/Meiling\|Phone/;
       s/nova_6_(5G)-919b263c8cc38/Meiling\|Phone/;
+      s/MIPAD4PLUS-IforPad/Ifor\|MiPad/;
       s/WGRR-W19/Mia\|Pad/;
       s/XTC_D2/Mia\|Watch-New/;
       s/XTC_Z5q/Mia\|Watch-Old/;
