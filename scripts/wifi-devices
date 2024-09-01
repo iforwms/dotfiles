@@ -9,7 +9,7 @@ NC='\033[0m'
 router_reponse=$(
   curl \
     --silent 'http://192.168.1.1/web/cmcc/gch/status_terminal_info_gch.gch' \
-    -H 'Cookie: USER_LOG_TOKEN=A7316567671181336; ADMIN_LOG_TOKEN=A9599088703776728'
+    -H 'Cookie: USER_LOG_TOKEN=A7403221092919199; ADMIN_LOG_TOKEN=A9599088703776728'
 )
 devices=$(
   echo "$router_reponse" \
@@ -24,6 +24,7 @@ devices=$(
       s/Pixel/Ifor\|Phone-Pixel/;
       s/WLZ-AN00/Meiling\|Phone/;
       s/nova_6_(5G)-919b263c8cc38/Meiling\|Phone/;
+      s/MIPAD4PLUS-IforPad/Ifor\|MiPad/;
       s/WGRR-W19/Mia\|Pad/;
       s/XTC_D2/Mia\|Watch-New/;
       s/XTC_Z5q/Mia\|Watch-Old/;

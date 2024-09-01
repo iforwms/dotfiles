@@ -17,7 +17,7 @@ function clean() {
         mv "${src}" "${dest}"
     fi
 
-    echo "${src}" "--->" "${dest}"
+    echo "${src/\/Users\/ifor\/Downloads\//}" "--->" "${dest/\/Users\/ifor\/Movies\//}"
 }
 
 export -f clean
