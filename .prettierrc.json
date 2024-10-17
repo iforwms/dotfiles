@@ -1,0 +1,10 @@
+{
+  "trailingComma": "es5",
+  "tabWidth": 2,
+  "semi": true,
+  "singleQuote": true,
+  "plugins": [
+    "/usr/local/lib/node_modules/@prettier/plugin-php/standalone.js",
+    "/usr/local/lib/node_modules/@prettier/plugin-xml/src/plugin.js"
+  ]
+}
