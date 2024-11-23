@@ -99,7 +99,7 @@ do
       fi
 
       output_extension="${output_filename##*.}"
-      ffmpeg -i "$output_filename" -acodec aac -vcodec copy "${output_filename/.${output_extension}/-aac.mp4}"
+      ffmpeg -i "$output_filename" -acodec aac -vcodec libx264 "${output_filename/.${output_extension}/-aac.mp4}"
       clean "${output_filename/.${output_extension}/-aac.mp4}"
       exit 0
       ;;

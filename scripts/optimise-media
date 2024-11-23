@@ -10,6 +10,7 @@ conversion_type="${1:-video}"
 export input_filetype="${2:-mp4}"
 export output_filetype="${3:-$input_filetype}"
 max_depth=${4:-1}
+export resolution=${5:-1080}
 
 success_msg="[${script_name}] All ${conversion_type} in $(pwd) successfully converted from ${input_filetype} to ${output_filetype}."
 
@@ -23,7 +24,7 @@ echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   if [[ $conversion_type == 'video' ]]; then
     find . -maxdepth "$max_depth" -type f -name "*.${input_filetype}" -print0 | \
-      xargs -0 -i bash -c 'ffmpeg -i "$1" -acodec mp3 -vcodec libx265 -crf 28 "${1/.${input_filetype}/.opt.${output_filetype}}"' - '{}'
+      xargs -0 -i bash -c 'ffmpeg -i "$1" -vf scale="${resolution}:-2" -acodec mp3 -vcodec libx265 -crf 28 "${1/.${input_filetype}/.opt.${output_filetype}}"' - '{}'
   elif [[ $conversion_type == 'audio' ]]; then
     find . -maxdepth "$max_depth" -type f -name "*.${input_filetype}" -print0 | \
       xargs -0 -i bash -c 'ffmpeg -i "$1" -vn -ar 44100 -ac 2 -b:a 320k "${1/.${input_filetype}/.${output_filetype}}"' - '{}'
