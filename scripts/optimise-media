@@ -10,7 +10,7 @@ conversion_type="${1:-video}"
 export input_filetype="${2:-mp4}"
 export output_filetype="${3:-$input_filetype}"
 max_depth=${4:-1}
-export resolution=${5:-1080}
+export resolution=${5:-1280}
 
 success_msg="[${script_name}] All ${conversion_type} in $(pwd) successfully converted from ${input_filetype} to ${output_filetype}."
 
