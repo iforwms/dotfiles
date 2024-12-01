@@ -336,7 +336,7 @@ augroup END
 "Prettify current file
 function! Prettify()
     let curPos = getcurpos()
-    let cmd = "%!prettier --config /Users/ifor/.dotfiles/.prettierrc.json --tab-width 2 --stdin-filepath %"
+    let cmd = "%!prettier --config ~/.dotfiles/.prettierrc.json --tab-width 2 --stdin-filepath %"
     if (&ft=='sh')
         let cmd = ":silent make! %"
         set local errorformat+=%f:%l:%c\ %m
