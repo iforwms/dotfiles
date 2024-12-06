@@ -13,8 +13,8 @@ if [[ ! -e "${base_dir}/artisan" ]]; then
   exit 1
 fi
 
-# echo -e "${GREEN}[${script_name}] Setting ownership to ifor:www-data...${NC}"
-# sudo chown -R ifor:www-data "$base_dir"
+echo -e "${GREEN}[${script_name}] Setting ownership to ifor:www-data...${NC}"
+sudo chown -R ifor:www-data "$base_dir"
 
 echo -e "${GREEN}[${script_name}] Setting directory permissions to 775...${NC}"
 sudo find "$base_dir" -type d -exec chmod 775 {} \;
