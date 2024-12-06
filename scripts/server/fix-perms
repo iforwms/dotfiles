@@ -7,8 +7,8 @@ NC='\033[0m'
 script_name=fix-perms
 
 echo -e "${GREEN}[${script_name}] Updating code directory permissions...${NC}"
-sudo chmod -R g+w /var/www
 sudo chown -R ifor:www-data /var/www
+sudo chmod -R g+w /var/www
 
 echo -e "${GREEN}[${script_name}] Permissions updated!${NC}"
 exit 0
