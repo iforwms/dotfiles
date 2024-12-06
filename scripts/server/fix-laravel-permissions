@@ -29,4 +29,5 @@ sudo find "$base_dir" -type f -exec chmod 664 {} \;
 echo -e "${GREEN}[${script_name}] Making artisan and deploy scripts executable...${NC}"
 sudo chmod 755 "${base_dir}/"{artisan,deploy-remote,deploy-local}
 
-echo "${GREEN}[${script_name}] All done!${NC}"
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
