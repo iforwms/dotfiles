@@ -44,6 +44,7 @@ brew 'reattach-to-user-namespace' # Required for tmux copy paste
 brew 'scrcpy' # Android screen mirroring
 brew 'shellcheck'
 brew 'sox'
+# mupdf
 brew 'telnet'
 brew 'trash' # Manage the Trash bin
 brew 'yq'
