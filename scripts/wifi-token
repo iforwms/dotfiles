@@ -6,8 +6,9 @@ NC='\033[0m'
 
 script_name=wifi-token
 token="$1"
-echo -e "${GREEN}[${script_name}] Setting token to: ${token}${NC}"
 
-sed -i "'s/USER_LOG_TOKEN=[A-Z0-9]\+;/USER_LOG_TOKEN=${token};/" ~/.dotfiles/scripts/wifi-devices
+echo -e "${GREEN}[${script_name}] Setting token to: ${token}${NC}"
+sed -i "s/USER_LOG_TOKEN=[A-Z0-9]\+;/USER_LOG_TOKEN=${token};/" ~/.dotfiles/scripts/wifi-devices
+echo -e "${GREEN}[${script_name}] All done!${NC}"
 
 exit 0
