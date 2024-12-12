@@ -30,5 +30,8 @@ sudo chmod -R ugo+rw "${base_dir}/storage"
 echo -e "${GREEN}[${script_name}] Making artisan and deploy scripts executable...${NC}"
 sudo chmod 755 "${base_dir}/"{artisan,deploy-remote,deploy-local}
 
+echo -e "${GREEN}[${script_name}] Fixing .gitignore permissions...${NC}"
+sudo find "$base_dir" -type f -name '.gitignore' -exec chmod 664 {} \;
+
 echo -e "${GREEN}[${script_name}] All done!${NC}"
 exit 0
