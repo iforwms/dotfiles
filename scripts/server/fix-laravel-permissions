@@ -27,6 +27,9 @@ sudo chmod -R 775 "${base_dir}/storage"
 sudo chmod -R 775 "${base_dir}/bootstrap/cache"
 sudo chmod -R ugo+rw "${base_dir}/storage"
 
+echo -e "${GREEN}[${script_name}] Setting 'storage' owner to www-data...${NC}"
+sudo chown -R www-data "${base_dir}/storage"
+
 echo -e "${GREEN}[${script_name}] Making artisan and deploy scripts executable...${NC}"
 sudo chmod 755 "${base_dir}/"{artisan,deploy-remote,deploy-local}
 
