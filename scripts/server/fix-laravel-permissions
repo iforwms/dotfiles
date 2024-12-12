@@ -25,6 +25,7 @@ sudo find "$base_dir" -type f -exec chmod 664 {} \;
 echo -e "${GREEN}[${script_name}] Setting 'storage' and 'bootstrap/cache' directory permissions to 775...${NC}"
 sudo chmod -R 775 "${base_dir}/storage"
 sudo chmod -R 775 "${base_dir}/bootstrap/cache"
+sudo chmod -R ugo+rw "${base_dir}/storage"
 
 echo -e "${GREEN}[${script_name}] Making artisan and deploy scripts executable...${NC}"
 sudo chmod 755 "${base_dir}/"{artisan,deploy-remote,deploy-local}
