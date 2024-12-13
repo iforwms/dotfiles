@@ -22,10 +22,10 @@ sudo find "$base_dir" -type d -exec chmod 775 {} \;
 echo -e "${GREEN}[${script_name}] Setting file permissions to 664...${NC}"
 sudo find "$base_dir" -type f -exec chmod 664 {} \;
 
-echo -e "${GREEN}[${script_name}] Setting 'storage' and 'bootstrap/cache' directory permissions to 775...${NC}"
-sudo chmod -R 775 "${base_dir}/storage"
-sudo chmod -R 775 "${base_dir}/bootstrap/cache"
-sudo chmod -R ugo+rw "${base_dir}/storage"
+# echo -e "${GREEN}[${script_name}] Setting 'storage' and 'bootstrap/cache' directory permissions to 775...${NC}"
+# sudo chmod -R 775 "${base_dir}/storage"
+# sudo chmod -R 775 "${base_dir}/bootstrap/cache"
+# sudo chmod -R ugo+rw "${base_dir}/storage"
 
 echo -e "${GREEN}[${script_name}] Setting 'storage' owner to www-data...${NC}"
 sudo chown -R www-data "${base_dir}/storage"
