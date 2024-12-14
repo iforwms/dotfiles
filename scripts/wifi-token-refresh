@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# RED='\033[0;31m'
+GREEN='\033[0;32m'
+# YELLOW='\033[0;33m'
+NC='\033[0m'
+
+SCRIPT_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
+script_name=wifi-token-refresh
+
+echo -e "${GREEN}[${script_name}] Refreshing token...${NC}"
+res=$(curl 'http://192.168.1.1/' --silent -X POST --data-raw 'frashnum=&action=login&Frm_Logintoken=5&username=user&***REDACTED***&ieversion=1')
+token=$(echo "$res" | sed -n 's/.*USER_LOG_TOKEN=" + "\([0-9A-Z]\+\)";.*/\1/p')
+
+echo -e "${GREEN}[${script_name}] Setting token to \"${token}\"...${NC}"
+"${SCRIPT_DIR}/wifi-token" "$token"
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
+
+
