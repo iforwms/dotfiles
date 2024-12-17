@@ -24,6 +24,9 @@ ssh me "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa
 echo -e "${GREEN}[${script_name}] [tt] Updating server...${NC}"
 ssh tt "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/ifor_tt' && git -C ${base_dir} pull"
 
+echo -e "${GREEN}[${script_name}] [felix-weddings] Updating server...${NC}"
+ssh mpw "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_ed25519' && git -C ${base_dir} pull"
+
 echo -e "${GREEN}[${script_name}] [exped] Updating server...${NC}"
 ssh exped "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/ifor_wmai' && git -C ${base_dir} pull"
 
