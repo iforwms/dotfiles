@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+script_name=scp-rsync
+
+remote_path="$1"
+local_path="$2"
+
+if [[ $# -lt 2 ]]; then
+  echo -e "${RED}[${script_name}] Missing arguments.${NC}"
+  echo -e "${YELLOW}[${script_name}] Usage: scp-rsync <remote_path> <local_path>${NC}"
+  exit 1
+fi
+
+echo -e "${GREEN}[${script_name}] Preparing to copy from \"${remote_path}\" to \"${local_path}\".${NC}"
+rsync \
+  --compress \
+  --stats \
+  --checksum \
+  --human-readable \
+  --archive \
+  --verbose \
+  --partial \
+  --progress \
+  "$remote_path" \
+  "$local_path"
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
+
+

@@ -49,6 +49,10 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 echo
+echo "[${name}] Creating backup..."
+cp "$fpm_config" "${fpm_config/.conf/.conf.bak}"
+
+echo
 echo "[${name}] Updating config file..."
 sed -E "
    s/^;?pm.max_children.*$/pm.max_children = ${max_children}/;
