@@ -31,5 +31,3 @@ rsync \
 
 echo -e "${GREEN}[${script_name}] All done!${NC}"
 exit 0
-
-
