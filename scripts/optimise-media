@@ -23,8 +23,9 @@ echo
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   if [[ $conversion_type == 'video' ]]; then
+    # Recursively convert video to specified resolution (default 720p), with all audio and subtitle streams.
     find . -maxdepth "$max_depth" -type f -name "*.${input_filetype}" -print0 | \
-      xargs -0 -i bash -c 'ffmpeg -i "$1" -vf scale="${resolution}:-2" -acodec mp3 -vcodec libx265 -crf 28 "${1/.${input_filetype}/.opt.${output_filetype}}"' - '{}'
+      xargs -0 -i bash -c 'ffmpeg -i "$1" -vf scale="${resolution}:-2" -map 0 -scodec copy -acodec aac -vcodec libx265 -crf 28 "${1/.${input_filetype}/.opt.${output_filetype}}"' - '{}'
   elif [[ $conversion_type == 'audio' ]]; then
     find . -maxdepth "$max_depth" -type f -name "*.${input_filetype}" -print0 | \
       xargs -0 -i bash -c 'ffmpeg -i "$1" -vn -ar 44100 -ac 2 -b:a 320k "${1/.${input_filetype}/.${output_filetype}}"' - '{}'

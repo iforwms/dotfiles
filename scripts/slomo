@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+script_name=slomo
+input_file="$1"
+
+if ! [[ -f "$input_file" ]]; then
+  echo -e "${RED}[${script_name}] File not found, aborting...${NC}"
+  exit 1
+fi
+
+ffmpeg -i "$input_file" -vf setpts="8*PTS" -r 30 -crf 18 "${input_file}.slomo.mp4"
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
