@@ -9,7 +9,7 @@ NC='\033[0m'
 router_reponse=$(
   curl \
     --silent 'http://192.168.1.1/web/cmcc/gch/status_terminal_info_gch.gch' \
-    -H 'Cookie: USER_LOG_TOKEN=; ADMIN_LOG_TOKEN=***REDACTED***'
+    -H 'Cookie: USER_LOG_TOKEN=***REDACTED***; ADMIN_LOG_TOKEN=***REDACTED***'
 )
 devices=$(
   echo "$router_reponse" \
