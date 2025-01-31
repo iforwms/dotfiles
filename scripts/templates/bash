@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -eo pipefail
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
@@ -7,11 +9,11 @@ NC='\033[0m'
 
 script_name=TODO
 
-base_dir=TODO
+local_dir=TODO
 server=TODO
-dir=TODO
+remote_dir=TODO
 
-if ! [[ -d "$dir" ]]; then
+if ! [[ -d "$local_dir" ]]; then
   echo -e "${RED}[${script_name}] Directory not found, aborting...${NC}"
   exit 1
 fi
