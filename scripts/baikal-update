@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+# RED='\033[0;31m'
+GREEN='\033[0;32m'
+# YELLOW='\033[0;33m'
+NC='\033[0m'
+
+script_name=baikal-update
+
+server=me
+remote_dir=/var/www/baikal
+
+# if ! [[ -d "$local_dir" ]]; then
+#   echo -e "${RED}[${script_name}] Directory not found, aborting...${NC}"
+#   exit 1
+# fi
+
+echo -e "${GREEN}[${script_name}] Making temp directory...${NC}"
+temp_dir=$(mktemp -d)
+filepath="${temp_dir}/baikal.zip"
+
+echo -e "${GREEN}[${script_name}] Fetching latest release...${NC}"
+wget -O "$filepath" \
+  $(curl -s https://api.github.com/repos/sabre-io/Baikal/releases/latest | \
+    grep browser_download_url | \
+    cut -d'"' -f4)
+
+echo -e "${GREEN}[${script_name}] Unzipping file...${NC}"
+unzip "$filepath" -d "$temp_dir"
+
+echo -e "${GREEN}[${script_name}] Removing 'config' and 'Specific' directories...${NC}"
+rm -rf "$temp_dir"/baikal/{config,Specific}
+
+echo -e "${GREEN}[${script_name}] Uploading latest files to remote server...${NC}"
+rsync \
+  --verbose \
+  --compress \
+  --recursive \
+  --omit-dir-times \
+  --no-perms \
+  --times \
+  "$temp_dir"/baikal/* \
+  "${server}:${remote_dir}"
+
+echo -e "${GREEN}[${script_name}] Removing temp folder...${NC}"
+rm -rf "$temp_dir"
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
