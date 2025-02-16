@@ -1,5 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-echo "Killing mDNSResponder to force DNS refresh..."
+set -eo pipefail
 
+GREEN='\033[0;32m'
+NC='\033[0m'
+script_name=flushdns
+
+echo -e "${GREEN}[${script_name}] Flushing DNS cache...${NC}"
+sudo dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
