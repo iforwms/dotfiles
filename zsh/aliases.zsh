@@ -292,6 +292,7 @@ alias beetupdate="docker exec -it beets /bin/bash -c 'beet update'"
 # docker exec -it beets /bin/bash -c 'beet import /music'
 
 # rsync
+alias scpr="rsync -avz --progress"
 alias sl="$HOME/.dotfiles/scripts/sync /Users/ifor/Logic/ /Volumes/IFOR2T/Music/Logic/"
 alias sm="$HOME/.dotfiles/scripts/sync /Users/ifor/Music/ /Volumes/IFOR2T/Music/"
 
