@@ -9,7 +9,7 @@ NC='\033[0m'
 REPLACE='\e[1A\e[K'
 
 script_name=website-ping
-
+output_file=/tmp/website_pings
 websites=(
   bikeasia.com
   booking.indier.net
@@ -30,16 +30,25 @@ websites=(
   yangshuotaichi.com
 )
 
-for site in "${websites[@]}"; do
-  echo -e "${YELLOW}[${script_name}][${site}] Checking...${NC}"
-  status_code=$(curl -sL --head -w "%{http_code}\n" "$site" -o /dev/null)
-  status_color="$GREEN"
-  if [[ "$status_code" != "200" ]]; then
-    status_color="$RED"
+if [[ $# -eq 0 ]]; then
+  echo -n > "$output_file"
+  for site in "${websites[@]}"; do
+    echo -e "${YELLOW}[${script_name}][${site}] Checking...${NC}"
+    status_code=$(curl -sL --head -w "%{http_code}\n" "$site" -o /dev/null)
+    status_color="$GREEN"
+    if [[ "$status_code" != "200" ]]; then
+      status_color="$RED"
+      echo "$site" >> "$output_file"
+    fi
+    echo -e "${REPLACE}${status_color}[${script_name}][${site}] ${status_code}${NC}"
+  done
+  echo -e "${GREEN}[${script_name}] All done!${NC}"
+else
+  if [[ -e "$output_file" ]] && [[ ! -s "$output_file" ]]; then
+    echo "{'text':'All OK!', 'font_color': '101,232,134,255'}"
+  else
+    echo "{'text':'$(cat "$output_file")', 'font_color': '255, 72, 72,255'}"
   fi
-  echo -e "${REPLACE}${status_color}[${script_name}][${site}] ${status_code}${NC}"
-done
-
-echo -e "${GREEN}[${script_name}] All done!${NC}"
+fi
 exit 0
 
