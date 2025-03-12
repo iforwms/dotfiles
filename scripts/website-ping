@@ -1,31 +1,45 @@
 #!/usr/bin/env bash
 
-WEBSITES=(
-  dominochinese.com
+set -o pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+REPLACE='\e[1A\e[K'
+
+script_name=website-ping
+
+websites=(
+  bikeasia.com
   booking.indier.net
-  kimtaichichina.com
-  yangshuotaichi.com
-  yibuparks.com
-  expednet.cn
-  iforwms.com
-  thyme.cors.tech
+  cindra.se
   cors.tech
+  dominochinese.com
+  expednet.cn
+  felixweddings.com
+  iforwms.com
+  indier.net
+  indier.org
+  kimtaichichina.com
+  plan.cindra.se
+  theindier.org
+  thyme.cors.tech
+  wildmed.asia
+  wmai.wildmed.asia
+  yangshuotaichi.com
 )
-MESSAGE=""
 
-function checkHost()
-{
-  # nc -z -w 3 $1 80
-  nmap $1 -PN -p 80 | grep -iq open && echo "OK" || echo "FAIL"
-}
-
-for SITE in "${WEBSITES[@]}"; do
-  STATUS=$(checkHost $SITE)
-  MESSAGE="${MESSAGE}${SITE}: ${STATUS}\n"
+for site in "${websites[@]}"; do
+  echo -e "${YELLOW}[${script_name}][${site}] Checking...${NC}"
+  status_code=$(curl -sL --head -w "%{http_code}\n" "$site" -o /dev/null)
+  status_color="$GREEN"
+  if [[ "$status_code" != "200" ]]; then
+    status_color="$RED"
+  fi
+  echo -e "${REPLACE}${status_color}[${script_name}][${site}] ${status_code}${NC}"
 done
 
-if [[ $(uname -a|grep "Darwin") ]]; then
-  #osascript -e "display notification \"${MESSAGE}\" with title \"Websites down!\""
-  osascript -e "display alert \"Website Status\" message \"${MESSAGE}\""
-fi
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
 
