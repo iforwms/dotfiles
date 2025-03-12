@@ -6,6 +6,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
+REPLACE='\e[1A\e[K' # To go N lines up: \e[<N>A (\e[K clears the line)
 
 script_name=TODO
 
