@@ -31,16 +31,28 @@ websites=(
 )
 
 if [[ $# -eq 0 ]]; then
+  longest_url=-1
+  for site in ${websites[@]}
+  do
+    if [ ${#site} -gt $longest_url ]
+    then
+      longest_url=${#site}
+    fi
+  done
+
   echo -n > "$output_file"
   for site in "${websites[@]}"; do
-    echo -e "${YELLOW}[${script_name}][${site}] Checking...${NC}"
+    site_padded=$(printf "%-${longest_url}s" "${site}")
+    start_millis=$(date +%s%3N)
+    echo -e "${YELLOW}[${script_name}] ${site_padded} | Checking...${NC}"
     status_code=$(curl -sL --head -w "%{http_code}\n" "$site" -o /dev/null)
     status_color="$GREEN"
     if [[ "$status_code" != "200" ]]; then
       status_color="$RED"
       echo "$site" >> "$output_file"
     fi
-    echo -e "${REPLACE}${status_color}[${script_name}][${site}] ${status_code}${NC}"
+    duration=$(printf "%5s" $(($(date +%s%3N) - $start_millis)))
+    echo -e "${REPLACE}${status_color}[${script_name}] ${site_padded} | ${duration}ms | ${status_code}${NC}"
   done
   echo -e "${GREEN}[${script_name}] All done!${NC}"
 else
