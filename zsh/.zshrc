@@ -174,3 +174,11 @@ fi
 # Herd injected PHP binary.
 export PATH="/Users/ifor/Library/Application Support/Herd/bin/":$PATH
 export PHP_INI_SCAN_DIR="/Users/ifor/Library/Application Support/Herd/config/php/":$PHP_INI_SCAN_DIR
+
+# Created by `pipx` on 2025-03-15 09:02:19
+export PATH="$PATH:/Users/ifor/.local/bin"
+
+export PATH="$HOME/.pyenv/bin:$PATH"
+export PATH="$HOME/.pyenv/shims:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
