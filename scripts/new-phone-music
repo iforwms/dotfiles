@@ -41,7 +41,7 @@ rm "${local_music_dir}/"*.ncm 2>/dev/null
 
 echo -e "${GREEN}[${script_name}] Opening new-music directory and Picard...${NC}"
 open -a "MusicBrainz Picard"
-open "$local_music_dir"
+open "$local_music_dir/.."
 
 echo -e "${GREEN}[${script_name}] All done!${NC}"
 exit 0
