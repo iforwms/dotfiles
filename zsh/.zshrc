@@ -95,6 +95,7 @@ ZSH_CUSTOM="$DOTFILES/zsh"
 
 EZA_CONFIG_DIR=/Users/ifor/.config/eza
 XDG_CONFIG_HOME=/Users/ifor/.config
+EZA_SHOW_GIT_IGNORED=1
 
 # Which plugins would you like to load?
 # Standard plugins can be found in ~/.oh-my-zsh/plugins/*
