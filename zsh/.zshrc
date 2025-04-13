@@ -95,14 +95,14 @@ ZSH_CUSTOM="$DOTFILES/zsh"
 
 EZA_CONFIG_DIR=/Users/ifor/.config/eza
 XDG_CONFIG_HOME=/Users/ifor/.config
-EZA_SHOW_GIT_IGNORED=1
+# EZA_SHOW_GIT_IGNORED=1
 
 # Which plugins would you like to load?
 # Standard plugins can be found in ~/.oh-my-zsh/plugins/*
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(zsh-syntax-highlighting zsh-autosuggestions eza)
+plugins=(zsh-syntax-highlighting zsh-autosuggestions)
 source $ZSH/oh-my-zsh.sh
 
 # Reduce key timeout (switching from insert to normal mode in vim)
