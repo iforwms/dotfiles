@@ -33,8 +33,21 @@ alias c="clear"
 # alias zbundle="antibody bundle < $DOTFILES/zsh_plugins.txt > $DOTFILES/zsh_plugins"
 alias vimgolf='docker run --rm -it -e "key=4ff4186b1f258b4dd2755c104835abeb" kramos/vimgolf'
 alias deploy='sudo -u www-data ./deploy'
-# alias l='ls -vlAh --color=auto --time-style="+%Y %b %d %H:%M"'
-# alias ls='ls -vA --color=auto --time-style="+%Y %b %d %H:%M"'
+
+if command -v eza &> /dev/null; then
+  eza_params=(
+    '--git' '--icons' '--group' '--group-directories-first'
+    '--time-style=long-iso' '--color-scale=all' '--hyperlink'
+    '--git-ignore'
+  )
+  alias ls="eza -F --group --header ${eza_params}"
+  alias la='ls --all'
+  alias l='ls --long'
+else
+  alias l='ls -vlAh --color=auto --time-style="+%Y %b %d %H:%M"'
+  alias ls='ls -vA --color=auto --time-style="+%Y %b %d %H:%M"'
+fi
+
 
 # Apt
 alias iap='sudo apt install'
