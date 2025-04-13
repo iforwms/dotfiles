@@ -182,7 +182,9 @@ export PHP_INI_SCAN_DIR="/Users/ifor/Library/Application Support/Herd/config/php
 # Created by `pipx` on 2025-03-15 09:02:19
 export PATH="$PATH:/Users/ifor/.local/bin"
 
-export PATH="$HOME/.pyenv/bin:$PATH"
-export PATH="$HOME/.pyenv/shims:$PATH"
-eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
+if [[ "$(command -v pyenv)" ]]; then
+  export PATH="$HOME/.pyenv/bin:$PATH"
+  export PATH="$HOME/.pyenv/shims:$PATH"
+  eval "$(pyenv init -)"
+  # eval "$(pyenv virtualenv-init -)"
+fi
