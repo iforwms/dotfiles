@@ -506,8 +506,8 @@ let g:netrw_banner=0                                "Remove header from director
 let g:netrw_browse_split=4                          "Open files in a new vertical split. (1: hsplit, 2: vsplit, 3: tab, 4: prev window)
 let g:netrw_altv=1                                  "Open files to the right.
 let g:netrw_liststyle=3                             "Set display mode to be Tree.
-let g:netrw_list_hide=netrw_gitignore#Hide()        "Hide files hidden by .gitignore.
-let g:netrw_list_hide.=',\(^\|\s\s)\zs\.\S+'        "Hide additional files.
+" let g:netrw_list_hide=netrw_gitignore#Hide()        "Hide files hidden by .gitignore.
+" let g:netrw_list_hide.=',\(^\|\s\s)\zs\.\S+'        "Hide additional files.
 "autocmd FileType netrw setl bufhidden=Delete        "By default, netrw leaves unmodified buffers open. This autocommand deletes netrw's buffer once it's hidden.
 "autocmd BufRead * call s:set_hidden()
 "function s:set_hidden()
