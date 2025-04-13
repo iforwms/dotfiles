@@ -95,7 +95,6 @@ ZSH_CUSTOM="$DOTFILES/zsh"
 
 EZA_CONFIG_DIR=/Users/ifor/.config/eza
 XDG_CONFIG_HOME=/Users/ifor/.config
-# EZA_SHOW_GIT_IGNORED=1
 
 # Which plugins would you like to load?
 # Standard plugins can be found in ~/.oh-my-zsh/plugins/*
@@ -186,5 +185,5 @@ if [[ "$(command -v pyenv)" ]]; then
   export PATH="$HOME/.pyenv/bin:$PATH"
   export PATH="$HOME/.pyenv/shims:$PATH"
   eval "$(pyenv init -)"
-  # eval "$(pyenv virtualenv-init -)"
+  # eval "$(pyenv virtualenv-init -)" # Not working on laptop
 fi
