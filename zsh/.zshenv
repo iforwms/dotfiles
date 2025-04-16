@@ -1,4 +1,4 @@
 source "$HOME/.cargo/env"
 
-source "$DOTFILES/zsh/custom_aliases.zsh"
+source "/Users/ifor/.dotfiles/zsh/custom_aliases.zsh"
 
