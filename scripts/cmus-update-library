@@ -3,6 +3,10 @@
 # To bind, type the following command in cmus
 # :bind -f common u shell ~/.dotfiles/scripts/update-cmus-library.sh
 cmus-remote -C clear
-cmus-remote -C "add $HOME/Music/to_sort"
-cmus-remote -C "add $HOME/Music/library"
+if [[ $(hostname) == 'iMac-Ifor' ]]; then
+  cmus-remote -C "add /Volumes/IFOR2T/music/library"
+else
+  cmus-remote -C "add $HOME/Music/to_sort"
+  cmus-remote -C "add $HOME/Music/library"
+fi
 cmus-remote -C "update-cache -f"
