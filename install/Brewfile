@@ -11,6 +11,7 @@ tap 'homebrew/cask-fonts'
 tap 'homebrew/cask-versions'
 
 # Binaries
+brew 'aliyun-cli'
 brew 'arduino-cli'
 brew 'awscli'
 brew 'binwalk'
