@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+# Script to update the SSL certificate for video.dominoedu.com in Aliyun
+
+# Check if the domain argument is provided
+domain="${1:-video.dominoedu.com}"
+if [ -z "$domain" ]; then
+  echo "Usage: $0 <domain>"
+  exit 1
+fi
+
+acme="${HOME}/.acme.sh/acme.sh"
+if ! [[ $(command -v "$acme") ]]; then
+  echo "Missing required program: acme.sh (https://github.com/acmesh-official/acme.sh). Aborting..."
+  exit 1
+fi
+
+if ! [[ $(command -v aliyun) ]]; then
+  echo "Missing required program: aliyun (https://github.com/aliyun/aliyun-cli). Aborting..."
+  exit 1
+fi
+
+# Aliyun credentials should be stored in ~/.acme.sh/account.conf (Ali_Key and Ali_Secret)
+echo "Running acme.sh to create a new certificate for ${domain}..."
+"$acme" --issue -d "$domain" --dns dns_ali
+cert="$(cat "${HOME}/.acme.sh/${domain}_ecc/${domain}.cer")"
+key="$(cat "${HOME}/.acme.sh/${domain}_ecc/${domain}.key")"
+echo "$cert"
+echo "$key"
+
+echo "Uploading the certificate to Aliyun..."
+now=$(date +%Y%m%d%H%M)
+output=$(aliyun cas UploadUserCertificate --region cn-hangzhou --Name "${domain}_${now}" --Cert="$cert" --Key="$key")
+certId=$(echo "$output" | jq -r '.CertId')
+echo "New Certificate ID: ${certId}"
+
+# Settings for the deployment job
+vodId=249878 # VOD service ID
+contactId=230 # Charlie
+
+echo "Creating a deployment job in Aliyun..."
+randomJobName=$(openssl rand -hex 4)
+jobName="deploy-video-certificate-$randomJobName"
+job=$(aliyun cas CreateDeploymentJob --region cn-hangzhou --JobType user --CertIds "$certId" --Name "$jobName" --ResourceIds "$vodId" --ContactIds "$contactId")
+jobId=$(echo "$job" | jq -r '.JobId')
+
+echo "Setting the deployment job status to pending..."
+aliyun cas UpdateDeploymentJobStatus --region cn-hangzhou --JobId "$jobId" --Status pending
+
+echo "Deployment job created with ID: ${jobId}"
+exit 0
