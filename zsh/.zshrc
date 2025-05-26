@@ -188,4 +188,6 @@ if [[ "$(command -v pyenv)" ]]; then
   # eval "$(pyenv virtualenv-init -)" # Not working on laptop
 fi
 
-. "/Users/ifor/.acme.sh/acme.sh.env"
+if [[ -e /Users/ifor/.acme.sh/acme.sh.env ]]; then
+  source /Users/ifor/.acme.sh/acme.sh.env
+fi
