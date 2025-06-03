@@ -1,3 +1,22 @@
 #!/usr/bin/env bash
 
-scp $1 "me:/var/www/downloads/${2}"
+server=me
+filepath="$1"
+remote_dir="$2"
+
+if [[ ! -e "$filepath" ]]; then
+  echo "File not found, aborting."
+  exit 1
+fi
+
+filename=$(basename "$filepath")
+remote_path="/var/www/downloads/${remote_dir}"
+
+echo "Uploading file..."
+rsync -avz --progress "$filepath" "${server}:${remote_path}"
+
+echo "Setting file permissions..."
+ssh "$server" "chmod 644 ${remote_path}/${filename} && chown :www-data ${remote_path}/${filename}"
+
+echo "All done!"
+exit 0
