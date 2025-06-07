@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+script_name=linode-create
+
+label="$1"
+root_pass="$2"
+image="${3:-linode/ubuntu24.04}"
+linode_type="${4:-g6-nanode-1}"
+
+usage="Usage: linode-create <label> <root_pass> [image] [linode_type]"
+
+if [[ -z "$label" ]]; then
+  echo -e "${RED}[${script_name}] Missing label...${NC}"
+  echo -e "${YELLOW}[${script_name}] ${usage} ${NC}"
+  exit 1
+fi
+
+if [[ -z "$root_pass" ]]; then
+  echo -e "${RED}[${script_name}] Missing label...${NC}"
+  echo -e "${YELLOW}[${script_name}] ${usage} ${NC}"
+  exit 1
+fi
+
+
+echo -e "${GREEN}[${script_name}] Creating linode...${NC}"
+linode-cli linodes create \
+  --backups_enabled true \
+  --image "$image" \
+  --private_ip false \
+  --region ap-south \
+  --type "$linode_type" \
+  --label "$label" \
+  --root_pass "$root_pass" \
+  --authorized_users iforwms \
+  --disk_encryption enabled
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
+
