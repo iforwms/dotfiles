@@ -19,7 +19,7 @@ echo -e "${GREEN}[${script_name}] [clients] Updating server...${NC}"
 ssh clients "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa' && git -C ${base_dir} pull"
 
 echo -e "${GREEN}[${script_name}] [karst-climber] Updating server...${NC}"
-ssh karst "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/ifor_linode-clients' && git -C ${base_dir} pull"
+ssh karst "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa' && git -C ${base_dir} pull"
 
 echo -e "${GREEN}[${script_name}] [personal] Updating server...${NC}"
 ssh me "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa' && git -C ${base_dir} pull"
