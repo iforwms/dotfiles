@@ -17,6 +17,21 @@ php_version="${3:-8.3}"
 code_dir="/Users/ifor/code"
 repo_path="${code_dir}/${project_name}"
 
+echo -e "${GREEN}[${script_name}] Updating .env file...${NC}"
+sed -i "s|^APP_NAME.*|APP_NAME=${project_name^}|" "${repo_path}/.env"
+sed -i "s|^APP_URL.*|APP_URL=https://${project_name}.test|" "${repo_path}/.env"
+sed -i "s|# DB_|DB_|" "${repo_path}/.env"
+sed -i "s|^DB_CONNECTION.*|DB_CONNECTION=mysql|" "${repo_path}/.env"
+sed -i "s|^DB_HOST.*|DB_HOST=${homestead_ip}|" "${repo_path}/.env"
+sed -i "s|^DB_USERNAME.*|DB_USERNAME=homestead|" "${repo_path}/.env"
+sed -i "s|^DB_PASSWORD.*|DB_PASSWORD=secret|" "${repo_path}/.env"
+sed -i "/^APP_URL/a\\\nASSET_URL=\"\${APP_URL}\"" "${repo_path}/.env"
+sed -i "/^APP_URL/a\APP_TIMEZONE=Asia/Shanghai" "${repo_path}/.env"
+sed -i "/^APP_URL/a\APP_SUPPORT_EMAIL=support@${project_name}.test" "${repo_path}/.env"
+sed -i "/^ASSET_URL/a\\\nHASH_VERIFY=false" "${repo_path}/.env"
+sed -i "s/'timezone' => 'UTC'/'timezone' => env('APP_TIMEZONE', 'UTC')/" "${repo_path}/config/app.php"
+exit
+
 if [[ -z "$project_name" ]]; then
   echo -e "${RED}[${script_name}] Please specify a directory name, aborting...${NC}"
   echo -e "${YELLOW}[${script_name}] ${usage}${NC}"
@@ -49,6 +64,12 @@ laravel new "$project_name" \
   --dark \
   --phpunit \
   --no-interaction
+
+echo
+echo
+echo -e "${GREEN}[${script_name}] Updating .env file...${NC}"
+echo
+echo
 
 echo -e "${GREEN}[${script_name}] Adding base Eloquent model...${NC}"
 cat > "${repo_path}/app/Models/Model.php" << EOF
@@ -174,6 +195,9 @@ composer require --dev --working-dir "${repo_path}" barryvdh/laravel-debugbar
 
 echo -e "${GREEN}[${script_name}] Adding helpers.php to composer autoloader.${NC}"
 sed -i '/"autoload": {/a\        "files": [\n            "bootstrap/helpers.php"\n        ],' "${repo_path}/composer.json"
+
+echo -e "${GREEN}[${script_name}] Running migrations...${NC}"
+php "${repo_path}/artisan" migrate
 
 echo -e "${GREEN}[${script_name}] Creating new repo...${NC}"
 git -C "$repo_path" init
