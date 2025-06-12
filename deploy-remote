@@ -28,7 +28,7 @@ ssh me "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa
 # ssh tt "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/ifor_tt' && git -C ${base_dir} pull"
 
 echo -e "${GREEN}[${script_name}] [cindra] Updating server...${NC}"
-ssh cindra "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/digital-ocean-felix-weddings' && git -C ${base_dir} pull"
+ssh cindra "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_ed25519' && git -C ${base_dir} pull"
 
 # echo -e "${GREEN}[${script_name}] [felix-weddings] Updating server...${NC}"
 # ssh mpw "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_ed25519' && git -C ${base_dir} pull"
