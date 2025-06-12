@@ -1,0 +1,189 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+# REPLACE='\e[1A\e[K' # To go N lines up: \e[<N>A (\e[K clears the line)
+
+homestead_ip=192.168.56.4
+script_name=laravel-init
+project_name="$1"
+code_dir="/Users/ifor/code"
+repo_path="${code_dir}/${project_name}"
+
+if [[ -z "$project_name" ]]; then
+  echo -e "${RED}[${script_name}] Please specify a directory name, aborting...${NC}"
+  exit 1
+fi
+
+if [[ $(pwd) != "$code_dir" ]]; then
+  echo -e "${RED}[${script_name}] This script must be run in ${code_dir}, aborting...${NC}"
+  exit 1
+fi
+
+if [[ -e "$repo_path" ]]; then
+  echo -e "${RED}[${script_name}] Directory already exists, aborting...${NC}"
+  exit 1
+fi
+
+echo -e "${GREEN}[${script_name}] Creating new project...${NC}"
+laravel new "$project_name" \
+  --breeze \
+  --stack=blade \
+  --dark \
+  --phpunit \
+  --no-interaction
+
+echo -e "${GREEN}[${script_name}] Adding base Eloquent model...${NC}"
+cat > "${repo_path}/app/Models/Model.php" << EOF
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model as Eloquent;
+
+class Model extends Eloquent
+{
+  protected \$guarded = [];
+}
+EOF
+
+echo -e "${GREEN}[${script_name}] Publishing stubs...${NC}"
+php "${repo_path}/artisan" stub:publish
+
+echo -e "${GREEN}[${script_name}] Customising stubs...${NC}"
+cat > "${repo_path}/stubs/model.stub" << EOF
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
+class {{ class }} extends Model
+{
+  use HasUuids;
+
+  public function transform()
+  {
+    \$arr = \$this->toArray();
+    return \$arr;
+  }
+}
+EOF
+
+cat > "${repo_path}/stubs/migration.create.stub" << EOF
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+  public function up(): void
+  {
+    Schema::create('{{ table }}', function (Blueprint \$table) {
+      \$table->id();
+      \$table->uuid('id')->primary();
+      \$table->timestamps();
+    });
+  }
+
+  public function down(): void
+  {
+    Schema::dropIfExists('{{ table }}');
+  }
+};
+EOF
+
+cat > "${repo_path}/stubs/migration.update.stub" << EOF
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+  public function up(): void
+  {
+    Schema::table('{{ table }}', function (Blueprint \$table) {
+      //
+    });
+  }
+
+  public function down(): void
+  {
+    Schema::table('{{ table }}', function (Blueprint \$table) {
+      //
+    });
+  }
+};
+EOF
+
+echo -e "${GREEN}[${script_name}] Creating helpers file...${NC}"
+cat > "${repo_path}/bootstrap/helpers.php" << EOF
+<?php
+
+function imageToDataString(string \$filepath): string
+{
+  \$type = pathinfo(\$filepath, PATHINFO_EXTENSION);
+  \$data = file_get_contents(\$filepath);
+  return 'data:image/' . \$type . ';base64,' . base64_encode(\$data);
+}
+
+function svgIcon(\$iconName)
+{
+  \$filepath = public_path("icons/{\$iconName}.svg");
+  if (!file_exists(\$filepath)) {
+    return file_get_contents(public_path('icons/other.svg'));
+  }
+  return file_get_contents(\$filepath);
+}
+EOF
+
+echo -e "${GREEN}[${script_name}] Creating icon directory...${NC}"
+mkdir -p "${repo_path}/public/icons"
+touch "${repo_path}/public/icons/.gitkeep"
+
+echo -e "${GREEN}[${script_name}] Installing additional composer dependencies...${NC}"
+composer require --working-dir "${repo_path}" livewire/livewire barryvdh/laravel-dompdf barryvdh/laravel-translation-manager doctrine/dbal league/csv sentry/sentry-laravel spatie/laravel-backup spatie/laravel-markdown spatie/laravel-medialibrary spatie/laravel-permission spatie/laravel-sluggable spatie/livewire-filepond
+composer require --dev --working-dir "${repo_path}" barryvdh/laravel-debugbar
+
+echo -e "${GREEN}[${script_name}] Creating new repo...${NC}"
+git -C "$repo_path" init
+gh repo create "$project_name" --private --source="$repo_path" --remote=upstream
+
+echo -e "${GREEN}[${script_name}] Finalising git setup and creating initial commit...${NC}"
+git -C "$repo_path" add --all
+git -C "$repo_path" commit -m "Initial commit."
+git -C "$repo_path" branch -m main
+git -C "$repo_path" push --set-upstream upstream main
+
+echo -e "${GREEN}[${script_name}] Updating hosts file...${NC}"
+echo "${homestead_ip} ${project_name}.test" >> /etc/hosts
+
+echo -e "${YELLOW}[${script_name}] Add the following to the autoloads section of composer.json.${NC}"
+cat <<EOF
+"files": [
+  "bootstrap/helpers.php"
+],
+EOF
+
+echo -e "${YELLOW}[${script_name}] Add the following to ~/Homestead/Homestead.yaml and add en entry under the database section.${NC}"
+cat <<EOF
+    - map: ${project_name}.test
+      to: /home/vagrant/code/${project_name}/public
+      php: "8.3"
+EOF
+
+echo -e "${YELLOW}[${script_name}] Copy deploy-remote and deploy-local from existing project.${NC}"
+
+echo -e "${YELLOW}[${script_name}] Create a new tab and run \`npm run dev\`.${NC}"
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
+
