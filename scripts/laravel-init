@@ -6,28 +6,41 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
+usage="Usage: laravel-init <project_name> [server_name:me] [php_version:8.3]"
 # REPLACE='\e[1A\e[K' # To go N lines up: \e[<N>A (\e[K clears the line)
 
 homestead_ip=192.168.56.4
 script_name=laravel-init
 project_name="$1"
+server_name="${2:-me}"
+php_version="${3:-8.3}"
 code_dir="/Users/ifor/code"
 repo_path="${code_dir}/${project_name}"
 
 if [[ -z "$project_name" ]]; then
   echo -e "${RED}[${script_name}] Please specify a directory name, aborting...${NC}"
+  echo -e "${YELLOW}[${script_name}] ${usage}${NC}"
   exit 1
 fi
 
 if [[ $(pwd) != "$code_dir" ]]; then
   echo -e "${RED}[${script_name}] This script must be run in ${code_dir}, aborting...${NC}"
+  echo -e "${YELLOW}[${script_name}] ${usage}${NC}"
+  exit 1
+fi
+
+if [[ "$1" == *"-"* ]]; then
+  echo -e "${RED}[${script_name}] Project name cannot contain hyphens, only underscores, aborting...${NC}"
+  echo -e "${YELLOW}[${script_name}] ${usage}${NC}"
   exit 1
 fi
 
 if [[ -e "$repo_path" ]]; then
   echo -e "${RED}[${script_name}] Directory already exists, aborting...${NC}"
+  echo -e "${YELLOW}[${script_name}] ${usage}${NC}"
   exit 1
 fi
+
 
 echo -e "${GREEN}[${script_name}] Creating new project...${NC}"
 laravel new "$project_name" \
@@ -145,6 +158,12 @@ function svgIcon(\$iconName)
 }
 EOF
 
+echo -e "${GREEN}[${script_name}] Creating deploy scripts...${NC}"
+sed "s/PROJECT/${project_name}/" "${DOTFILES}/scripts/deploy-local" > "${repo_path}/deploy-local"
+chmod +x "${repo_path}/deploy-local"
+sed "s/PROJECT/${project_name}/;s/SERVER/${server_name}/" "${DOTFILES}/scripts/deploy-remote" > "${repo_path}/deploy-remote"
+chmod +x "${repo_path}/deploy-remote"
+
 echo -e "${GREEN}[${script_name}] Creating icon directory...${NC}"
 mkdir -p "${repo_path}/public/icons"
 touch "${repo_path}/public/icons/.gitkeep"
@@ -152,6 +171,9 @@ touch "${repo_path}/public/icons/.gitkeep"
 echo -e "${GREEN}[${script_name}] Installing additional composer dependencies...${NC}"
 composer require --working-dir "${repo_path}" livewire/livewire barryvdh/laravel-dompdf barryvdh/laravel-translation-manager doctrine/dbal league/csv sentry/sentry-laravel spatie/laravel-backup spatie/laravel-markdown spatie/laravel-medialibrary spatie/laravel-permission spatie/laravel-sluggable spatie/livewire-filepond
 composer require --dev --working-dir "${repo_path}" barryvdh/laravel-debugbar
+
+echo -e "${GREEN}[${script_name}] Adding helpers.php to composer autoloader.${NC}"
+sed -i '/"autoload": {/a\        "files": [\n            "bootstrap/helpers.php"\n        ],' "${repo_path}/composer.json"
 
 echo -e "${GREEN}[${script_name}] Creating new repo...${NC}"
 git -C "$repo_path" init
@@ -163,27 +185,24 @@ git -C "$repo_path" commit -m "Initial commit."
 git -C "$repo_path" branch -m main
 git -C "$repo_path" push --set-upstream upstream main
 
-echo -e "${GREEN}[${script_name}] Updating hosts file...${NC}"
-echo "${homestead_ip} ${project_name}.test" >> /etc/hosts
+if grep -q "${homestead_ip} ${project_name}.test" /etc/hosts; then
+  echo -e "${GREEN}[${script_name}] Updating hosts file...${NC}"
+  echo "${homestead_ip} ${project_name}.test" >> /etc/hosts
+else
+  echo -e "${YELLOW}[${script_name}] Entry found, skipping hosts file update...${NC}"
+fi
 
-echo -e "${YELLOW}[${script_name}] Add the following to the autoloads section of composer.json.${NC}"
-cat <<EOF
-"files": [
-  "bootstrap/helpers.php"
-],
-EOF
+echo -e "${GREEN}[${script_name}] Adding site to Homestead config.${NC}"
+sed -i "/sites:/a\    - map: ${project_name}.test\n      to: /home/vagrant/code/${project_name}/public\n      php: \"${php_version}\"" "${HOME}/Homestead/Homestead.yaml"
+sed -i "/databases:/a\    - ${project_name}" "${HOME}/Homestead/Homestead.yaml"
 
-echo -e "${YELLOW}[${script_name}] Add the following to ~/Homestead/Homestead.yaml and add en entry under the database section.${NC}"
-cat <<EOF
-    - map: ${project_name}.test
-      to: /home/vagrant/code/${project_name}/public
-      php: "8.3"
-EOF
+echo -e "${GREEN}[${script_name}] Provisioning Homestead virtual machine...${NC}"
+cd ~/Homestead && vagrant reload --provision
 
-echo -e "${YELLOW}[${script_name}] Copy deploy-remote and deploy-local from existing project.${NC}"
+echo -e "${YELLOW}[${script_name}] [TODO] Create a new tab and run \`npm run dev\` to start the dev server.${NC}"
 
-echo -e "${YELLOW}[${script_name}] Create a new tab and run \`npm run dev\`.${NC}"
+echo -e "${GREEN}[${script_name}] All done! Opening site...${NC}"
+open "https://${project_name}.test"
 
-echo -e "${GREEN}[${script_name}] All done!${NC}"
 exit 0
 

@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+if [[ -n $DEBUG ]]; then
+    set -x
+fi
+
+if [[ $# -lt 2 ]]; then
+    echo "Local and remote addresses required. Aborting..."
+    exit 1
+fi
+
+local_dir="$1"
+remote_dir="$2"
+include="$3"
+exclude="${4:-.env;.phpunit.result.cache;*.log;.git;.gitignore;.DS_Store;deploy_remote;tags;vendor;node_modules}"
+owner="${5:-www-data}"
+group="${6:-www-data}"
+# perms="${7:-D2775,F664}"
+
+include_opts=()
+IFS=';' read -ra arg <<< "$include"
+for item in "${arg[@]}"; do
+    include_opts+=( --include="$item" )
+done
+
+exclude_opts=()
+IFS=';' read -ra arg <<< "$exclude"
+for item in "${arg[@]}"; do
+    exclude_opts+=( --exclude="$item" )
+done
+
+# --chmod="${perms}" \
+
+rsync \
+    ${DRYRUNARG:+"$DRYRUNARG"} \
+    --verbose \
+    --recursive \
+    --compress \
+    --times \
+    --omit-dir-times \
+    --fake-super \
+    --owner \
+    --group \
+    --usermap="\*:${owner}" \
+    --groupmap="\*:${group}" \
+    "${include_opts[@]}" \
+    "${exclude_opts[@]}" \
+    --delete \
+    "${local_dir}" \
+    "${remote_dir}"

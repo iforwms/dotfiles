@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+export HOME=/home/ifor
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+script_name=PROJECT-local
+base_dir="/var/www/${script_name/-local/}"
+
+echo -e "${GREEN}[${script_name}] Enabling maintenance mode...${NC}"
+php "${base_dir}/artisan" down
+
+echo -e "${GREEN}[${script_name}] Updating composer dependencies...${NC}"
+composer --working-dir "$base_dir" install --no-interaction --optimize-autoloader --no-dev --prefer-dist
+
+echo -e "${GREEN}[${script_name}] Running migrations...${NC}"
+php "${base_dir}/artisan" migrate --force
+
+echo -e "${GREEN}[${script_name}] Busting cache...${NC}"
+php "${base_dir}/artisan" route:cache
+php "${base_dir}/artisan" config:cache
+php "${base_dir}/artisan" view:cache
+# php "${base_dir}/artisan" queue:restart
+
+echo -e "${GREEN}[${script_name}] Disabling maintenance mode...${NC}"
+php "${base_dir}/artisan" up
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
+
