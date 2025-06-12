@@ -1,50 +1,41 @@
 #!/usr/bin/env bash
 
-if [[ -n $DEBUG ]]; then
-    set -x
-fi
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
 
-if [[ $# -lt 2 ]]; then
-    echo "Local and remote addresses required. Aborting..."
-    exit 1
-fi
+server=SERVER
+script_name=PROJECT
+remote_dir="/var/www/${script_name}"
 
-local_dir="$1"
-remote_dir="$2"
-include="$3"
-exclude="${4:-.env;.phpunit.result.cache;*.log;.git;.gitignore;.DS_Store;deploy_remote;tags;vendor;node_modules}"
-owner="${5:-www-data}"
-group="${6:-www-data}"
-# perms="${7:-D2775,F664}"
+echo -e "${GREEN}[${script_name}] Running git pull...${NC}"
+ssh "$server" "git -C ${remote_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa' && git -C ${remote_dir} pull"
 
-include_opts=()
-IFS=';' read -ra arg <<< "$include"
-for item in "${arg[@]}"; do
-    include_opts+=( --include="$item" )
-done
+echo -e "${GREEN}[${script_name}] Building assets...${NC}"
+npm run build
 
-exclude_opts=()
-IFS=';' read -ra arg <<< "$exclude"
-for item in "${arg[@]}"; do
-    exclude_opts+=( --exclude="$item" )
-done
-
-# --chmod="${perms}" \
-
+echo -e "${GREEN}[${script_name}] Copying build files to remote...${NC}"
 rsync \
-    ${DRYRUNARG:+"$DRYRUNARG"} \
-    --verbose \
-    --recursive \
-    --compress \
-    --times \
-    --omit-dir-times \
-    --fake-super \
-    --owner \
-    --group \
-    --usermap="\*:${owner}" \
-    --groupmap="\*:${group}" \
-    "${include_opts[@]}" \
-    "${exclude_opts[@]}" \
-    --delete \
-    "${local_dir}" \
-    "${remote_dir}"
+  --verbose \
+  --compress \
+  --recursive \
+  --omit-dir-times \
+  --times \
+  public/build/* \
+  "${server}:${remote_dir}/public/build"
+# rsync \
+#   --verbose \
+#   --compress \
+#   --recursive \
+#   --omit-dir-times \
+#   --no-perms \
+#   --times \
+#   storage/app/public/* \
+#   "${server}:${remote_dir}/storage/app/public"
+
+echo -e "${GREEN}[${script_name}] Running deploy script on remote...${NC}"
+ssh "$server" "${remote_dir}/deploy-local"
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
