@@ -1,22 +1,209 @@
 #!/usr/bin/env bash
 
-name=UFW
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+script_name=install_firewall
+
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
-    echo "[${name}] This script must be run as root (or sudo). Exiting."
+    echo -e "${RED}[${script_name}] You need to be root to run this program. Aborting...${NC}"
     exit 1
 fi
 
-echo "[${name}] Installing."
-apt install -y ufw fail2ban
+echo -e "${GREEN}[${script_name}] Installing software...${NC}"
+apt-get install -y ufw fail2ban
 
-echo "[${name}] Setting up firewall rules."
+echo -e "${GREEN}[${script_name}] Enabling fail2ban...${NC}"
+rm /etc/fail2ban/jail.d/custom.conf
+systemctl start fail2ban
+systemctl enable fail2ban
+systemctl status fail2ban
 
-ufw app list
+echo -e "${GREEN}[${script_name}] Creating initial fail2ban config...${NC}"
+cat > /etc/fail2ban/jail.d/custom.conf <<EOF
+[DEFAULT]
+bantime = 1d
+findtime = 1d
+ignoreip = 127.0.0.1/8 192.168.0.0/16
+maxretry = 1
+
+banaction = ufw
+banaction_allports = ufw
+EOF
+
+echo -e "${GREEN}[${script_name}] Creating ufw fail2ban filter...${NC}"
+cat > /etc/fail2ban/filter.d/ufw.conf <<EOF
+[Definition]
+failregex = [UFW BLOCK].+SRC=<HOST> DST
+ignoreregex =
+EOF
+
+echo -e "${GREEN}[${script_name}] Restarting fail2ban..."
+systemctl restart fail2ban
+while [[ ! -S /var/run/fail2ban/fail2ban.sock ]]; do
+  echo -e "${YELLOW}[${script_name}] fail2ban-client socket unavailable, retrying in one second...${NC}"
+  sleep 1
+done
+fail2ban-client status
+
+echo -e "${GREEN}[${script_name}] Setting up ufw rules...${NC}"
+ufw disable
+ufw --force reset
+ufw default deny incoming
+ufw default deny outgoing
 ufw allow OpenSSH
-ufw allow 'Nginx HTTP'
-ufw allow 'Nginx HTTPS'
-ufw enable
+ufw allow "Nginx Full"
+ufw allow out http comment 'Outgoing HTTP'
+ufw allow out https comment 'Outgoing HTTPS'
+ufw allow out 465 comment 'Outgoing TLS'
+ufw allow out 587 comment 'Outgoing SMTP'
+ufw allow out 22 comment 'Outgoing SSH'
+ufw allow out 53 comment 'DNS lookup'
 
-echo "[${name}] All done!"
+echo -e "${GREEN}[${script_name}] Enabling ufw...${NC}"
+ufw --force enable
+ufw status verbose
+
+echo -e "${GREEN}[${script_name}] Existing nginx fail2ban filters:${NC}"
+ls -alt /etc/fail2ban/filter.d/nginx* 2> /dev/null
+
+if [[ -e /etc/fail2ban/filter.d/nginx-sslerror.conf ]]; then
+  echo -e "${YELLOW}[${script_name}] nginx-sslerror.conf filter already exists, skipping...${NC}"
+else
+  echo -e "${GREEN}[${script_name}] Creating fail2ban nginx-sslerror filter...${NC}"
+  cat > /etc/fail2ban/filter.d/nginx-sslerror.conf <<EOF
+[Definition]
+failregex = [UFW BLOCK].+SRC=<HOST> DST
+ignoreregex =
+EOF
+fi
+
+if [[ -e /etc/fail2ban/filter.d/nginx-4xx.conf ]]; then
+  echo -e "${YELLOW}[${script_name}] nginx-4xx filter already exists, skipping...${NC}"
+else
+  echo -e "${GREEN}[${script_name}] Creating fail2ban nginx-4xx filter...${NC}"
+  cat > /etc/fail2ban/filter.d/nginx-4xx.conf <<EOF
+[Definition]
+failregex = ^<HOST>.*"(GET|POST).*" (404|444|403|400) .*$
+ignoreregex = .*(robots.txt|favicon.ico|jpg|png)
+EOF
+fi
+
+if [[ -e /etc/fail2ban/filter.d/nginx-forbidden.conf ]]; then
+  echo -e "${YELLOW}[${script_name}] nginx-forbidden filter already exists, skipping...${NC}"
+else
+  echo -e "${GREEN}[${script_name}] Creating fail2ban nginx-forbidden filter...${NC}"
+  cat > /etc/fail2ban/filter.d/nginx-forbidden.conf <<EOF
+[Definition]
+failregex = directory index of .+ is forbidden, client: <HOST>, server: .+
+ignoreregex =
+EOF
+fi
+
+if [[ -e /etc/fail2ban/filter.d/nginx-botsearch.conf ]]; then
+  echo -e "${YELLOW}[${script_name}] nginx-botsearch filter already exists, skipping...${NC}"
+else
+  echo -e "${GREEN}[${script_name}] Creating fail2ban nginx-botsearch filter...${NC}"
+  cat > /etc/fail2ban/filter.d/nginx-botsearch.conf <<EOF
+# Fail2Ban filter to match web requests for selected URLs that don't exist
+#
+
+[INCLUDES]
+
+# Load regexes for filtering
+before = botsearch-common.conf
+
+[Definition]
+
+failregex = ^<HOST> \- \S+ \[\] \"(GET|POST|HEAD) \/<block> \S+\" 404 .+$
+            ^ \[error\] \d+#\d+: \*\d+ (\S+ )?\"\S+\" (failed|is not found) \(2\: No such file or directory\), client\: <HOST>\, server\: \S*\, request: \"(GET|POST|HEAD) \/<block> \S+\"\, .*?$
+
+ignoreregex =
+
+datepattern = {^LN-BEG}%%ExY(?P<_sep>[-/.])%%m(?P=_sep)%%d[T ]%%H:%%M:%%S(?:[.,]%%f)?(?:\s*%%z)?
+              ^[^\[]*\[({DATE})
+              {^LN-BEG}
+
+journalmatch = _SYSTEMD_UNIT=nginx.service + _COMM=nginx
+
+# DEV Notes:
+# Based on apache-botsearch filter
+#
+# Author: Frantisek Sumsal
+EOF
+fi
+
+if [[ -e /etc/fail2ban/filter.d/nginx-http-auth.conf ]]; then
+  echo -e "${YELLOW}[${script_name}] nginx-http-auth filter already exists, skipping...${NC}"
+else
+  echo -e "${GREEN}[${script_name}] Creating fail2ban nginx-http-auth filter...${NC}"
+  cat > /etc/fail2ban/filter.d/nginx-http-auth.conf <<EOF
+# fail2ban filter configuration for nginx
+
+[Definition]
+failregex = ^ \[error\] \d+#\d+: \*\d+ user "(?:[^"]+|.*?)":? (password mismatch|was not found in "[^\"]*"), client: <HOST>, server: \S*, request: "\S+ \S+ HTTP/\d+\.\d+", host: "\S+"(?:, referrer: "\S+")?\s*$
+ignoreregex =
+datepattern = {^LN-BEG}
+
+# DEV NOTES:
+# Based on samples in https://github.com/fail2ban/fail2ban/pull/43/files
+# Extensive search of all nginx auth failures not done yet.
+#
+# Author: Daniel Black
+EOF
+fi
+
+echo -e "${GREEN}[${script_name}] Updating fail2ban config...${NC}"
+cat >> /etc/fail2ban/jail.d/custom.conf <<EOF
+[sshd]
+enabled = true
+
+[nginx-4xx]
+enabled = true
+port     = http,https
+filter   = nginx-4xx
+logpath  = %(nginx_error_log)s
+
+[nginx-http-auth]
+enabled = true
+port     = http,https
+filter   = nginx-http-auth
+logpath  = %(nginx_error_log)s
+
+[nginx-botsearch]
+enabled = true
+port     = http,https
+filter   = nginx-botsearch
+logpath  = %(nginx_access_log)s
+
+[nginx-forbidden]
+enabled = true
+port    = http,https
+filter  = nginx-forbidden
+logpath = %(nginx_error_log)s
+
+[nginx-sslerror]
+enabled = true
+port    = http,https
+filter  = nginx-sslerror
+logpath = %(nginx_error_log)s
+
+[ufw]
+enabled = true
+filter  = ufw
+logpath = /var/log/ufw.log
+EOF
+
+echo -e "${GREEN}[${script_name}] Restarting fail2ban..."
+systemctl restart fail2ban
+while [[ ! -S /var/run/fail2ban/fail2ban.sock ]]; do
+  echo -e "${YELLOW}[${script_name}] fail2ban-client socket unavailable, retrying in one second...${NC}"
+  sleep 1
+done
+fail2ban-client status
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
 exit 0
 
