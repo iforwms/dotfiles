@@ -1,0 +1,18 @@
+<?php
+
+function imageToDataString(string $filepath): string
+{
+  $type = pathinfo($filepath, PATHINFO_EXTENSION);
+  $data = file_get_contents($filepath);
+  return 'data:image/' . $type . ';base64,' . base64_encode($data);
+}
+
+function svgIcon($iconName)
+{
+  $filepath = public_path("icons/{$iconName}.svg");
+  if (!file_exists($filepath)) {
+    return file_get_contents(public_path('icons/other.svg'));
+  }
+  return file_get_contents($filepath);
+}
+

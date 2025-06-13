@@ -1,0 +1,17 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
+class {{ class }} extends Model
+{
+  use HasUuids;
+
+  public function transform()
+  {
+    $arr = $this->toArray();
+    return $arr;
+  }
+}
+
