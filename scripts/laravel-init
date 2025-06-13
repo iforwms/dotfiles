@@ -14,8 +14,13 @@ script_name=laravel-init
 project_name="$1"
 server_name="${2:-me}"
 php_version="${3:-8.3}"
+github_user="iforwms"
 code_dir="/Users/ifor/code"
 repo_path="${code_dir}/${project_name}"
+
+git-remote-url-reachable() {
+  git ls-remote "git@github.com:${1}" CHECK_GIT_REMOTE_URL_REACHABILITY >/dev/null 2>&1
+}
 
 if [[ -z "$project_name" ]]; then
   echo -e "${RED}[${script_name}] Please specify a directory name, aborting...${NC}"
@@ -41,12 +46,10 @@ if [[ -e "$repo_path" ]]; then
   exit 1
 fi
 
-
 echo -e "${GREEN}[${script_name}] Creating new project...${NC}"
 laravel new "$project_name" \
   --breeze \
   --stack=blade \
-  --dark \
   --phpunit \
   --no-interaction
 
@@ -61,13 +64,19 @@ sed -i "s|^DB_CONNECTION.*|DB_CONNECTION=mysql|" "${repo_path}/.env"
 sed -i "s|^DB_HOST.*|DB_HOST=${homestead_ip}|" "${repo_path}/.env"
 sed -i "s|^DB_USERNAME.*|DB_USERNAME=homestead|" "${repo_path}/.env"
 sed -i "s|^DB_PASSWORD.*|DB_PASSWORD=secret|" "${repo_path}/.env"
+sed -i "s/LOG_STACK=single/LOG_STACK=daily/" "${repo_path}/.env"
 sed -i "/^APP_URL/a\\\nASSET_URL=\"\${APP_URL}\"" "${repo_path}/.env"
 sed -i "/^APP_URL/a\APP_TIMEZONE=Asia/Shanghai" "${repo_path}/.env"
 sed -i "/^APP_URL/a\APP_SUPPORT_EMAIL=support@${project_name}.test" "${repo_path}/.env"
 sed -i "/^ASSET_URL/a\\\nHASH_VERIFY=false" "${repo_path}/.env"
+echo -e '\nSENTRY_LARAVEL_DSN=https://a4741bb9eb1b70e3e4b3cf989f67e8a6@o213124.ingest.us.sentry.io/0508959730958330' >> "${repo_path}/.env"
 
 echo -e "${GREEN}[${script_name}] Updating config/app.php...${NC}"
 sed -i "s/'timezone' => 'UTC'/'timezone' => env('APP_TIMEZONE', 'UTC')/" "${repo_path}/config/app.php"
+
+echo -e "${GREEN}[${script_name}] Changing user ID to UUID...${NC}"
+sed -i "s/\$table->id();/\$table->uuid('id')->primary();/" "${repo_path}/database/migrations/0001_01_01_000000_create_users_table.php"
+sed -i "s/\$table->foreignId('user_id')/\$table->foreignUuid('user_id')/" "${repo_path}/database/migrations/0001_01_01_000000_create_users_table.php"
 
 echo -e "${GREEN}[${script_name}] Adding base Eloquent model...${NC}"
 cat > "${repo_path}/app/Models/Model.php" << EOF
@@ -102,6 +111,23 @@ class {{ class }} extends Model
   {
     \$arr = \$this->toArray();
     return \$arr;
+  }
+}
+EOF
+
+cat > "${repo_path}/stubs/seeder.stub" << EOF
+<?php
+
+namespace {{ namespace }};
+
+# use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class {{ class }} extends Seeder
+{
+  public function run(): void
+  {
+    //
   }
 }
 EOF
@@ -178,9 +204,9 @@ function svgIcon(\$iconName)
 EOF
 
 echo -e "${GREEN}[${script_name}] Creating deploy scripts...${NC}"
-sed "s/PROJECT/${project_name}/" "${DOTFILES}/scripts/deploy-local" > "${repo_path}/deploy-local"
+sed -i "s/PROJECT/${project_name}/" "${DOTFILES}/scripts/deploy-local" > "${repo_path}/deploy-local"
 chmod +x "${repo_path}/deploy-local"
-sed "s/PROJECT/${project_name}/;s/SERVER/${server_name}/" "${DOTFILES}/scripts/deploy-remote" > "${repo_path}/deploy-remote"
+sed -i "s/PROJECT/${project_name}/;s/SERVER/${server_name}/" "${DOTFILES}/scripts/deploy-remote" > "${repo_path}/deploy-remote"
 chmod +x "${repo_path}/deploy-remote"
 
 echo -e "${GREEN}[${script_name}] Creating icon directory...${NC}"
@@ -188,8 +214,39 @@ mkdir -p "${repo_path}/public/icons"
 touch "${repo_path}/public/icons/.gitkeep"
 
 echo -e "${GREEN}[${script_name}] Installing additional composer dependencies...${NC}"
-composer require --working-dir "${repo_path}" livewire/livewire barryvdh/laravel-dompdf barryvdh/laravel-translation-manager doctrine/dbal league/csv sentry/sentry-laravel spatie/laravel-backup spatie/laravel-markdown spatie/laravel-medialibrary spatie/laravel-permission spatie/laravel-sluggable spatie/livewire-filepond
+composer require --working-dir "${repo_path}" \
+  livewire/livewire \
+  barryvdh/laravel-dompdf \
+  barryvdh/laravel-translation-manager \
+  doctrine/dbal \
+  league/csv \
+  sentry/sentry-laravel \
+  spatie/laravel-backup \
+  spatie/laravel-markdown \
+  spatie/laravel-medialibrary \
+  spatie/laravel-sluggable \
+  spatie/livewire-filepond
 composer require --dev --working-dir "${repo_path}" barryvdh/laravel-debugbar
+
+echo -e "${GREEN}[${script_name}] Publishing assets...${NC}"
+php "${repo_path}/artisan" vendor:publish --provider='Barryvdh\DomPDF\ServiceProvider'
+php "${repo_path}/artisan" vendor:publish --provider='Barryvdh\TranslationManager\ManagerServiceProvider' --tag=migrations
+php "${repo_path}/artisan" vendor:publish --provider='Barryvdh\TranslationManager\ManagerServiceProvider' --tag=config
+php "${repo_path}/artisan" vendor:publish --provider='Barryvdh\TranslationManager\ManagerServiceProvider' --tag=views
+php "${repo_path}/artisan" vendor:publish --provider='Spatie\MediaLibrary\MediaLibraryServiceProvider' --tag="medialibrary-migrations"
+php "${repo_path}/artisan" vendor:publish --provider='Spatie\MediaLibrary\MediaLibraryServiceProvider' --tag="medialibrary-config"
+php "${repo_path}/artisan" vendor:publish --provider='Spatie\Backup\BackupServiceProvider' --tag=backup-config
+php "${repo_path}/artisan" vendor:publish --provider='Spatie\LaravelMarkdown\MarkdownServiceProvider' --tag="markdown-config"
+php "${repo_path}/artisan" vendor:publish --provider='Spatie\Permission\PermissionServiceProvider'
+php "${repo_path}/artisan" vendor:publish --tag="livewire-filepond-views"
+php "${repo_path}/artisan" sentry:publish --without-test --with-send-default-pii --no-interaction
+
+echo -e "${GREEN}[${script_name}] Finishing Sentry installation...${NC}"
+sed -i '/Middleware;/a\use Sentry\\Laravel\\Integration;' "${repo_path}/bootstrap/app.php"
+sed -i '/withExceptions(function (Exceptions $exceptions)/a\        Integration::handles($exceptions);' "${repo_path}/bootstrap/app.php"
+
+echo -e "${GREEN}[${script_name}] Updating markdown config...${NC}"
+sed -i "/'extensions' => \[/a\\\\\\League\\\\CommonMark\\\\Extension\\\\Table\\\\TableExtension::class" "${repo_path}/config/markdown.php"
 
 echo -e "${GREEN}[${script_name}] Adding helpers.php to composer autoloader.${NC}"
 sed -i '/"autoload": {/a\        "files": [\n            "bootstrap/helpers.php"\n        ],' "${repo_path}/composer.json"
@@ -199,13 +256,17 @@ php "${repo_path}/artisan" migrate
 
 echo -e "${GREEN}[${script_name}] Creating new repo...${NC}"
 git -C "$repo_path" init
-gh repo create "$project_name" --private --source="$repo_path" --remote=upstream
+if git-remote-url-reachable "${github_user}/${project_name}"; then
+  git -C "$repo_path" remote add upstream "git@github.com:${github_user}/${project_name}"
+else
+  gh repo create "$project_name" --private --source="$repo_path" --remote=upstream
+fi
 
 echo -e "${GREEN}[${script_name}] Finalising git setup and creating initial commit...${NC}"
 git -C "$repo_path" add --all
 git -C "$repo_path" commit -m "Initial commit."
 git -C "$repo_path" branch -m main
-git -C "$repo_path" push --set-upstream upstream main
+git -C "$repo_path" push --force --set-upstream upstream main
 
 if grep -q "${homestead_ip} ${project_name}.test" /etc/hosts; then
   echo -e "${GREEN}[${script_name}] Updating hosts file...${NC}"
@@ -214,12 +275,16 @@ else
   echo -e "${YELLOW}[${script_name}] Entry found, skipping hosts file update...${NC}"
 fi
 
-echo -e "${GREEN}[${script_name}] Adding site to Homestead config.${NC}"
-sed -i "/sites:/a\    - map: ${project_name}.test\n      to: /home/vagrant/code/${project_name}/public\n      php: \"${php_version}\"" "${HOME}/Homestead/Homestead.yaml"
-sed -i "/databases:/a\    - ${project_name}" "${HOME}/Homestead/Homestead.yaml"
+if grep -q "map ${project_name}.test" "${HOME}/Homestead/Homestead.yaml"; then
+  echo -e "${GREEN}[${script_name}] Adding site to Homestead config.${NC}"
+  sed -i "/sites:/a\    - map: ${project_name}.test\n      to: /home/vagrant/code/${project_name}/public\n      php: \"${php_version}\"" "${HOME}/Homestead/Homestead.yaml"
+  sed -i "/databases:/a\    - ${project_name}" "${HOME}/Homestead/Homestead.yaml"
 
-echo -e "${GREEN}[${script_name}] Provisioning Homestead virtual machine...${NC}"
-cd ~/Homestead && vagrant reload --provision
+  echo -e "${GREEN}[${script_name}] Provisioning Homestead virtual machine...${NC}"
+  cd ~/Homestead && vagrant reload --provision
+else
+  echo -e "${YELLOW}[${script_name}] URL entry found, skipping Homestead.yaml update...${NC}"
+fi
 
 echo -e "${YELLOW}[${script_name}] [TODO] Create a new tab and run \`npm run dev\` to start the dev server.${NC}"
 
