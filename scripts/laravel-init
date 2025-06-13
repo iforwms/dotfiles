@@ -9,11 +9,12 @@ NC='\033[0m'
 usage="Usage: laravel-init <project_name> [server_name:me] [php_version:8.3]"
 # REPLACE='\e[1A\e[K' # To go N lines up: \e[<N>A (\e[K clears the line)
 
-homestead_ip=192.168.56.4
-script_name=laravel-init
 project_name="$1"
 server_name="${2:-me}"
 php_version="${3:-8.3}"
+
+script_name=laravel-init
+homestead_ip=192.168.56.4
 github_user="iforwms"
 code_dir="/Users/ifor/code"
 repo_path="${code_dir}/${project_name}"
@@ -204,9 +205,9 @@ function svgIcon(\$iconName)
 EOF
 
 echo -e "${GREEN}[${script_name}] Creating deploy scripts...${NC}"
-sed -i "s/PROJECT/${project_name}/" "${DOTFILES}/scripts/deploy-local" > "${repo_path}/deploy-local"
+sed "s/PROJECT/${project_name}/" "${DOTFILES}/scripts/templates/deploy-local" > "${repo_path}/deploy-local"
 chmod +x "${repo_path}/deploy-local"
-sed -i "s/PROJECT/${project_name}/;s/SERVER/${server_name}/" "${DOTFILES}/scripts/deploy-remote" > "${repo_path}/deploy-remote"
+sed "s/PROJECT/${project_name}/;s/SERVER/${server_name}/" "${DOTFILES}/scripts/templates/deploy-remote" > "${repo_path}/deploy-remote"
 chmod +x "${repo_path}/deploy-remote"
 
 echo -e "${GREEN}[${script_name}] Creating icon directory...${NC}"

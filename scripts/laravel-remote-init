@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+usage="Usage: laravel-remote-init <project_name> <project_url> <db_username> <db_password> [server_name:me] [php_version:8.3] [timezone:Asia/Shanghai] [sentry-dsn]"
+# REPLACE='\e[1A\e[K' # To go N lines up: \e[<N>A (\e[K clears the line)
+
+project_name="$1"
+project_url="$2"
+db_username="$3"
+db_password="$4"
+server_name="${5:-me}"
+php_version="${6:-8.3}"
+timezone="${7:-Asia/Shanghai}"
+sentry_dsn="$8"
+
+script_name=laravel-remote-init
+local_code_dir="/Users/ifor/code"
+local_repo="${local_code_dir}/${project_name}"
+# remote_code_dir="/var/www"
+# remote_repo="${remote_code_dir}/${project_name}"
+
+if [[ -z "$project_name" ]]; then
+  echo -e "${RED}[${script_name}] Missing project name, aborting...${NC}"
+  echo -e "${YELLOW}[${script_name}] ${usage}${NC}"
+  exit 1
+fi
+
+if [[ -z "$project_url" ]]; then
+  echo -e "${RED}[${script_name}] Missing a URL for the project, aborting...${NC}"
+  echo -e "${YELLOW}[${script_name}] ${usage}${NC}"
+  exit 1
+fi
+
+if [[ -z "$db_username" ]]; then
+  echo -e "${RED}[${script_name}] Missing database username, aborting...${NC}"
+  echo -e "${YELLOW}[${script_name}] ${usage}${NC}"
+  exit 1
+fi
+
+if [[ -z "$db_password" ]]; then
+  echo -e "${RED}[${script_name}] Missing database password, aborting...${NC}"
+  echo -e "${YELLOW}[${script_name}] ${usage}${NC}"
+  exit 1
+fi
+
+if [[ "$1" == *"-"* ]]; then
+  echo -e "${RED}[${script_name}] Project name cannot contain hyphens, only underscores, aborting...${NC}"
+  echo -e "${YELLOW}[${script_name}] ${usage}${NC}"
+  exit 1
+fi
+
+if [[ ! -e "$local_repo" ]]; then
+  echo -e "${RED}[${script_name}] Missing local repo, aborting...${NC}"
+  echo -e "${YELLOW}[${script_name}] ${usage}${NC}"
+  exit 1
+fi
+
+echo -e "${GREEN}[${script_name}] Generating production .env...${NC}"
+temp_env="$(mktemp)"
+local_env="${local_repo}/.env"
+cp "$local_env" "$temp_env"
+sed -i "s/APP_ENV=.*/APP_ENV=production/" "$temp_env"
+sed -i "s/APP_URL=.*/APP_URL=https:\/\/${project_url}/" "$temp_env"
+sed -i "s/APP_SUPPORT_EMAIL=.*/APP_SUPPORT_EMAIL=support@${project_url}/" "$temp_env"
+sed -i "s|APP_TIMEZONE=.*|APP_TIMEZONE=${timezone}|" "$temp_env"
+sed -i "s/DB_HOST=.*/DB_HOST=127.0.0.1/" "$temp_env"
+sed -i "s/DB_USERNAME=.*/DB_USERNAME=${db_username}/" "$temp_env"
+sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=${db_password}/" "$temp_env"
+if [[ -n "$sentry_dsn" ]]; then
+  sed -i "s|^.*SENTRY_LARAVEL_DSN=.*|SENTRY_LARAVEL_DSN=${sentry_dsn}|" "$temp_env"
+else
+  echo -e "${YELLOW}[${script_name}] Missing Sentry DSN!${NC}"
+fi
+
+echo -e "${GREEN}[${script_name}] Copying updated .env to remote server...${NC}"
+rsync -avz --progress "$temp_env" "${server_name}:${remote_repo}/.env"
+
+echo -e "${GREEN}[${script_name}] Generating NGINX config...${NC}"
+temp_nginx_conf="$(mktemp)"
+remote_nginx_conf="/etc/nginx/conf.d/${project_name}.conf"
+cp "${DOTFILES}/scripts/templates/nginx_php_site_conf" "$temp_nginx_conf"
+sed -i "s/PROJECT_NAME/${project_name}/g" "$temp_nginx_conf"
+sed -i "s/PROJECT_URL/${project_url}/g" "$temp_nginx_conf"
+sed -i "s/PHP_VERSION/${php_version}/" "$temp_nginx_conf"
+
+echo -e "${GREEN}[${script_name}] Copying NGINX config file to remote server...${NC}"
+rsync -avz --progress "$temp_nginx_conf" "${server_name}:${remote_nginx_conf}"
+
+echo -e "${GREEN}[${script_name}] Fixing NGINX config file permissions...${NC}"
+ssh "$server_name" "chmod 664 ${remote_nginx_conf}; chown :www-data ${remote_nginx_conf}"
+
+echo -e "${YELLOW}[${script_name}] Reloading NGINX config, you will be asked your server sudo password shortly...${NC}"
+ssh -t "$server_name" "sudo service nginx reload"
+
+echo -e "${GREEN}[${script_name}] Attempting to issue SSL certificates...${NC}"
+set +eo pipefail
+ssh "$server_name" "/home/ifor/.acme.sh/acme.sh --issue -d ${project_url} -w /var/www/${project_name}/public --server letsencrypt"
+
+set -eo pipefail
+echo -e "${GREEN}[${script_name}] Updating NGINX config to use SSL certificates...${NC}"
+sed -i 's/# //;/listen 80;/d' "$temp_nginx_conf"
+
+echo -e "${GREEN}[${script_name}] Copying NGINX SSL config file to remote server...${NC}"
+rsync -avz --progress "$temp_nginx_conf" "${server_name}:${remote_nginx_conf}"
+
+echo -e "${GREEN}[${script_name}] Fixing NGINX SSL config file permissions...${NC}"
+ssh "$server_name" "chmod 664 ${remote_nginx_conf}; chown :www-data ${remote_nginx_conf}"
+
+echo -e "${YELLOW}[${script_name}] Reloading NGINX config, you will be asked your server sudo password shortly...${NC}"
+ssh -t "$server_name" "sudo service nginx reload"
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+
+exit 0
+
