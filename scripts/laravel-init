@@ -80,129 +80,20 @@ sed -i "s/\$table->id();/\$table->uuid('id')->primary();/" "${repo_path}/databas
 sed -i "s/\$table->foreignId('user_id')/\$table->foreignUuid('user_id')/" "${repo_path}/database/migrations/0001_01_01_000000_create_users_table.php"
 
 echo -e "${GREEN}[${script_name}] Adding base Eloquent model...${NC}"
-cat > "${repo_path}/app/Models/Model.php" << EOF
-<?php
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Model as Eloquent;
-
-class Model extends Eloquent
-{
-  protected \$guarded = [];
-}
-EOF
+cp "${DOTFILES}/scripts/templates/laravel/base_model.stub" "${repo_path}/app/Models/Model.php"
 
 echo -e "${GREEN}[${script_name}] Publishing stubs...${NC}"
 php "${repo_path}/artisan" stub:publish
 
 echo -e "${GREEN}[${script_name}] Customising stubs...${NC}"
-cat > "${repo_path}/stubs/model.stub" << EOF
-<?php
-
-namespace {{ namespace }};
-
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-
-class {{ class }} extends Model
-{
-  use HasUuids;
-
-  public function transform()
-  {
-    \$arr = \$this->toArray();
-    return \$arr;
-  }
-}
-EOF
-
-cat > "${repo_path}/stubs/seeder.stub" << EOF
-<?php
-
-namespace {{ namespace }};
-
-# use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-
-class {{ class }} extends Seeder
-{
-  public function run(): void
-  {
-    //
-  }
-}
-EOF
-
-cat > "${repo_path}/stubs/migration.create.stub" << EOF
-<?php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-  public function up(): void
-  {
-    Schema::create('{{ table }}', function (Blueprint \$table) {
-      \$table->id();
-      \$table->uuid('id')->primary();
-      \$table->timestamps();
-    });
-  }
-
-  public function down(): void
-  {
-    Schema::dropIfExists('{{ table }}');
-  }
-};
-EOF
-
-cat > "${repo_path}/stubs/migration.update.stub" << EOF
-<?php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-  public function up(): void
-  {
-    Schema::table('{{ table }}', function (Blueprint \$table) {
-      //
-    });
-  }
-
-  public function down(): void
-  {
-    Schema::table('{{ table }}', function (Blueprint \$table) {
-      //
-    });
-  }
-};
-EOF
+cp "${DOTFILES}/scripts/templates/laravel/model.stub" "${repo_path}/stubs/model.stub"
+cp "${DOTFILES}/scripts/templates/laravel/seeder.stub" "${repo_path}/stubs/seeder.stub"
+cp "${DOTFILES}/scripts/templates/laravel/migration.create.stub" "${repo_path}/stubs/migration.create.stub"
+cp "${DOTFILES}/scripts/templates/laravel/migration.update.stub" "${repo_path}/stubs/migration.update.stub"
 
 echo -e "${GREEN}[${script_name}] Creating helpers file...${NC}"
-cat > "${repo_path}/bootstrap/helpers.php" << EOF
-<?php
-
-function imageToDataString(string \$filepath): string
-{
-  \$type = pathinfo(\$filepath, PATHINFO_EXTENSION);
-  \$data = file_get_contents(\$filepath);
-  return 'data:image/' . \$type . ';base64,' . base64_encode(\$data);
-}
-
-function svgIcon(\$iconName)
-{
-  \$filepath = public_path("icons/{\$iconName}.svg");
-  if (!file_exists(\$filepath)) {
-    return file_get_contents(public_path('icons/other.svg'));
-  }
-  return file_get_contents(\$filepath);
-}
-EOF
+cp "${DOTFILES}/scripts/templates/laravel/helpers.stub" "${repo_path}/bootstrap/helpers.php"
+exit
 
 echo -e "${GREEN}[${script_name}] Creating deploy scripts...${NC}"
 sed "s/PROJECT/${project_name}/" "${DOTFILES}/scripts/templates/deploy-local" > "${repo_path}/deploy-local"
