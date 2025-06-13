@@ -344,3 +344,5 @@ autoloads
 env
 husfokus
 DSN
+cdn
+tailwindcss

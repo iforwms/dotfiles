@@ -13,6 +13,16 @@ base_dir="/var/www/${script_name/-local/}"
 echo -e "${GREEN}[${script_name}] Enabling maintenance mode...${NC}"
 php "${base_dir}/artisan" down
 
+echo -e "${GREEN}[${script_name}] Removing fonts.bunny.net and cdn.tailwindcss.com references.${NC}"
+for f in vendor/laravel/framework/src/Illuminate/Foundation/resources/exceptions/renderer/components/layout.blade.php \
+  vendor/laravel/framework/src/Illuminate/Foundation/resources/health-up.blade.php; do
+  if [[ ! -e "$f" ]]; then
+    continue
+  fi
+  sed -i '/fonts.bunny.net/d' "${base_dir}/${f}"
+  sed -i '/cdn.tailwindcss.com/d' "${base_dir}/${f}"
+done
+
 echo -e "${GREEN}[${script_name}] Updating composer dependencies...${NC}"
 composer --working-dir "$base_dir" install --no-interaction --optimize-autoloader --no-dev --prefer-dist
 

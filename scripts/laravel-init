@@ -131,6 +131,7 @@ php "${repo_path}/artisan" vendor:publish --provider='Spatie\Backup\BackupServic
 php "${repo_path}/artisan" vendor:publish --provider='Spatie\LaravelMarkdown\MarkdownServiceProvider' --tag="markdown-config"
 php "${repo_path}/artisan" vendor:publish --provider='Spatie\Permission\PermissionServiceProvider'
 php "${repo_path}/artisan" vendor:publish --tag="livewire-filepond-views"
+php "${repo_path}/artisan" vendor:publish --tag="laravel-errors"
 php "${repo_path}/artisan" sentry:publish --without-test --with-send-default-pii --no-interaction
 
 echo -e "${GREEN}[${script_name}] Finishing Sentry installation...${NC}"
@@ -142,6 +143,19 @@ sed -i "/'extensions' => \[/a\\\\\\League\\\\CommonMark\\\\Extension\\\\Table\\\
 
 echo -e "${GREEN}[${script_name}] Adding helpers.php to composer autoloader.${NC}"
 sed -i '/"autoload": {/a\        "files": [\n            "bootstrap/helpers.php"\n        ],' "${repo_path}/composer.json"
+
+echo -e "${GREEN}[${script_name}] Removing fonts.bunny.net and cdn.tailwindcss.com references.${NC}"
+for f in resources/views/welcome.blade.php \
+  resources/views/layouts/guest.blade.php \
+  resources/views/layouts/app.blade.php \
+  vendor/laravel/framework/src/Illuminate/Foundation/resources/exceptions/renderer/components/layout.blade.php \
+  vendor/laravel/framework/src/Illuminate/Foundation/resources/health-up.blade.php; do
+  if [[ ! -e "$f" ]]; then
+    continue
+  fi
+  sed -i '/fonts.bunny.net/d' "${repo_path}/${f}"
+  sed -i '/cdn.tailwindcss.com/d' "${repo_path}/${f}"
+done
 
 echo -e "${GREEN}[${script_name}] Running migrations...${NC}"
 php "${repo_path}/artisan" migrate
