@@ -79,6 +79,10 @@ echo -e "${GREEN}[${script_name}] Changing user ID to UUID...${NC}"
 sed -i "s/\$table->id();/\$table->uuid('id')->primary();/" "${repo_path}/database/migrations/0001_01_01_000000_create_users_table.php"
 sed -i "s/\$table->foreignId('user_id')/\$table->foreignUuid('user_id')/" "${repo_path}/database/migrations/0001_01_01_000000_create_users_table.php"
 
+echo -e "${GREEN}[${script_name}] Updating User model to use UUID...${NC}"
+sed -i '/namespace/a\\nuse Illuminate\\Database\\Eloquent\\Concerns\\HasUuids;' "${repo_path}/app/Models/User.php"
+sed -i 's/use HasFactory, Notifiable;/use HasFactory, Notifiable, HasUuids;/' "${repo_path}/app/Models/User.php"
+
 echo -e "${GREEN}[${script_name}] Adding base Eloquent model...${NC}"
 cp "${DOTFILES}/scripts/templates/laravel/base_model.stub" "${repo_path}/app/Models/Model.php"
 
@@ -90,6 +94,7 @@ cp "${DOTFILES}/scripts/templates/laravel/model.stub" "${repo_path}/stubs/model.
 cp "${DOTFILES}/scripts/templates/laravel/seeder.stub" "${repo_path}/stubs/seeder.stub"
 cp "${DOTFILES}/scripts/templates/laravel/migration.create.stub" "${repo_path}/stubs/migration.create.stub"
 cp "${DOTFILES}/scripts/templates/laravel/migration.update.stub" "${repo_path}/stubs/migration.update.stub"
+cp "${DOTFILES}/scripts/templates/laravel/database.seeder.stub" "${repo_path}/database/seeders/DatabaseSeeder.php"
 
 echo -e "${GREEN}[${script_name}] Creating helpers file...${NC}"
 cp "${DOTFILES}/scripts/templates/laravel/helpers.stub" "${repo_path}/bootstrap/helpers.php"
