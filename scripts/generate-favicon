@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+# REPLACE='\e[1A\e[K' # To go N lines up: \e[<N>A (\e[K clears the line)
+
+script_name=generate-favicon
+usage="usage: ${script_name} <image-path> <api-key> [output-path]"
+
+api_url=https://realfavicongenerator.net/api/favicon
+icon_path="$1"
+api_key="$2"
+output_path="${3:-${HOME}/Downloads/favicon-temp}"
+
+if ! [[ -e "$icon_path" ]]; then
+  echo -e "${RED}[${script_name}] Image not found, aborting...${NC}"
+  echo -e "${YELLOW}${usage}${NC}"
+  exit 1
+fi
+
+if [[ -z "$api_key" ]]; then
+  echo -e "${RED}[${script_name}] API key not found, aborting...${NC}"
+  echo -e "${YELLOW}${usage}${NC}"
+  exit 1
+fi
+
+if ! [[ -e "$output_path" ]]; then
+  echo -e "${YELLOW}[${script_name}] Output path not found, creating...${NC}"
+  mkdir -p "$output_path"
+fi
+
+
+echo -e "${GREEN}[${script_name}] Converting image to base64...${NC}"
+base64_image=$(base64 "${icon_path}" --wrap=0)
+
+echo -e "${GREEN}[${script_name}] Making API request...${NC}"
+result=$(curl "$api_url" \
+  --header 'Content-Type: application/json' \
+  --data "{
+    \"favicon_generation\": {
+      \"api_key\": \"${api_key}\",
+      \"master_picture\": {
+        \"type\": \"inline\",
+        \"content\": \"${base64_image}\"
+      },
+      \"files_location\": {
+        \"type\": \"root\"
+      },
+      \"callback\": {
+        \"type\": \"none\"
+      }
+    }
+  }"
+)
+
+urls=$(echo "$result" | jq --raw-output '.favicon_generation_result.favicon.files_urls[]')
+echo -e "${GREEN}[${script_name}] Downloading assets...${NC}"
+for url in $urls; do
+  echo -e "${GREEN}[${script_name}] Downloading ${url}...${NC}"
+  wget "$url" --directory-prefix="${output_path}/"
+done
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
+
+

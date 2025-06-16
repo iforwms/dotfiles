@@ -83,8 +83,8 @@ echo -e "${GREEN}[${script_name}] Updating User model to use UUID...${NC}"
 sed -i '/namespace/a\\nuse Illuminate\\Database\\Eloquent\\Concerns\\HasUuids;' "${repo_path}/app/Models/User.php"
 sed -i 's/use HasFactory, Notifiable;/use HasFactory, Notifiable, HasUuids;/' "${repo_path}/app/Models/User.php"
 
-echo -e "${GREEN}[${script_name}] Adding base Eloquent model...${NC}"
-cp "${DOTFILES}/scripts/templates/laravel/base_model.stub" "${repo_path}/app/Models/Model.php"
+echo -e "${GREEN}[${script_name}] Adding head partial...${NC}"
+sed "s/PROJECT/${project_name^}/" "${DOTFILES}/scripts/templates/laravel/head.blade.stub" > "${repo_path}/resources/views/components/head.blade.php"
 
 echo -e "${GREEN}[${script_name}] Publishing stubs...${NC}"
 php "${repo_path}/artisan" stub:publish
@@ -95,6 +95,9 @@ cp "${DOTFILES}/scripts/templates/laravel/seeder.stub" "${repo_path}/stubs/seede
 cp "${DOTFILES}/scripts/templates/laravel/migration.create.stub" "${repo_path}/stubs/migration.create.stub"
 cp "${DOTFILES}/scripts/templates/laravel/migration.update.stub" "${repo_path}/stubs/migration.update.stub"
 cp "${DOTFILES}/scripts/templates/laravel/database.seeder.stub" "${repo_path}/database/seeders/DatabaseSeeder.php"
+
+echo -e "${GREEN}[${script_name}] Creating helpers file...${NC}"
+cp "${DOTFILES}/scripts/templates/laravel/helpers.stub" "${repo_path}/bootstrap/helpers.php"
 
 echo -e "${GREEN}[${script_name}] Creating helpers file...${NC}"
 cp "${DOTFILES}/scripts/templates/laravel/helpers.stub" "${repo_path}/bootstrap/helpers.php"
@@ -196,6 +199,8 @@ if grep -q "map ${project_name}.test" "${HOME}/Homestead/Homestead.yaml"; then
 else
   echo -e "${YELLOW}[${script_name}] URL entry found, skipping Homestead.yaml update...${NC}"
 fi
+
+echo -e "${YELLOW}[${script_name}] [TODO] Generate site favicons by running \`generate-favicon\`.${NC}"
 
 echo -e "${YELLOW}[${script_name}] [TODO] Create a new tab and run \`npm run dev\` to start the dev server.${NC}"
 

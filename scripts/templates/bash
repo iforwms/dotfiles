@@ -9,6 +9,7 @@ NC='\033[0m'
 REPLACE='\e[1A\e[K' # To go N lines up: \e[<N>A (\e[K clears the line)
 
 script_name=TODO
+usage="usage: ${script_name} <required> [optional]"
 
 local_dir=TODO
 server=TODO
@@ -16,6 +17,7 @@ remote_dir=TODO
 
 if ! [[ -d "$local_dir" ]]; then
   echo -e "${RED}[${script_name}] Directory not found, aborting...${NC}"
+  echo -e "${YELLOW}${usage}${NC}"
   exit 1
 fi
 
