@@ -347,3 +347,5 @@ DSN
 cdn
 tailwindcss
 DatabaseSeeder
+base64
+favicons
