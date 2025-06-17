@@ -97,11 +97,7 @@ cp "${DOTFILES}/scripts/templates/laravel/migration.update.stub" "${repo_path}/s
 cp "${DOTFILES}/scripts/templates/laravel/database.seeder.stub" "${repo_path}/database/seeders/DatabaseSeeder.php"
 
 echo -e "${GREEN}[${script_name}] Creating helpers file...${NC}"
-cp "${DOTFILES}/scripts/templates/laravel/helpers.stub" "${repo_path}/bootstrap/helpers.php"
-
-echo -e "${GREEN}[${script_name}] Creating helpers file...${NC}"
-cp "${DOTFILES}/scripts/templates/laravel/helpers.stub" "${repo_path}/bootstrap/helpers.php"
-exit
+cp "${DOTFILES}/scripts/templates/helpers.stub" "${repo_path}/bootstrap/helpers.php"
 
 echo -e "${GREEN}[${script_name}] Creating deploy scripts...${NC}"
 sed "s/PROJECT/${project_name}/" "${DOTFILES}/scripts/templates/deploy-local" > "${repo_path}/deploy-local"

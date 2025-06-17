@@ -1,63 +1,75 @@
-#!/bin/bash
-
-base_dir="/Users/ifor/code"
-repo_name="$1"
-repo_path="${base_dir}/${repo_name}"
-
-if [[ -z "$repo_name" ]]; then
-    echo -e "${RED}[${script_name}] Missing repo name, aborting...${NC}"
-    exit 1
-fi
-
-echo -e "${GREEN}[${script_name}] Creating repo...${NC}"
-mkdir -p "$repo_path"/{src,assets}
-touch "$repo_path"/{src,assets}/.gitkeep
-git -C "$repo_path" init
-gh repo create "$repo_name" --private --source="$repo_path" --remote=upstream
-
-touch "${repo_path}/LOCAL_MACHINE"
-
-echo -e "${GREEN}[${script_name}] Creating .gitignore file...${NC}"
-cat >"${repo_path}/.gitignore" <<EOL
-.DS_store
-LOCAL_MACHINE
-assets/output.css
-node_modules/
-tags
-vendor/
-*.log
-cache_buster
-EOL
-
-echo -e "${GREEN}[${script_name}] Creating deploy script...${NC}"
-cat >"${repo_path}/deploy-remote" <<EOL
 #!/usr/bin/env bash
+
+set -eo pipefail
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
+usage="Usage: git-init <project_name>"
+# REPLACE='\e[1A\e[K' # To go N lines up: \e[<N>A (\e[K clears the line)
 
-script_name=TODO
+code_dir="/Users/ifor/code"
+project_name="$1"
+project_name_pretty="$(sed 's/-/ /g; s/_/ /g; s/\b\(.\)/\u\1/g' <<<"${project_name}")"
+repo_path="${code_dir}/${project_name}"
+script_name=git-init
+github_user=iforwms
 
-echo -e "\${GREEN}[\${script_name}] All done!\${NC}"
-exit 0
-EOL
+git-remote-url-reachable() {
+  git ls-remote "git@github.com:${1}" CHECK_GIT_REMOTE_URL_REACHABILITY >/dev/null 2>&1
+}
+
+if [[ -z "$project_name" ]]; then
+  echo -e "${RED}[${script_name}] Missing repo name, aborting...${NC}"
+  echo -e "${YELLOW}[${script_name}] ${usage}${NC}"
+  exit 1
+fi
+
+if [[ "$1" == *"-"* ]]; then
+  echo -e "${RED}[${script_name}] Project name cannot contain hyphens, only underscores, aborting...${NC}"
+  echo -e "${YELLOW}[${script_name}] ${usage}${NC}"
+  exit 1
+fi
+
+mkdir -p "$repo_path"
+read -p "Do you wish to create default directory structure? (y/n) " -n 1 -r make_dirs
+echo
+if [[ $make_dirs =~ ^[Yy]$ ]]; then
+  mkdir -p "$repo_path"/{src,assets,templates,bootstrap,db}
+  touch "$repo_path"/{src,assets,templates,bootstrap,db}/.gitkeep
+fi
+
+echo -e "${GREEN}[${script_name}] Creating repo...${NC}"
+git -C "$repo_path" init
+if git-remote-url-reachable "${github_user}/${project_name}"; then
+  git -C "$repo_path" remote add upstream "git@github.com:${github_user}/${project_name}"
+else
+  gh repo create "$project_name" --private --source="$repo_path" --remote=upstream
+fi
+
+echo -e "${GREEN}[${script_name}] Creating .gitignore file...${NC}"
+cp "${DOTFILES}/scripts/templates/gitignore.stub" "${repo_path}/.gitignore"
+
+touch "${repo_path}/LOCAL_MACHINE"
+
+echo -e "${GREEN}[${script_name}] Creating deploy script...${NC}"
+sed "s/PROJECT/${project_name}/;s/SERVER/${server_name}/" "${DOTFILES}/scripts/templates/deploy-remote" > "${repo_path}/deploy-remote"
 chmod +x "${repo_path}/deploy-remote"
 
 read -p "Do you wish to install tailwindcss? (y/n) " -n 1 -r install_tailwind
 echo
 if [[ $install_tailwind =~ ^[Yy]$ ]]; then
   echo -e "${GREEN}[${script_name}] Installing tailwind...${NC}"
+  npm install --prefix "$repo_path" tailwindcss @tailwindcss/cli
 
-  npm install --prefix "$repo_path" -D tailwindcss
-  npm exec --prefix "$repo_path" tailwind init
+  sed -i '2i "scripts": { "dev": "npx @tailwindcss/cli -i ./src/input.css -o ./assets/output.css --watch" },' "${repo_path}/package.json"
 
   rm -rf "${repo_path}/tailwind.config.js"
   cat >"${repo_path}/tailwind.config.js" <<EOL
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{html,js}"],
+  content: ["./src/**/*.{html,js,php}"],
   theme: {
     extend: {},
   },
@@ -65,31 +77,76 @@ module.exports = {
 }
 EOL
 
-  cat >"${repo_path}/assets/input.css" <<EOL
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+  cat > "${repo_path}/src/input.css" <<EOL
+@config "../tailwind.config.js";
+@import "tailwindcss";
 EOL
 fi
 
-read -p "Do you wish to install PHP helpers? (y/n) " -n 1 -r install_php
+read -p "Do you wish to install PHP framework? (y/n) " -n 1 -r install_php
 echo
 if [[ $install_php =~ ^[Yy]$ ]]; then
-  echo -e "${GREEN}[${script_name}] Installing PHP helpers - TODO${NC}"
+  echo -e "${GREEN}[${script_name}] Initialising composer...${NC}"
+cat > "${repo_path}/composer.json" <<EOL
+{
+  "name": "${github_user}/${project_name}",
+  "authors": [
+  {
+    "name": "Ifor Waldo Williams"
+  }
+  ],
+  "require": {}
+}
+EOL
+
+  echo -e "${GREEN}[${script_name}] Adding helpers.php to composer autoloader.${NC}"
+  sed -i '/"autoload": {/a\        "files": [\n            "bootstrap/helpers.php"\n        ],' "${repo_path}/composer.json"
+  composer install
+
+  echo -e "${GREEN}[${script_name}] Installing bootstrap files...${NC}"
+  cp "${DOTFILES}/scripts/templates/helpers.stub" "${repo_path}/bootstrap/helpers.php"
+  cat > "${repo_path}/bootstrap/app.php" <<EOL
+<?php
+
+require_once __DIR__ . "/../vendor/autoload.php";
+require_once __DIR__ . "/helpers.php";
+EOL
+
+  cat > "${repo_path}/index.php" <<EOL
+<?php
+
+require_once __DIR__ . '/bootstrap/app.php';
+
+require_once __DIR__ . '/templates/head.blade.php';
+?>
+It works!
+<?php
+
+require_once __DIR__ . '/templates/foot.blade.php';
+EOL
+fi
+
+read -p "Do you wish to install blade templates? (y/n) " -n 1 -r install_templates
+echo
+if [[ $install_templates =~ ^[Yy]$ ]]; then
+  echo -e "${GREEN}[${script_name}] Adding templates...${NC}"
+  sed "s/PROJECT/${project_name_pretty}/g" "${DOTFILES}/scripts/templates/head.blade.stub" > "${repo_path}/templates/head.blade.php"
+  cp "${DOTFILES}/scripts/templates/foot.blade.stub" "${repo_path}/templates/foot.blade.php"
 fi
 
 echo -e "${GREEN}[${script_name}] Finalising git setup and creating initial commit...${NC}"
 git -C "$repo_path" add --all
 git -C "$repo_path" commit -m "Initial commit."
 git -C "$repo_path" branch -m main
-git -C "$repo_path" push --set-upstream upstream main
-
-echo -e "${GREEN}[${script_name}] All done!${NC}"
+git -C "$repo_path" push --force --set-upstream upstream main
 
 if [[ $install_tailwind =~ ^[Yy]$ ]]; then
   echo
-  echo -e "${GREEN}[${script_name}] To recompile tailwind run the following command:${NC}"
-  echo -e "${GREEN}[${script_name}] npx tailwindcss -i ./assets/input.css -o ./assets/output.css --watch${NC}"
+  echo -e "${YELLOW}[${script_name}] To recompile tailwind run the following command: \`npm run dev\`${NC}"
 fi
+
+echo -e "${YELLOW}[${script_name}] Generate site favicons by running \`generate-favicon\`.${NC}"
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
 
 exit 0
