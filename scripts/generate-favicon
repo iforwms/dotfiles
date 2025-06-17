@@ -9,12 +9,12 @@ NC='\033[0m'
 # REPLACE='\e[1A\e[K' # To go N lines up: \e[<N>A (\e[K clears the line)
 
 script_name=generate-favicon
-usage="usage: ${script_name} <image-path> <api-key> [output-path]"
+usage="usage: ${script_name} <image_path> [output_path] [api_key]"
 
 api_url=https://realfavicongenerator.net/api/favicon
 icon_path="$1"
-api_key="$2"
-output_path="${3:-${HOME}/Downloads/favicon-temp}"
+output_path="${2:-${HOME}/Downloads/favicon-temp}"
+api_key="$3"
 
 if ! [[ -e "$icon_path" ]]; then
   echo -e "${RED}[${script_name}] Image not found, aborting...${NC}"
@@ -23,9 +23,7 @@ if ! [[ -e "$icon_path" ]]; then
 fi
 
 if [[ -z "$api_key" ]]; then
-  echo -e "${RED}[${script_name}] API key not found, aborting...${NC}"
-  echo -e "${YELLOW}${usage}${NC}"
-  exit 1
+  api_key="$(cat /Users/ifor/Documents/backup/realfavicon-api)"
 fi
 
 if ! [[ -e "$output_path" ]]; then
