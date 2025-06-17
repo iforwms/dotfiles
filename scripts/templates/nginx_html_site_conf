@@ -19,8 +19,6 @@ server {
   location = /favicon.ico { access_log off; log_not_found off; }
   location = /robots.txt  { access_log off; log_not_found off; }
 
-  error_page 404 /index.php;
-
   error_log  /var/log/nginx/PROJECT_NAME-error.log error;
 
   sendfile off;
