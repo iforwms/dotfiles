@@ -6,11 +6,12 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
-usage="Usage: git-init <project_name>"
+usage="Usage: git-init <project_name> [server_name]"
 # REPLACE='\e[1A\e[K' # To go N lines up: \e[<N>A (\e[K clears the line)
 
 code_dir="/Users/ifor/code"
 project_name="$1"
+server_name="${2:-me}"
 project_name_pretty="$(sed 's/-/ /g; s/_/ /g; s/\b\(.\)/\u\1/g' <<<"${project_name}")"
 repo_path="${code_dir}/${project_name}"
 script_name=git-init
@@ -63,7 +64,7 @@ if [[ $install_tailwind =~ ^[Yy]$ ]]; then
   echo -e "${GREEN}[${script_name}] Installing tailwind...${NC}"
   npm install --prefix "$repo_path" tailwindcss @tailwindcss/cli
 
-  sed -i '2i "scripts": { "dev": "npx @tailwindcss/cli -i ./src/input.css -o ./assets/output.css --watch" },' "${repo_path}/package.json"
+  sed -i '2i "scripts": { "dev": "npx @tailwindcss/cli -i ./src/input.css -o ./assets/output.css --watch", "build": "npx @tailwindcss/cli -i ./src/input.css -o ./assets/output.css --minify" },' "${repo_path}/package.json"
 
   rm -rf "${repo_path}/tailwind.config.js"
   cat >"${repo_path}/tailwind.config.js" <<EOL
@@ -86,6 +87,8 @@ fi
 read -p "Do you wish to install PHP framework? (y/n) " -n 1 -r install_php
 echo
 if [[ $install_php =~ ^[Yy]$ ]]; then
+  mkdir -p "$repo_path"/{bootstrap,templates}
+
   echo -e "${GREEN}[${script_name}] Initialising composer...${NC}"
 cat > "${repo_path}/composer.json" <<EOL
 {
@@ -95,13 +98,14 @@ cat > "${repo_path}/composer.json" <<EOL
     "name": "Ifor Waldo Williams"
   }
   ],
-  "require": {}
+  "require": {},
+  "autoload": {
+    "files": [
+      "bootstrap/helpers.php"
+    ]
+  }
 }
 EOL
-
-  echo -e "${GREEN}[${script_name}] Adding helpers.php to composer autoloader.${NC}"
-  sed -i '/"autoload": {/a\        "files": [\n            "bootstrap/helpers.php"\n        ],' "${repo_path}/composer.json"
-  composer install
 
   echo -e "${GREEN}[${script_name}] Installing bootstrap files...${NC}"
   cp "${DOTFILES}/scripts/templates/helpers.stub" "${repo_path}/bootstrap/helpers.php"
@@ -124,6 +128,9 @@ It works!
 
 require_once __DIR__ . '/templates/foot.blade.php';
 EOL
+
+  echo -e "${GREEN}[${script_name}] Generating composer autoload files...${NC}"
+  composer --working-dir "${repo_path}" dump-autoload
 fi
 
 read -p "Do you wish to install blade templates? (y/n) " -n 1 -r install_templates

@@ -15,18 +15,15 @@ ssh "$server" "git -C ${remote_dir} config core.sshCommand 'ssh -i /home/ifor/.s
 echo -e "${GREEN}[${script_name}] Building assets...${NC}"
 npm run build
 
-echo -e "${GREEN}[${script_name}] Copying CSS files to remote...${NC}"
-rsync -avz --progress "assets/output.css" "${server}:${remote_dir}/assets/output.css"
-
-# echo -e "${GREEN}[${script_name}] Copying build files to remote...${NC}"
-# rsync \
-#   --verbose \
-#   --compress \
-#   --recursive \
-#   --omit-dir-times \
-#   --times \
-#   public/build/* \
-#   "${server}:${remote_dir}/public/build"
+echo -e "${GREEN}[${script_name}] Copying build files to remote...${NC}"
+rsync \
+  --verbose \
+  --compress \
+  --recursive \
+  --omit-dir-times \
+  --times \
+  public/build/* \
+  "${server}:${remote_dir}/public/build"
 # rsync \
 #   --verbose \
 #   --compress \
@@ -37,8 +34,8 @@ rsync -avz --progress "assets/output.css" "${server}:${remote_dir}/assets/output
 #   storage/app/public/* \
 #   "${server}:${remote_dir}/storage/app/public"
 
-# echo -e "${GREEN}[${script_name}] Running deploy script on remote...${NC}"
-# ssh "$server" "${remote_dir}/deploy-local"
+echo -e "${GREEN}[${script_name}] Running deploy script on remote...${NC}"
+ssh "$server" "${remote_dir}/deploy-local"
 
 echo -e "${GREEN}[${script_name}] All done!${NC}"
 exit 0
