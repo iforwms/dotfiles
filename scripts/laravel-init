@@ -100,9 +100,9 @@ echo -e "${GREEN}[${script_name}] Creating helpers file...${NC}"
 cp "${DOTFILES}/scripts/templates/helpers.stub" "${repo_path}/bootstrap/helpers.php"
 
 echo -e "${GREEN}[${script_name}] Creating deploy scripts...${NC}"
-sed "s/PROJECT/${project_name}/" "${DOTFILES}/scripts/templates/deploy-local" > "${repo_path}/deploy-local"
+sed "s/PROJECT/${project_name}/" "${DOTFILES}/scripts/templates/laravel/deploy-local" > "${repo_path}/deploy-local"
 chmod +x "${repo_path}/deploy-local"
-sed "s/PROJECT/${project_name}/;s/SERVER/${server_name}/" "${DOTFILES}/scripts/templates/deploy-remote" > "${repo_path}/deploy-remote"
+sed "s/PROJECT/${project_name}/;s/SERVER/${server_name}/" "${DOTFILES}/scripts/templates/laravel/deploy-remote" > "${repo_path}/deploy-remote"
 chmod +x "${repo_path}/deploy-remote"
 
 echo -e "${GREEN}[${script_name}] Creating icon directory...${NC}"
