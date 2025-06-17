@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+# REPLACE='\e[1A\e[K' # To go N lines up: \e[<N>A (\e[K clears the line)
+
+domain="$1"
+record_type="$2"
+record_name="$3"
+record_data="$4"
+
+
+script_name=do-create-dns
+usage="usage: ${script_name} <domain> <record_type> <record_name> <record_data>"
+
+if [[ -z "$domain" ]]; then
+  echo -e "${RED}[${script_name}] Missing domain, aborting...${NC}"
+  echo -e "${YELLOW}${usage}${NC}"
+  exit 1
+fi
+
+if [[ -z "$record_type" ]]; then
+  echo -e "${RED}[${script_name}] Missing record type (A, AAAA, CNAME, etc), aborting...${NC}"
+  echo -e "${YELLOW}${usage}${NC}"
+  exit 1
+fi
+
+if [[ -z "$record_name" ]]; then
+  echo -e "${RED}[${script_name}] Missing record name, aborting...${NC}"
+  echo -e "${YELLOW}${usage}${NC}"
+  exit 1
+fi
+
+if [[ -z "$record_data" ]]; then
+  echo -e "${RED}[${script_name}] Missing record data, aborting...${NC}"
+  echo -e "${YELLOW}${usage}${NC}"
+  exit 1
+fi
+
+echo -e "${GREEN}[${script_name}] Creating DNS record...${NC}"
+doctl compute domain records create "$domain" --record-type "$record_type" --record-name "$record_name" --record-data "$record_data" --record-ttl 60
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
+
+
