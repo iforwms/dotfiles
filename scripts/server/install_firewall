@@ -16,7 +16,7 @@ echo -e "${GREEN}[${script_name}] Installing software...${NC}"
 apt-get install -y ufw fail2ban
 
 echo -e "${GREEN}[${script_name}] Enabling fail2ban...${NC}"
-rm /etc/fail2ban/jail.d/custom.conf
+rm /etc/fail2ban/jail.d/custom.conf 2> /dev/null
 systemctl start fail2ban
 systemctl enable fail2ban
 systemctl status fail2ban
