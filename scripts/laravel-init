@@ -49,8 +49,9 @@ fi
 
 echo -e "${GREEN}[${script_name}] Creating new project...${NC}"
 laravel new "$project_name" \
-  --breeze \
-  --stack=blade \
+  --livewire \
+  --livewire-class-components \
+  --npm \
   --phpunit \
   --no-interaction
 
@@ -63,6 +64,7 @@ sed -i "s|^APP_URL.*|APP_URL=https://${project_name}.test|" "${repo_path}/.env"
 sed -i "s|# DB_|DB_|" "${repo_path}/.env"
 sed -i "s|^DB_CONNECTION.*|DB_CONNECTION=mysql|" "${repo_path}/.env"
 sed -i "s|^DB_HOST.*|DB_HOST=${homestead_ip}|" "${repo_path}/.env"
+sed -i "s|^DB_DATABASE.*|DB_DATABASE=${project_name}|" "${repo_path}/.env"
 sed -i "s|^DB_USERNAME.*|DB_USERNAME=homestead|" "${repo_path}/.env"
 sed -i "s|^DB_PASSWORD.*|DB_PASSWORD=secret|" "${repo_path}/.env"
 sed -i "s/LOG_STACK=single/LOG_STACK=daily/" "${repo_path}/.env"
@@ -71,6 +73,9 @@ sed -i "/^APP_URL/a\APP_TIMEZONE=Asia/Shanghai" "${repo_path}/.env"
 sed -i "/^APP_URL/a\APP_SUPPORT_EMAIL=support@${project_name}.test" "${repo_path}/.env"
 sed -i "/^ASSET_URL/a\\\nHASH_VERIFY=false" "${repo_path}/.env"
 echo -e '\nSENTRY_LARAVEL_DSN=https://a4741bb9eb1b70e3e4b3cf989f67e8a6@o213124.ingest.us.sentry.io/0508959730958330' >> "${repo_path}/.env"
+
+echo -e "${GREEN}[${script_name}] Creating database...${NC}"
+cd ~/Homestead && vagrant ssh -c "mysql -uhomestead -psecret -e \"CREATE DATABASE IF NOT EXISTS "$project_name" CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci\"";
 
 echo -e "${GREEN}[${script_name}] Updating config/app.php...${NC}"
 sed -i "s/'timezone' => 'UTC'/'timezone' => env('APP_TIMEZONE', 'UTC')/" "${repo_path}/config/app.php"
@@ -112,6 +117,7 @@ touch "${repo_path}/public/icons/.gitkeep"
 echo -e "${GREEN}[${script_name}] Installing additional composer dependencies...${NC}"
 composer require --working-dir "${repo_path}" \
   livewire/livewire \
+  livewire/volt \
   barryvdh/laravel-dompdf \
   barryvdh/laravel-translation-manager \
   doctrine/dbal \
@@ -137,6 +143,7 @@ php "${repo_path}/artisan" vendor:publish --provider='Spatie\Permission\Permissi
 php "${repo_path}/artisan" vendor:publish --tag="livewire-filepond-views"
 php "${repo_path}/artisan" vendor:publish --tag="laravel-errors"
 php "${repo_path}/artisan" sentry:publish --without-test --with-send-default-pii --no-interaction
+php "${repo_path}/artisan" lang:publish --no-interaction
 
 echo -e "${GREEN}[${script_name}] Finishing Sentry installation...${NC}"
 sed -i '/Middleware;/a\use Sentry\\Laravel\\Integration;' "${repo_path}/bootstrap/app.php"
@@ -147,6 +154,7 @@ sed -i "/'extensions' => \[/a\\\\\\League\\\\CommonMark\\\\Extension\\\\Table\\\
 
 echo -e "${GREEN}[${script_name}] Adding helpers.php to composer autoloader.${NC}"
 sed -i '/"autoload": {/a\        "files": [\n            "bootstrap/helpers.php"\n        ],' "${repo_path}/composer.json"
+composer --working-dir "${repo_path}" dump-autoloader
 
 echo -e "${GREEN}[${script_name}] Removing fonts.bunny.net and cdn.tailwindcss.com references.${NC}"
 for f in resources/views/welcome.blade.php \
@@ -162,7 +170,7 @@ for f in resources/views/welcome.blade.php \
 done
 
 echo -e "${GREEN}[${script_name}] Running migrations...${NC}"
-php "${repo_path}/artisan" migrate
+php "${repo_path}/artisan" migrate:fresh --seed --no-interaction
 
 echo -e "${GREEN}[${script_name}] Creating new repo...${NC}"
 git -C "$repo_path" init

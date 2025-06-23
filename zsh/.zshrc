@@ -191,3 +191,7 @@ fi
 if [[ -e "${HOME}/.acme.sh/acme.sh.env" ]]; then
   source "${HOME}/.acme.sh/acme.sh.env"
 fi
+
+
+# Herd injected PHP 8.2 configuration.
+export HERD_PHP_82_INI_SCAN_DIR="/Users/ifor/Library/Application Support/Herd/config/php/82/"

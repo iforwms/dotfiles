@@ -1,0 +1,15 @@
+<a
+  href="#top"
+  id="scrollTop"
+  class="fixed bottom-[112px] sm:bottom-[88px] right-0 hidden px-2 py-2 m-2 text-xs rounded-lg shadow bg-white/80 hover:text-karst-teal shadow-md text-karst-blue">
+  {{__('Top')}}
+</a>
+
+<script>
+(function() {
+  const scrollTop = document.getElementById("scrollTop");
+  window.onscroll = () =>
+    scrollTop.style.display = document.body.scrollTop > 600
+      || document.documentElement.scrollTop > 600 ? 'block' : 'none';
+})();
+</script>

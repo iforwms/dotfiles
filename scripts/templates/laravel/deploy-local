@@ -23,6 +23,10 @@ for f in vendor/laravel/framework/src/Illuminate/Foundation/resources/exceptions
   sed -i '/cdn.tailwindcss.com/d' "${base_dir}/${f}"
 done
 
+echo -e "${GREEN}[${script_name}] Fixing Translation Manager bugs.${NC}"
+sed -i 's|\$group = basename($group)\;|\/\/ \$group =basename($group)\;|' "${base_dir}/vendor/barryvdh/laravel-translation-manager/src/Manager.php"
+sed -i 's:\\JSON_PRETTY_PRINT | \\JSON_UNESCAPED_UNICODE):\\JSON_PRETTY_PRINT | \\JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES):' "${base_dir}/vendor/barryvdh/laravel-translation-manager/src/Manager.php"
+
 echo -e "${GREEN}[${script_name}] Updating composer dependencies...${NC}"
 composer --working-dir "$base_dir" install --no-interaction --optimize-autoloader --no-dev --prefer-dist
 
