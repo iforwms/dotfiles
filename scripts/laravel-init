@@ -90,6 +90,9 @@ sed -i 's/use HasFactory, Notifiable;/use HasFactory, Notifiable, HasUuids;/' "$
 
 echo -e "${GREEN}[${script_name}] Adding head partial...${NC}"
 sed "s/PROJECT/${project_name^}/" "${DOTFILES}/scripts/templates/laravel/head.blade.stub" > "${repo_path}/resources/views/components/head.blade.php"
+sed "s/PROJECT/${project_name^}/" "${DOTFILES}/scripts/templates/laravel/footer.blade.stub" > "${repo_path}/resources/views/components/footer.blade.php"
+sed "s/PROJECT/${project_name^}/" "${DOTFILES}/scripts/templates/laravel/notifications.blade.stub" > "${repo_path}/resources/views/components/notifications.blade.php"
+sed "s/PROJECT/${project_name^}/" "${DOTFILES}/scripts/templates/laravel/error-notifications.blade.stub" > "${repo_path}/resources/views/components/error-notifications.blade.php"
 
 echo -e "${GREEN}[${script_name}] Publishing stubs...${NC}"
 php "${repo_path}/artisan" stub:publish
