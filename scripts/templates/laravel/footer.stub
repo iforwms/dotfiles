@@ -1,0 +1,11 @@
+<x-notifications />
+<x-error-notifications />
+
+@include('components.scroll-to-top')
+
+<footer class="py-4">
+  <div class="text-sm text-center">
+    &copy; {{__("Copyright")}} {{config('app.name')}} {{date('Y')}}
+  </div>
+</footer>
+
