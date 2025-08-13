@@ -11,12 +11,16 @@ fi
 
 acme="${HOME}/.acme.sh/acme.sh"
 if ! [[ $(command -v "$acme") ]]; then
-  echo "Missing required program: acme.sh (https://github.com/acmesh-official/acme.sh). Aborting..."
+  echo "Missing required program: acme.sh (https://github.com/acmesh-official/acme.sh)"
+  echo "To install: curl https://get.acme.sh | sh -s email=ifor@cors.tech"
+  echo "Aborting..."
   exit 1
 fi
 
 if ! [[ $(command -v aliyun) ]]; then
-  echo "Missing required program: aliyun (https://github.com/aliyun/aliyun-cli). Aborting..."
+  echo "Missing required program: aliyun (https://github.com/aliyun/aliyun-cli)"
+  echo 'To install: /bin/bash -c "$(curl -fsSL https://aliyuncli.alicdn.com/install.sh)"'
+  echo "Aborting..."
   exit 1
 fi
 
