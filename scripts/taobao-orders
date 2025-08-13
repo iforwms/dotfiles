@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eo pipefail
+# set -eo pipefail
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -22,7 +22,7 @@ if ! [[ -d "$local_dir" ]]; then
 fi
 
 echo -e "${GREEN}[${script_name}] Fetching data from TaoBao...${NC}"
-$(which php) "${local_dir}/taobao.php"
+/usr/local/bin/php "${local_dir}/taobao.php"
 
 json_file="${local_dir}/db/taobao"
 if ! [[ -e "${json_file}.json" ]]; then
