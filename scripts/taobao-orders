@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+# REPLACE='\e[1A\e[K' # To go N lines up: \e[<N>A (\e[K clears the line)
+
+script_name=taobao-orders
+usage="usage: ${script_name}"
+
+server=me
+local_dir=/Users/ifor/code/kuaidi
+remote_dir=/var/www/kuaidi/db
+
+if ! [[ -d "$local_dir" ]]; then
+  echo -e "${RED}[${script_name}] Directory not found, aborting...${NC}"
+  echo -e "${YELLOW}${usage}${NC}"
+  exit 1
+fi
+
+echo -e "${GREEN}[${script_name}] Fetching data from TaoBao...${NC}"
+php "${local_dir}/taobao.php"
+
+json_file="${local_dir}/db/taobao"
+if ! [[ -e "${json_file}.json" ]]; then
+  echo -e "${RED}[${script_name}] JSON file not found, aborting...${NC}"
+  exit 1
+fi
+
+echo -e "${GREEN}[${script_name}] Uploading JSON file to server...${NC}"
+rsync -avc "${json_file}.json" "${json_file}-raw.json" "${server}:${remote_dir}"
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
+

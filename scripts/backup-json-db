@@ -1,14 +1,18 @@
 #!/bin/bash
 
 destination="/Users/ifor/Documents/backup/db_json"
+today="$(date +%Y-%m-%d)"
+
+echo "Backing up kuaidi..."
+filename="backup_kuaidi_$(date +%Y-%m-%d)"
+base_dir="/var/www/kuaidi/db"
+rsync --verbose --times --compress "me:${base_dir}/*" "${destination}/kuaidi"
 
 echo "Backing up ego buster..."
-today="$(date +%Y-%m-%d)"
 base_dir="/var/www/ego_buster"
 rsync --verbose --times --compress "me:${base_dir}/results/*" "${destination}/ego_buster/results_${today}"
 
 echo "Backing up jukebox..."
-today="$(date +%Y-%m-%d)"
 base_dir="/var/www/jukebox"
 rsync --verbose --times --compress "me:${base_dir}/mb_db/*" "${destination}/jukebox/mb_db"
 rsync --verbose --times --compress "me:${base_dir}/album_art/*" "${destination}/jukebox/album_art"
