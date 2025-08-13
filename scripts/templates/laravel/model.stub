@@ -11,7 +11,17 @@ class {{ class }} extends Model
   public function transform()
   {
     $arr = $this->toArray();
+    if (property_exists($this, 'name')) {
+      $arr['_name'] = $this->name();
+    }
     return $arr;
+  }
+
+  public function name()
+  {
+    return app()->getLocale() === 'zh'
+      ? $this->chinese_name ?? $this->name
+      : $this->name;
   }
 }
 
