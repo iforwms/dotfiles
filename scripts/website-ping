@@ -28,6 +28,9 @@ websites=(
   wildmed.asia
   wmai.wildmed.asia
   yangshuotaichi.com
+  husfokus.info
+  portal.karstclimber.com
+  karstclimber.com
 )
 
 if [[ $# -eq 0 ]]; then
