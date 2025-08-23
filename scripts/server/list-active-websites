@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+REPLACE='\e[1A\e[K' # To go N lines up: \e[<N>A (\e[K clears the line)
+
+script_name=list-active-websites
+usage="usage: ${script_name}"
+
+sudo nginx -T 2>/dev/null \
+  | sed -n '/server_name /p;/fastcgi_pass /p' \
+  | sed 'N;s/\n/ /p' \
+  | sort -u \
+  | awk '{print $2 $4}' \
+  | sed 's/;unix:/|/;s|/var/run/php/||;s/\.sock;//;s/^\.//' \
+  | column -t -s'|'
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
+
+

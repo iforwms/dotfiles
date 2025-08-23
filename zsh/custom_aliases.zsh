@@ -367,6 +367,17 @@ function tma() {
     fi
 }
 
+function nginx-sites() {
+  sudo nginx -T 2>/dev/null \
+    | sed -n '/server_name /p;/fastcgi_pass /p' \
+    | sed 'N;s/\n/ /p' \
+    | sort -u \
+    | awk '{print $2 $4}' \
+    | sed 's/;unix:/|/;s|/var/run/php/||;s/\.sock;//;s/^\.//' \
+    | column -t -s'|'
+}
+
+
 # Create a new tmux session if needed, then attach to it.
 function tm() {
     (tmux list-sessions|grep "^${1}" &>/dev/null) || \
