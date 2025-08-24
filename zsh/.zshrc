@@ -195,4 +195,8 @@ fi
 
 # Herd injected PHP 8.2 configuration.
 export HERD_PHP_82_INI_SCAN_DIR="/Users/ifor/Library/Application Support/Herd/config/php/82/"
-. "/Users/ifor/.acme.sh/acme.sh.env"
+
+acme_env="/Users/ifor/.acme.sh/acme.sh.env"
+if [[ -e "$acme_env" ]]; then
+  . "$acme_env"
+fi
