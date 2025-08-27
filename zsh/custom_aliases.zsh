@@ -34,6 +34,8 @@ alias c="clear"
 alias vimgolf='docker run --rm -it -e "key=4ff4186b1f258b4dd2755c104835abeb" kramos/vimgolf'
 alias deploy='sudo -u www-data ./deploy'
 
+alias seqrename='/bin/ls -1prt | grep -v "/$" | cat -n | while read n f; do mv -n "${f}" "$(printf "%04d" $n).${f#*.}"; done'
+
 if command -v eza &> /dev/null; then
   eza_params=(
     '--git' '--icons' '--group' '--group-directories-first'
