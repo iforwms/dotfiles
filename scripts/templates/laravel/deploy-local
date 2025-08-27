@@ -7,6 +7,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
+fpm_version=8.3
 script_name=PROJECT-local
 base_dir="/var/www/${script_name/-local/}"
 
@@ -41,6 +42,15 @@ php "${base_dir}/artisan" view:cache
 
 echo -e "${GREEN}[${script_name}] Disabling maintenance mode...${NC}"
 php "${base_dir}/artisan" up
+
+fpm_bin="php-fpm${fpm_version}"
+if ! [[ $(command -v "$fpm_bin") ]]; then
+  echo -e "${RED}[${script_name}] Couldn't find ${fpm_bin}, do you have the correct version set?${NC}"
+  exit 1
+else
+  echo -e "${GREEN}[${script_name}] Restarting php-fpm server...${NC}"
+  SUDO_ASKPASS="${HOME}/.sdconfig" sudo -A systemctl reload "php${fpm_version}-fpm"
+fi
 
 echo -e "${GREEN}[${script_name}] All done!${NC}"
 exit 0

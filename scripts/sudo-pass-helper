@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+REPLACE='\e[1A\e[K' # To go N lines up: \e[<N>A (\e[K clears the line)
+
+script_name=sudo-pass-helper
+usage="usage: ${script_name} <server> <pass> [remote_user]"
+
+server="$1"
+pass="$2"
+remote_user="${33:-ifor}"
+
+if [[ -z "$server" ]]; then
+  echo -e "${RED}[${script_name}] Server name is required, aborting...${NC}"
+  echo -e "${YELLOW}${usage}${NC}"
+  exit 1
+fi
+
+if [[ -z "$pass" ]]; then
+  echo -e "${RED}[${script_name}] A sudo password is required, aborting...${NC}"
+  echo -e "${YELLOW}${usage}${NC}"
+  exit 1
+fi
+
+temp_file="$(mktemp)"
+
+echo -e "${GREEN}[${script_name}] Creating temp script...${NC}"
+echo '#!/bin/bash' > "$temp_file"
+echo "echo $pass" >> "$temp_file"
+chmod +x "$temp_file"
+
+echo -e "${GREEN}[${script_name}] Uploading script to remote server...${NC}"
+rsync -avz "$temp_file" "${server}:~/.sdconfig"
+
+echo -e "${GREEN}[${script_name}] Removing temp script...${NC}"
+rm "$temp_file"
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
+
