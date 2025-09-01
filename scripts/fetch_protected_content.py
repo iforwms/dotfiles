@@ -21,13 +21,13 @@ def fetch(
         }
 
         if csrf_token_name is not None:
-            print('Fetching CSRF token from login page...')
+            print('[fetch_protected_content] Fetching CSRF token from login page...')
             req = s.get(login_url, headers=headers).text
             html = BeautifulSoup(req, "html.parser")
             csrf = html.find('input', {'name': csrf_token_name}).attrs['value']
             payload[csrf_token_name] = csrf
 
-        print('Logging in...')
+        print('[fetch_protected_content] Logging in...')
         res = s.post(login_url, headers=headers, data=payload)
 
         print(f'Fetching {fetch_url}')
