@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-RED='\033[0;31m'
+# RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
@@ -9,6 +9,11 @@ script_name=fix-perms
 echo -e "${GREEN}[${script_name}] Updating code directory permissions...${NC}"
 sudo chown -R ifor:www-data /var/www
 sudo chmod -R g+w /var/www
+
+if [[ $(hostname) == 'karst-climber' ]]; then
+  echo -e "${GREEN}[${script_name}] Updating KarstClimber WordPress directory permissions...${NC}"
+  sudo chown -R www-data:www-data /var/www/karst_climber_wp
+fi
 
 if [[ $(hostname) == 'cindra' ]]; then
   echo -e "${GREEN}[${script_name}] Updating Cindra WordPress directory permissions...${NC}"
