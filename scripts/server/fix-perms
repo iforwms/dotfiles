@@ -12,7 +12,7 @@ sudo chmod -R g+w /var/www
 
 if [[ $(hostname) == 'karst-climber' ]]; then
   echo -e "${GREEN}[${script_name}] Updating KarstClimber WordPress directory permissions...${NC}"
-  sudo chown -R www-data:www-data /var/www/karst_climber_wp
+  sudo chown -R www-data:www-data /var/www/karst-climber-wp
 fi
 
 if [[ $(hostname) == 'cindra' ]]; then
