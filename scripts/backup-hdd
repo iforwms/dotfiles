@@ -5,7 +5,7 @@ GREEN='\033[0;32m'
 NC='\033[0m'
 
 src="${1:-/Volumes/IFOR2T}"
-dest="${2:-/Volumes/IFOR2T_BACKUP}"
+dest="${2:-/Volumes/IFOR2T_BACK}"
 script_name=backup-hdd
 exclude_list=(
   '.DS_Store'
