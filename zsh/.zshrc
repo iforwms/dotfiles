@@ -200,3 +200,9 @@ acme_env="/Users/ifor/.acme.sh/acme.sh.env"
 if [[ -e "$acme_env" ]]; then
   . "$acme_env"
 fi
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/ifor/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/ifor/Downloads/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/ifor/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/ifor/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
