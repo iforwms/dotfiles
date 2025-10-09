@@ -16,7 +16,7 @@ echo "Uploading file..."
 rsync -avz --progress "$filepath" "${server}:${remote_path}"
 
 echo "Setting file permissions..."
-ssh "$server" "chmod 644 ${remote_path}/${filename} && chown :www-data ${remote_path}/${filename}"
+ssh "$server" "chmod 644 '${remote_path}/${filename}' && chown :www-data '${remote_path}/${filename}'"
 
 echo "All done!"
 exit 0
