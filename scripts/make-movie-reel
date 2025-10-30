@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# Usage: ./make_reel.sh <image_dir> <audio_file> [start_time] [end_time]
+
+# set -e
+
+if [ $# -lt 2 ]; then
+  echo "Usage: $0 <image_dir> <audio_file> [start_time] [end_time]"
+  exit 1
+fi
+
+IMG_DIR="$1"
+AUDIO_FILE="$2"
+START_TIME="$3"
+END_TIME="$4"
+
+# Check dependencies
+if ! command -v ffmpeg >/dev/null 2>&1; then
+  echo "Error: ffmpeg not found. Please install ffmpeg first."
+  exit 1
+fi
+
+# Collect images
+IMAGES=("$IMG_DIR"/*.{jpg,jpeg,png})
+if [ ${#IMAGES[@]} -eq 0 ]; then
+  echo "No images found in $IMG_DIR"
+  exit 1
+fi
+
+# Create a temporary working directory
+WORKDIR=$(mktemp -d)
+trap 'rm -rf "$WORKDIR"' EXIT
+
+# Resize and rename images sequentially for ffmpeg input
+i=1
+for img in "${IMAGES[@]}"; do
+  echo "Resizing image: ${img}";
+  ffmpeg -y -i "$img" -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2" "$WORKDIR/$(printf "%04d.jpg" "$i")" >/dev/null 2>&1
+  ((i++))
+done
+
+# Generate transition list
+TRANSITIONS=("fade" "wipeleft" "wiperight" "slideleft" "slideright" "circleopen" "circleclose" "rectcrop" "distance" "smoothleft" "fadeblack" "fadewhite")
+
+DURATION_PER_IMAGE=3
+TRANSITION_DURATION=1
+
+# Create ffmpeg concat filter script dynamically
+FILTER_COMPLEX=""
+for ((j=1; j<=${#IMAGES[@]}; j++)); do
+  FILTER_COMPLEX+="[${j}:v]scale=1920:1080,format=yuv420p,setsar=1[v$j];"
+done
+
+echo "Filter: ${FILTER_COMPLEX}";
+
+# Build transition chain
+CHAIN="[v1]"
+for ((j=2; j<=${#IMAGES[@]}; j++)); do
+  t="${TRANSITIONS[$RANDOM % ${#TRANSITIONS[@]}]}"
+  CHAIN="${CHAIN}[v${j}]xfade=transition=${t}:duration=${TRANSITION_DURATION}:offset=$(( (j-1)*(DURATION_PER_IMAGE) ))"
+  if [ $j -lt ${#IMAGES[@]} ]; then
+    CHAIN+="[tmp$j];[tmp$j]"
+  fi
+done
+echo "Chain: ${CHAIN}";
+
+# Generate ffmpeg input args
+INPUTS=""
+for img in "$WORKDIR"/*.jpg; do
+  INPUTS+=" -loop 1 -t $DURATION_PER_IMAGE -i \"$img\""
+done
+echo "Inputs: ${INPUTS}";
+
+
+# Build full ffmpeg command
+CMD="ffmpeg -y $INPUTS -i \"$AUDIO_FILE\" -filter_complex \"$FILTER_COMPLEX ${CHAIN[outv]}\" -map \"[outv]\" -map $((${#IMAGES[@]})):a -shortest -c:v libx264 -pix_fmt yuv420p output.mp4"
+echo "Command: ${CMD}";
+
+# Trim if start/end provided
+if [ -n "$START_TIME" ]; then
+  CMD="ffmpeg -ss $START_TIME -to $END_TIME -i \"$AUDIO_FILE\" -c copy \"$WORKDIR/trimmed_audio.mp3\" && ${CMD/\"$AUDIO_FILE\"/\"$WORKDIR\/trimmed_audio.mp3\"}"
+  echo "Command with trimmed audio: ${CMD}";
+fi
+
+echo "Generating video..."
+eval "$CMD"
+
+echo "✅ Done! Output saved as output.mp4"
+
