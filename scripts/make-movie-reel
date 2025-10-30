@@ -17,12 +17,9 @@ audio_start_time="${4:-0}"        # default = 0 (start of audio)
 
 duration_per_image=3      # seconds each image shows (excluding transition)
 transition_duration=1     # seconds per xfade
-
 video_fade_in=2
 video_fade_out=3
 text_end=10
-
-fps=25
 fade_duration=2
 
 workdir=$(mktemp -d)
@@ -34,6 +31,7 @@ images=("$img_dir"/*.{jpg,jpeg,png,JPG,PNG})
 image_count=${#images[@]}
 if [ "$image_count" -eq 0 ]; then
   echo -e "${RED}[${script_name}] No images found in ${img_dir}...${NC}"
+  echo -e "${YELLOW}[${script_name}] ${usage}"
   exit 1
 fi
 
@@ -52,36 +50,14 @@ for ((i=0;i<image_count;i++)); do
   img="${images[$i]}"
   clip="${workdir}/clip_${i}.mp4"
 
-  # Random zoom factor and direction
-  zoom_factor=$(awk -v min=1.05 -v max=1.2 'BEGIN{srand(); print min+rand()*(max-min)}')
-  zoom_dir=$((RANDOM % 2 * 2 - 1))  # 1 = zoom in, -1 = zoom out
-  if [ "$zoom_dir" -eq -1 ]; then
-    zoom_start=$zoom_factor
-    zoom_end=1.0
-  else
-    zoom_start=1.0
-    zoom_end=$zoom_factor
-  fi
-
-  # Random pan offsets (fixed for this image, -20% to 20%)
-  x_off=$(awk -v min=-0.2 -v max=0.2 'BEGIN{srand(); print min+rand()*(max-min)}')
-  y_off=$(awk -v min=-0.2 -v max=0.2 'BEGIN{srand(); print min+rand()*(max-min)}')
-  total_frames=$(( (duration_per_image + transition_duration) * fps ))
-
-  echo -e "${YELLOW}[${script_name}] Zoom Start: ${zoom_start} | Zoom End: ${zoom_end} | PanX: ${x_off} | PanY: ${y_off} | Frames: ${total_frames}"
-
-  ffmpeg -y -loop 1 -i "$img" -t "$(echo "$duration_per_image + $transition_duration" | bc)" \
-    -vf "scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2,
-        zoompan=z='${zoom_start}+(${zoom_end}-${zoom_start})*on/${total_frames}':
-x='iw/2-(iw/zoom/2)+iw*${x_off}':y='ih/2-(ih/zoom/2)+ih*${y_off}':d=$(echo "$fps*($duration_per_image+$transition_duration)" | bc),fps=$fps,format=yuv420p" \
-    -c:v libx264 -pix_fmt yuv420p "$clip" >/dev/null 2>&1
+  "${DOTFILES}/scripts/single-image-reel" "$img" "$clip" "$width" "$height"
 
   echo -e "${YELLOW}[${script_name}] Clip: ${clip}"
-  open "$clip"
-  exit
+  # open "$clip"
+  # exit
   temp_clips+=("$clip")
 done
-exit
+# exit
 
 # Trim/pad audio to match total video duration
 total_video=$(echo "$image_count * $duration_per_image + $transition_duration" | bc)
