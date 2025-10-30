@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+image="$1"
+output_file="${2:-output.mp4}"
+width=${3:-0}
+height=${4:-0}
+
+if ! [ -r "$image" ]; then
+  echo "Unable to find image file, aborting."
+  echo "Usage: $0 <image_file>"
+  exit 1
+fi
+
+if [[ $width -eq 0 || $height -eq 0 ]]; then
+# Get image resolution
+  echo 'Calculating dimensions'
+  IFS=',' read -r width height < <(ffprobe -v error -select_streams v:0 \
+      -show_entries stream=width,height -of csv=p=0:s=, "$image")
+fi
+
+# Video parameters
+DURATION=4
+FPS=25
+FRAMES=$((DURATION*FPS))
+
+# Randomized zoom and pan
+ZOOM_AMOUNT=$(awk 'BEGIN{srand(); print 0.2+rand()*0.1}')
+
+# Maximum pan distance
+MAX_PAN_X=$((width / 4))
+MAX_PAN_Y=$((height / 4))
+
+# Random pan in any direction (negative or positive)
+PAN_X=$(awk -v max="$MAX_PAN_X" 'BEGIN{srand(); print (rand()*2-1)*max}')  # [-max, +max]
+PAN_Y=$(awk -v max="$MAX_PAN_Y" 'BEGIN{srand(); print (rand()*2-1)*max}')  # [-max, +max]
+
+# DELAY=0.5
+# Ease-in/ease-out expressions
+# Smooth ease-in/out zoom curve (starts and ends at 1, peaks halfway)
+SPEED_FACTOR=1
+
+zoom_expr="1 + $ZOOM_AMOUNT * sin(3.14159265 * $SPEED_FACTOR * on / $FRAMES)^3"
+x_expr="$PAN_X * sin(3.14159265 * $SPEED_FACTOR * on / $FRAMES)^3"
+y_expr="$PAN_Y * sin(3.14159265 * $SPEED_FACTOR * on / $FRAMES)^3"
+
+# Generate smooth video
+width=$((width*2))
+height=$((height*2))
+ffmpeg -loglevel error \
+  -y \
+  -loop 1 \
+  -i "$image" \
+  -t $DURATION \
+  -r $FPS \
+  -vf "
+    scale=$width:$height,
+    zoompan=z='$zoom_expr':x='$x_expr':y='$y_expr':s=${width}x${height}:fps=$FPS:d=1
+    " -c:v libx264 -pix_fmt yuv420p "$output_file"
+
+# open "$output_file"
+
