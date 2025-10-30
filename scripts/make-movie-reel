@@ -1,121 +1,130 @@
 #!/usr/bin/env bash
-# Usage: ./make_reel.sh <image_dir> <audio_file> [audio_start] [duration_per_image] [transition_duration]
+# Usage: ./make_reel.sh <image_dir> <text_overlay> <audio_file> [audio_start]
 
-IMG_DIR="$1"
-AUDIO_FILE="$2"
-AUDIO_START_TIME="${3:-0}"  # default = 0 (start of audio)
-DURATION_PER_IMAGE="${4:-3}"
-TRANSITION_DURATION="${5:-1}"
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+# REPLACE='\e[1A\e[K' # To go N lines up: \e[<N>A (\e[K clears the line)
 
-WORKDIR=$(mktemp -d)
-trap 'rm -rf "$WORKDIR"' EXIT
+script_name=make-movie-reel
+usage="Usage: ${script_name} <image_dir> <text_overlay> <audio_file> [audio_start]"
 
-# Collect images
+img_dir="$1"
+text_overlay="$2"
+audio_file="$3"
+audio_start_time="${4:-0}"        # default = 0 (start of audio)
+
+duration_per_image=3      # seconds each image shows (excluding transition)
+transition_duration=1     # seconds per xfade
+
+video_fade_in=2
+video_fade_out=3
+text_end=10
+
+fps=25
+fade_duration=2
+
+workdir=$(mktemp -d)
+# trap 'rm -rf "$workdir"' EXIT
+
+echo -e "${YELLOW}[${script_name}] Collecting images..."
 shopt -s nullglob
-IMAGES=("$IMG_DIR"/*.{jpg,jpeg,png,JPG,PNG})
-IMAGE_COUNT=${#IMAGES[@]}
-if [ $IMAGE_COUNT -eq 0 ]; then
-  echo "No images found in $IMG_DIR"
+images=("$img_dir"/*.{jpg,jpeg,png,JPG,PNG})
+image_count=${#images[@]}
+if [ "$image_count" -eq 0 ]; then
+  echo -e "${RED}[${script_name}] No images found in ${img_dir}...${NC}"
   exit 1
 fi
 
-IFS=',' read WIDTH HEIGHT < <(ffprobe -v error -select_streams v:0 \
-    -show_entries stream=width,height -of csv=p=0:s=, "${IMAGES[0]}")
+IFS=',' read -r width height < <(ffprobe -v error -select_streams v:0 \
+    -show_entries stream=width,height -of csv=p=0:s=, "${images[0]}")
 
-echo "📏 Using resolution ${WIDTH}x${HEIGHT}"
+echo -e "${GREEN}[${script_name}] Found ${image_count} images: ${images[@]}"
+echo -e "${GREEN}[${script_name}] Duration per image: ${duration_per_image}s"
+echo -e "${GREEN}[${script_name}] Transition duration: ${transition_duration}s"
+echo -e "${GREEN}[${script_name}] Using resolution ${width}x${height}"
 
-echo "📸 Found $IMAGE_COUNT images"
-echo "🕒 Duration per image: $DURATION_PER_IMAGE s"
-echo "🌈 Transition duration: $TRANSITION_DURATION s"
+temp_clips=()
 
-# Resize to 1080p
-i=1
-for img in "${IMAGES[@]}"; do
-  ffmpeg -y -i "$img" \
-    -vf "scale=${WIDTH}:${HEIGHT}:force_original_aspect_ratio=decrease,pad=${WIDTH}:${HEIGHT}:(ow-iw)/2:(oh-ih)/2" \
-    "$WORKDIR/$(printf "%04d.png" "$i")" >/dev/null 2>&1
-  ((i++))
-done
+echo -e "${YELLOW}[${script_name}] Creating per-image video clips with random Ken Burns effect..."
+for ((i=0;i<image_count;i++)); do
+  img="${images[$i]}"
+  clip="${workdir}/clip_${i}.mp4"
 
-# Generate input list
-INPUTS=()
-for ((i=1;i<=IMAGE_COUNT;i++)); do
-  INPUTS+=("-loop" "1" "-t" "$((DURATION_PER_IMAGE + TRANSITION_DURATION))" "-i" "$WORKDIR/$(printf "%04d.png" "$i")")
-done
-
-# Audio trimming and fading
-FADE_DURATION=2
-TOTAL_VIDEO=$(echo "$IMAGE_COUNT * $DURATION_PER_IMAGE - ($DURATION_PER_IMAGE - $TRANSITION_DURATION) + $FADE_DURATION" | bc)
-TRIMMED_AUDIO="$WORKDIR/audio_trimmed.mp3"
-
-ffmpeg -y -i "$AUDIO_FILE" \
-  -filter_complex "[0:a]atrim=start=$AUDIO_START_TIME:end=$(echo "$AUDIO_START_TIME + $TOTAL_VIDEO" | bc),asetpts=PTS-STARTPTS,afade=t=in:st=0:d=$FADE_DURATION,afade=t=out:st=$(echo "$TOTAL_VIDEO - $FADE_DURATION" | bc):d=$FADE_DURATION[a]" \
-  -map "[a]" -ac 2 -c:a mp3 "$TRIMMED_AUDIO"
-
-# Define transition types
-TRANSITIONS=(wipeleft wiperight wipeup wipedown smoothleft smoothright vertopen vertclose)
-
-# Build filter graph
-FPS=25
-FILTER=""
-for ((i=0;i<IMAGE_COUNT;i++)); do
-  # Random zoom factor per image: 1.05 to 1.2 (5%-20%)
-  ZOOM_FACTOR=$(awk -v min=1.05 -v max=1.2 'BEGIN{srand(); print min+rand()*(max-min)}')
-
-  # Random zoom direction: 1 = zoom in, -1 = zoom out
-  ZOOM_DIR=$((RANDOM % 2 * 2 - 1))  # either 1 or -1
-  if [ "$ZOOM_DIR" -eq -1 ]; then
-    START_ZOOM=$ZOOM_FACTOR
-    END_ZOOM=1.0
+  # Random zoom factor and direction
+  zoom_factor=$(awk -v min=1.05 -v max=1.2 'BEGIN{srand(); print min+rand()*(max-min)}')
+  zoom_dir=$((RANDOM % 2 * 2 - 1))  # 1 = zoom in, -1 = zoom out
+  if [ "$zoom_dir" -eq -1 ]; then
+    zoom_start=$zoom_factor
+    zoom_end=1.0
   else
-    START_ZOOM=1.0
-    END_ZOOM=$ZOOM_FACTOR
+    zoom_start=1.0
+    zoom_end=$zoom_factor
   fi
 
-  # Compute zoom increment per frame
-  TOTAL_FRAMES=$(( (DURATION_PER_IMAGE + TRANSITION_DURATION) * FPS ))
-  ZOOM_SPEED=$(awk -v sz=$START_ZOOM -v ez=$END_ZOOM -v tf=$TOTAL_FRAMES 'BEGIN{print (ez-sz)/tf}')
+  # Random pan offsets (fixed for this image, -20% to 20%)
+  x_off=$(awk -v min=-0.2 -v max=0.2 'BEGIN{srand(); print min+rand()*(max-min)}')
+  y_off=$(awk -v min=-0.2 -v max=0.2 'BEGIN{srand(); print min+rand()*(max-min)}')
+  total_frames=$(( (duration_per_image + transition_duration) * fps ))
 
-  # Random small pan offsets, fixed for the whole image (0-10% of width/height)
-  X_OFF=$(awk -v min=-0.1 -v max=0.1 'BEGIN{srand(); print min+rand()*(max-min)}')
-  Y_OFF=$(awk -v min=-0.1 -v max=0.1 'BEGIN{srand(); print min+rand()*(max-min)}')
+  echo -e "${YELLOW}[${script_name}] Zoom Start: ${zoom_start} | Zoom End: ${zoom_end} | PanX: ${x_off} | PanY: ${y_off} | Frames: ${total_frames}"
 
-  # Apply zoompan per image
-  FILTER+="[${i}:v]format=yuv420p,setsar=1,zoompan="
-  FILTER+="z='if(lte(zoom,${END_ZOOM}),zoom+${ZOOM_SPEED},zoom)':"
-  FILTER+="x='iw/2-(iw/zoom/2)+iw*${X_OFF}':"
-  FILTER+="y='ih/2-(ih/zoom/2)+ih*${Y_OFF}':"
-  FILTER+="d=$TOTAL_FRAMES:s=${WIDTH}x${HEIGHT}[v$((i+1))];"
+  ffmpeg -y -loop 1 -i "$img" -t "$(echo "$duration_per_image + $transition_duration" | bc)" \
+    -vf "scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2,
+        zoompan=z='${zoom_start}+(${zoom_end}-${zoom_start})*on/${total_frames}':
+x='iw/2-(iw/zoom/2)+iw*${x_off}':y='ih/2-(ih/zoom/2)+ih*${y_off}':d=$(echo "$fps*($duration_per_image+$transition_duration)" | bc),fps=$fps,format=yuv420p" \
+    -c:v libx264 -pix_fmt yuv420p "$clip" >/dev/null 2>&1
+
+  echo -e "${YELLOW}[${script_name}] Clip: ${clip}"
+  open "$clip"
+  exit
+  temp_clips+=("$clip")
+done
+exit
+
+# Trim/pad audio to match total video duration
+total_video=$(echo "$image_count * $duration_per_image + $transition_duration" | bc)
+trimmed_audio="${workdir}/audio_trimmed.mp3"
+
+ffmpeg -y -i "$audio_file" \
+  -filter_complex "[0:a]atrim=start=$audio_start_time:end=$(echo "$audio_start_time + $total_video" | bc),asetpts=PTS-STARTPTS,afade=t=in:st=0:d=$fade_duration,afade=t=out:st=$(echo "$total_video - $fade_duration" | bc):d=${fade_duration}[a]" \
+  -map "[a]" -ac 2 -c:a mp3 "$trimmed_audio"
+
+# Generate xfade chain
+transitions=(wipeleft wiperight wipeup wipedown smoothleft smoothright vertopen vertclose)
+filter=""
+for ((i=0;i<image_count;i++)); do
+  filter+="[$i:v]setpts=PTS-STARTPTS[v$i];"
 done
 
-# Chain xfade transitions using the zoomed streams
-FILTER+="[v1][v2]xfade=transition=${TRANSITIONS[$RANDOM % ${#TRANSITIONS[@]}]}:duration=$TRANSITION_DURATION:offset=$DURATION_PER_IMAGE[vx1];"
-OFFSET=$DURATION_PER_IMAGE
-for ((i=3;i<=IMAGE_COUNT;i++)); do
-  OFFSET=$(echo "$OFFSET + $DURATION_PER_IMAGE" | bc)
-  FILTER+="[vx$((i-2))][v$i]xfade=transition=${TRANSITIONS[$RANDOM % ${#TRANSITIONS[@]}]}:duration=$TRANSITION_DURATION:offset=$OFFSET[vx$((i-1))];"
+offset=$duration_per_image
+for ((i=1;i<image_count;i++)); do
+  T="${transitions[$RANDOM % ${#transitions[@]}]}"
+  if [ $i -eq 1 ]; then
+    filter+="[v0][v1]xfade=transition=$T:duration=$transition_duration:offset=${duration_per_image}[vx$i];"
+  else
+    PREV=$((i-1))
+    filter+="[vx$PREV][v$i]xfade=transition=$T:duration=$transition_duration:offset=${offset}[vx$i];"
+  fi
+  offset=$(echo "$offset + $duration_per_image" | bc)
 done
 
-# Add text overlay with line break + video fade in/out on the final output
-VIDEO_FADE_IN=2
-VIDEO_FADE_OUT=4
-TEXT_END=15
-TEXT_OVERLAY="Nynasvagen 84
-Haninge"
+# Final fade + text overlay
+filter+="[vx$((image_count-1))]fade=t=in:st=0:d=$video_fade_in,fade=t=out:st=$(echo "$total_video - $video_fade_out" | bc):d=$video_fade_out,\
+drawtext=fontfile=/System/Library/Fonts/Supplemental/AmericanTypewriter.ttc:text='$text_overlay':fontcolor=white:fontsize=48:box=1:boxcolor=black@0.5:boxborderw=10:x=(w-text_w)/2:y=(h-text_h)/2:enable='lte(t,$text_end)',format=yuv420p[vout]"
 
-FILTER+="[vx$((IMAGE_COUNT-1))]fade=t=in:st=0:d=$VIDEO_FADE_IN,\
-fade=t=out:st=$(echo "$TOTAL_VIDEO - $VIDEO_FADE_OUT" | bc):d=$VIDEO_FADE_OUT,\
-drawtext=fontfile=/System/Library/Fonts/Supplemental/AmericanTypewriter.ttc:text='$TEXT_OVERLAY':fontcolor=white:fontsize=48:box=1:boxcolor=black@0.5:boxborderw=10:x=(w-text_w)/2:y=(h-text_h)/2:enable='lte(t,$TEXT_END)',format=yuv420p[vout]"
+# Build ffmpeg input arguments
+input_args=()
+for clip in "${temp_clips[@]}"; do
+  input_args+=("-i" "$clip")
+done
+input_args+=("-i" "$trimmed_audio")
 
-# Run FFmpeg
-CMD=(
-  -y "${INPUTS[@]}" -i "$TRIMMED_AUDIO"
-  -filter_complex "$FILTER"
-  -map "[vout]" -map "$IMAGE_COUNT:a"
-  -shortest -c:v libx264 -pix_fmt yuv420p output.mp4
-)
+# Run ffmpeg
+ffmpeg -y "${input_args[@]}" \
+  -filter_complex "$filter" \
+  -map "[vout]" -map "$((image_count))":a -shortest \
+  -c:v libx264 -pix_fmt yuv420p output.mp4
 
-echo "🎬 Running FFmpeg..."
-ffmpeg "${CMD[@]}"
-
-echo "✅ Done! output.mp4 created (≈ ${TOTAL_VIDEO}s)"
+echo "Done! output.mp4 created (~${total_video}s)"
