@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+image="$1"
+if [ -z "$image" ]; then
+  echo "Usage: $0 <image_file>"
+  exit 1
+fi
+
+# Get image resolution
+IFS=',' read -r width height < <(ffprobe -v error -select_streams v:0 \
+    -show_entries stream=width,height -of csv=p=0:s=, "$image")
+
+# Force even resolution
+width=$((width - width % 2))
+height=$((height - height % 2))
+
+# Video parameters
+DURATION=3
+FPS=25
+FRAMES=$((DURATION*FPS))
+PULSES=3
+
+# Randomized motion amplitudes
+ZOOM_AMPLITUDE=$(awk 'BEGIN{srand(); print 0.2+rand()*0.3}')
+PAN_X_AMPLITUDE=$(awk -v max="$width/4" 'BEGIN{srand(); print int(rand()*max)}')
+PAN_Y_AMPLITUDE=$(awk -v max="$height/4" 'BEGIN{srand(); print int(rand()*max)}')
+
+# Pulse frequency
+OMEGA=$(awk -v pulses=$PULSES -v frames=$FRAMES 'BEGIN{print pulses*2*3.14159265/frames}')
+
+# Expressions
+zoom_expr="1 + $ZOOM_AMPLITUDE * sin($OMEGA*on)"
+x_expr="$PAN_X_AMPLITUDE * sin($OMEGA*on)"
+y_expr="$PAN_Y_AMPLITUDE * sin($OMEGA*on)"
+
+# Generate video
+ffmpeg -y -loop 1 -i "$image" -t $DURATION -vf "
+scale=$width:$height,
+zoompan=z='$zoom_expr':x='$x_expr':y='$y_expr':s=${width}x${height}:d=$FRAMES
+" -c:v libx264 -pix_fmt yuv420p -r $FPS output.mp4
+
+open "output.mp4"
+echo "Cinematic video generated successfully."
