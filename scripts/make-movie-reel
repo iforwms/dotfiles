@@ -56,12 +56,39 @@ ffmpeg -y -i "$AUDIO_FILE" \
 TRANSITIONS=(wipeleft wiperight wipeup wipedown smoothleft smoothright vertopen vertclose)
 
 # Build filter graph
+FPS=25
 FILTER=""
 for ((i=0;i<IMAGE_COUNT;i++)); do
-  FILTER+="[${i}:v]format=yuv420p,setsar=1[v$((i+1))];"
+  # Random zoom factor per image: 1.05 to 1.2 (5%-20%)
+  ZOOM_FACTOR=$(awk -v min=1.05 -v max=1.2 'BEGIN{srand(); print min+rand()*(max-min)}')
+
+  # Random zoom direction: 1 = zoom in, -1 = zoom out
+  ZOOM_DIR=$((RANDOM % 2 * 2 - 1))  # either 1 or -1
+  if [ "$ZOOM_DIR" -eq -1 ]; then
+    START_ZOOM=$ZOOM_FACTOR
+    END_ZOOM=1.0
+  else
+    START_ZOOM=1.0
+    END_ZOOM=$ZOOM_FACTOR
+  fi
+
+  # Compute zoom increment per frame
+  TOTAL_FRAMES=$(( (DURATION_PER_IMAGE + TRANSITION_DURATION) * FPS ))
+  ZOOM_SPEED=$(awk -v sz=$START_ZOOM -v ez=$END_ZOOM -v tf=$TOTAL_FRAMES 'BEGIN{print (ez-sz)/tf}')
+
+  # Random small pan offsets, fixed for the whole image (0-10% of width/height)
+  X_OFF=$(awk -v min=-0.1 -v max=0.1 'BEGIN{srand(); print min+rand()*(max-min)}')
+  Y_OFF=$(awk -v min=-0.1 -v max=0.1 'BEGIN{srand(); print min+rand()*(max-min)}')
+
+  # Apply zoompan per image
+  FILTER+="[${i}:v]format=yuv420p,setsar=1,zoompan="
+  FILTER+="z='if(lte(zoom,${END_ZOOM}),zoom+${ZOOM_SPEED},zoom)':"
+  FILTER+="x='iw/2-(iw/zoom/2)+iw*${X_OFF}':"
+  FILTER+="y='ih/2-(ih/zoom/2)+ih*${Y_OFF}':"
+  FILTER+="d=$TOTAL_FRAMES:s=${WIDTH}x${HEIGHT}[v$((i+1))];"
 done
 
-# Chain xfade transitions
+# Chain xfade transitions using the zoomed streams
 FILTER+="[v1][v2]xfade=transition=${TRANSITIONS[$RANDOM % ${#TRANSITIONS[@]}]}:duration=$TRANSITION_DURATION:offset=$DURATION_PER_IMAGE[vx1];"
 OFFSET=$DURATION_PER_IMAGE
 for ((i=3;i<=IMAGE_COUNT;i++)); do
@@ -69,13 +96,16 @@ for ((i=3;i<=IMAGE_COUNT;i++)); do
   FILTER+="[vx$((i-2))][v$i]xfade=transition=${TRANSITIONS[$RANDOM % ${#TRANSITIONS[@]}]}:duration=$TRANSITION_DURATION:offset=$OFFSET[vx$((i-1))];"
 done
 
-# Add text + video fade to final stream
+# Add text overlay with line break + video fade in/out on the final output
 VIDEO_FADE_IN=2
 VIDEO_FADE_OUT=4
 TEXT_END=15
-TEXT_OVERLAY="Nynasvagen 84\\nHaninge"
+TEXT_OVERLAY="Nynasvagen 84
+Haninge"
 
-FILTER+="[vx$((IMAGE_COUNT-1))]fade=t=in:st=0:d=$VIDEO_FADE_IN,fade=t=out:st=$(echo "$TOTAL_VIDEO - $VIDEO_FADE_OUT" | bc):d=$VIDEO_FADE_OUT,drawtext=fontfile=/System/Library/Fonts/Supplemental/AmericanTypewriter.ttc:text='$TEXT_OVERLAY':fontcolor=white:fontsize=48:box=1:boxcolor=black@0.5:boxborderw=10:x=(w-text_w)/2:y=(h-text_h)/2:enable='lte(t,$TEXT_END)',format=yuv420p[vout]"
+FILTER+="[vx$((IMAGE_COUNT-1))]fade=t=in:st=0:d=$VIDEO_FADE_IN,\
+fade=t=out:st=$(echo "$TOTAL_VIDEO - $VIDEO_FADE_OUT" | bc):d=$VIDEO_FADE_OUT,\
+drawtext=fontfile=/System/Library/Fonts/Supplemental/AmericanTypewriter.ttc:text='$TEXT_OVERLAY':fontcolor=white:fontsize=48:box=1:boxcolor=black@0.5:boxborderw=10:x=(w-text_w)/2:y=(h-text_h)/2:enable='lte(t,$TEXT_END)',format=yuv420p[vout]"
 
 # Run FFmpeg
 CMD=(
