@@ -1,91 +1,39 @@
 #!/usr/bin/env bash
-# Usage: ./make_reel.sh <image_dir> <audio_file> [duration_per_image] [transition_duration]
-
-set -e
-
-if [ $# -lt 2 ]; then
-  echo "Usage: $0 <image_dir> <audio_file> [duration_per_image] [transition_duration]"
-  exit 1
-fi
 
 IMG_DIR="$1"
 AUDIO_FILE="$2"
-DURATION_PER_IMAGE="${3:-3}"      # seconds per image (default 3)
-TRANSITION_DURATION="${4:-1}"     # transition duration (default 1)
-
-if ! command -v ffmpeg >/dev/null; then
-  echo "Error: ffmpeg not found."
-  exit 1
-fi
-
-# Collect images
-shopt -s nullglob
-IMAGES=("$IMG_DIR"/*.{jpg,jpeg,png,JPG,PNG})
-if [ ${#IMAGES[@]} -eq 0 ]; then
-  echo "No images found in $IMG_DIR"
-  exit 1
-fi
+DURATION_PER_IMAGE="${3:-3}"
+TRANSITION_DURATION="${4:-1}"
 
 WORKDIR=$(mktemp -d)
 trap 'rm -rf "$WORKDIR"' EXIT
 
-# Resize and prepare images
+# Resize images
 i=1
-for img in "${IMAGES[@]}"; do
+for img in "$IMG_DIR"/*.{jpg,jpeg,png,JPG,PNG}; do
   ffmpeg -y -i "$img" -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2" \
-    "$WORKDIR/$(printf "%04d.jpg" "$i")" >/dev/null 2>&1
+    "$WORKDIR/$(printf "%04d.jpg" "$i").png" >/dev/null 2>&1
   ((i++))
 done
 
-IMAGE_COUNT=${#IMAGES[@]}
+# Build inputs for slideshow
+IMG_LIST="$WORKDIR/images.txt"
+rm -f "$IMG_LIST"
+for img in "$WORKDIR"/*.png; do
+  echo "file '$img'" >> "$IMG_LIST"
+  echo "duration $DURATION_PER_IMAGE" >> "$IMG_LIST"
+done
+# repeat last image to make total duration correct
+LAST_IMG=$(ls "$WORKDIR"/*.png | tail -n1)
+echo "file '$LAST_IMG'" >> "$IMG_LIST"
 
-# Calculate total video duration (images + transitions)
-TOTAL_VIDEO_DURATION=$(echo "$IMAGE_COUNT * $DURATION_PER_IMAGE + ($IMAGE_COUNT - 1) * $TRANSITION_DURATION" | bc)
-echo "🎞  Total images: $IMAGE_COUNT"
-echo "🕒 Duration per image: ${DURATION_PER_IMAGE}s"
-echo "🌈 Transition duration: ${TRANSITION_DURATION}s"
-echo "🎬 Total video duration: ${TOTAL_VIDEO_DURATION}s"
+# Generate base slideshow (no transitions yet)
+ffmpeg -y -f concat -safe 0 -i "$IMG_LIST" -vsync vfr -pix_fmt yuv420p "$WORKDIR/base.mp4"
 
-# Trim/pad audio to match total duration
+# Trim/pad audio to match
+TOTAL_DURATION=$(echo "$DURATION_PER_IMAGE * $(ls "$WORKDIR"/*.png | wc -l)" | bc)
 TRIMMED_AUDIO="$WORKDIR/audio_trimmed.mp3"
-ffmpeg -y -i "$AUDIO_FILE" -t "$TOTAL_VIDEO_DURATION" -af "apad=pad_dur=2" -acodec mp3 "$TRIMMED_AUDIO" >/dev/null 2>&1
+ffmpeg -y -i "$AUDIO_FILE" -t "$TOTAL_DURATION" -af "apad=pad_dur=2" -acodec mp3 "$TRIMMED_AUDIO"
 
-# Prepare inputs
-INPUTS=()
-for img in "$WORKDIR"/*.jpg; do
-  INPUTS+=(-loop 1 -t "$DURATION_PER_IMAGE" -i "$img")
-done
-INPUTS+=(-i "$TRIMMED_AUDIO")
-
-# Random transition list
-TRANSITIONS=(fade wipeleft wiperight slideleft slideright circleopen circleclose rectcrop distance smoothleft fadeblack fadewhite)
-
-# Build filter graph
-FILTER_COMPLEX=""
-for ((i=0; i<IMAGE_COUNT; i++)); do
-  FILTER_COMPLEX+="[${i}:v]scale=1920:1080,format=yuv420p,setsar=1[v$((i+1))];"
-done
-
-# Build the xfade chain with correct offsets
-CHAIN=""
-for ((i=1; i<IMAGE_COUNT; i++)); do
-  t="${TRANSITIONS[$RANDOM % ${#TRANSITIONS[@]}]}"
-  offset=$(echo "($DURATION_PER_IMAGE + $TRANSITION_DURATION) * ($i - 1)" | bc)
-  if [ $i -eq 1 ]; then
-    CHAIN="[v1][v2]xfade=transition=$t:duration=$TRANSITION_DURATION:offset=$offset[vx$i];"
-  else
-    prev=$((i-1))
-    CHAIN+="[vx$prev][v$((i+1))]xfade=transition=$t:duration=$TRANSITION_DURATION:offset=$offset[vx$i];"
-  fi
-done
-
-FILTER_COMPLEX+="$CHAIN"
-FINAL_OUT="[vx$((IMAGE_COUNT-1))]"
-
-# Build and run ffmpeg
-echo "🚀 Generating video..."
-ffmpeg -y "${INPUTS[@]}" -filter_complex "$FILTER_COMPLEX" \
-  -map "$FINAL_OUT" -map "$IMAGE_COUNT:a" -shortest \
-  -c:v libx264 -pix_fmt yuv420p output.mp4 >/dev/null 2>&1
-
-echo "✅ Done! Created output.mp4"
+# Combine slideshow + audio
+ffmpeg -y -i "$WORKDIR/base.mp4" -i "$TRIMMED_AUDIO" -c:v libx264 -c:a aac -shortest output.mp4
