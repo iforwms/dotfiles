@@ -20,7 +20,7 @@ FPS=25
 FRAMES=$((DURATION*FPS))
 
 # Randomized zoom and pan amounts
-ZOOM_AMOUNT=$(awk 'BEGIN{srand(); print 0.2+rand()*0.3}')  # zoom factor
+ZOOM_AMOUNT=$(awk 'BEGIN{srand(); print 0.2+rand()*0.1}')  # zoom factor
 PAN_X=$(awk -v max="$width/4" 'BEGIN{srand(); print int(rand()*max)}')
 PAN_Y=$(awk -v max="$height/4" 'BEGIN{srand(); print int(rand()*max)}')
 
