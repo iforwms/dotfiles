@@ -19,97 +19,73 @@ if [ $IMAGE_COUNT -eq 0 ]; then
   exit 1
 fi
 
-echo "📸 Images: $IMAGE_COUNT"
+IFS=',' read WIDTH HEIGHT < <(ffprobe -v error -select_streams v:0 \
+    -show_entries stream=width,height -of csv=p=0:s=, "${IMAGES[0]}")
+
+echo "📏 Using resolution ${WIDTH}x${HEIGHT}"
+
+echo "📸 Found $IMAGE_COUNT images"
 echo "🕒 Duration per image: $DURATION_PER_IMAGE s"
 echo "🌈 Transition duration: $TRANSITION_DURATION s"
 
-# Resize images
+# Resize to 1080p
 i=1
 for img in "${IMAGES[@]}"; do
   ffmpeg -y -i "$img" \
-    -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2" \
+    -vf "scale=${WIDTH}:${HEIGHT}:force_original_aspect_ratio=decrease,pad=${WIDTH}:${HEIGHT}:(ow-iw)/2:(oh-ih)/2" \
     "$WORKDIR/$(printf "%04d.png" "$i")" >/dev/null 2>&1
   ((i++))
 done
 
-# Generate a list of inputs for filter_complex
+# Generate input list
 INPUTS=()
 for ((i=1;i<=IMAGE_COUNT;i++)); do
   INPUTS+=("-loop" "1" "-t" "$((DURATION_PER_IMAGE + TRANSITION_DURATION))" "-i" "$WORKDIR/$(printf "%04d.png" "$i")")
 done
 
-# Trim/pad audio to match total video length
-TOTAL_VIDEO=$(echo "$IMAGE_COUNT * $DURATION_PER_IMAGE - ($DURATION_PER_IMAGE - $TRANSITION_DURATION)" | bc)
-echo "TOTAL_VIDEO=${TOTAL_VIDEO}"
+# Audio trimming and fading
+FADE_DURATION=2
+TOTAL_VIDEO=$(echo "$IMAGE_COUNT * $DURATION_PER_IMAGE - ($DURATION_PER_IMAGE - $TRANSITION_DURATION) + $FADE_DURATION" | bc)
 TRIMMED_AUDIO="$WORKDIR/audio_trimmed.mp3"
-FADE_DURATION=2                 # seconds
-FILTER="[0:a]atrim=start=$AUDIO_START_TIME:end=$(echo "$AUDIO_START_TIME + $TOTAL_VIDEO" | bc),asetpts=PTS-STARTPTS,
-  afade=t=in:st=0:d=$FADE_DURATION,
-  afade=t=out:st=$(echo "$TOTAL_VIDEO - $FADE_DURATION" | bc):d=$FADE_DURATION[a]"
 
-echo "Audio filter: ${FILTER}"
-
-
-ffmpeg -y -i "$AUDIO_FILE" -filter_complex "$FILTER" \
+ffmpeg -y -i "$AUDIO_FILE" \
+  -filter_complex "[0:a]atrim=start=$AUDIO_START_TIME:end=$(echo "$AUDIO_START_TIME + $TOTAL_VIDEO" | bc),asetpts=PTS-STARTPTS,afade=t=in:st=0:d=$FADE_DURATION,afade=t=out:st=$(echo "$TOTAL_VIDEO - $FADE_DURATION" | bc):d=$FADE_DURATION[a]" \
   -map "[a]" -ac 2 -c:a mp3 "$TRIMMED_AUDIO"
 
-# Random transitions
-TRANSITIONS=(
-  # fade
-  wipeleft
-  wiperight
-  wipeup
-  wipedown
-  # slideleft
-  # slideright
-  # circleopen
-  # circleclose
-  # rectcrop
-  # distance
-  smoothleft
-  smoothright
-  # horzclose
-  # horzopen
-  vertopen
-  vertclose
-  # fadeblack
-  # fadewhite
-)
+# Define transition types
+TRANSITIONS=(wipeleft wiperight wipeup wipedown smoothleft smoothright vertopen vertclose)
 
-# Build filter_complex string
+# Build filter graph
 FILTER=""
 for ((i=0;i<IMAGE_COUNT;i++)); do
   FILTER+="[${i}:v]format=yuv420p,setsar=1[v$((i+1))];"
 done
 
-# Chain xfade transitions with correct cumulative offsets
-CUM_OFFSET=0
-for ((i=1;i<IMAGE_COUNT;i++)); do
-  t="${TRANSITIONS[$RANDOM % ${#TRANSITIONS[@]}]}"
-  echo "Using transition: ${t}"
-  if [ $i -eq 1 ]; then
-    FILTER+="[v1][v2]xfade=transition=$t:duration=$TRANSITION_DURATION:offset=$DURATION_PER_IMAGE[vx$i];"
-  else
-    prev=$((i-1))
-    FILTER+="[vx$prev][v$((i+1))]xfade=transition=$t:duration=$TRANSITION_DURATION:offset=$CUM_OFFSET[vx$i];"
-  fi
-  # Increment offset by duration per image (not including transition)
-  CUM_OFFSET=$(echo "$CUM_OFFSET + $DURATION_PER_IMAGE" | bc)
-  # CUM_OFFSET=$(echo "$CUM_OFFSET + $DURATION_PER_IMAGE - $TRANSITION_DURATION" | bc)
+# Chain xfade transitions
+FILTER+="[v1][v2]xfade=transition=${TRANSITIONS[$RANDOM % ${#TRANSITIONS[@]}]}:duration=$TRANSITION_DURATION:offset=$DURATION_PER_IMAGE[vx1];"
+OFFSET=$DURATION_PER_IMAGE
+for ((i=3;i<=IMAGE_COUNT;i++)); do
+  OFFSET=$(echo "$OFFSET + $DURATION_PER_IMAGE" | bc)
+  FILTER+="[vx$((i-2))][v$i]xfade=transition=${TRANSITIONS[$RANDOM % ${#TRANSITIONS[@]}]}:duration=$TRANSITION_DURATION:offset=$OFFSET[vx$((i-1))];"
 done
 
-FILTER+="[0:v]drawtext=fontfile=/System/Library/Fonts/Supplemental/AmericanTypewriter.ttc:text='Stack Overflow':fontcolor=white:fontsize=24:box=1:boxcolor=black@0.5:boxborderw=5:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,5,10)'[vout]"
+# Add text + video fade to final stream
+VIDEO_FADE_IN=2
+VIDEO_FADE_OUT=4
+TEXT_END=15
+TEXT_OVERLAY="Nynasvagen 84\\nHaninge"
 
-FINAL_OUT="[vx$((IMAGE_COUNT-1))]"
+FILTER+="[vx$((IMAGE_COUNT-1))]fade=t=in:st=0:d=$VIDEO_FADE_IN,fade=t=out:st=$(echo "$TOTAL_VIDEO - $VIDEO_FADE_OUT" | bc):d=$VIDEO_FADE_OUT,drawtext=fontfile=/System/Library/Fonts/Supplemental/AmericanTypewriter.ttc:text='$TEXT_OVERLAY':fontcolor=white:fontsize=48:box=1:boxcolor=black@0.5:boxborderw=10:x=(w-text_w)/2:y=(h-text_h)/2:enable='lte(t,$TEXT_END)',format=yuv420p[vout]"
 
-# Run ffmpeg
-CMD="-y \"${INPUTS[@]}\" -i \"$TRIMMED_AUDIO\"
-  -filter_complex \"$FILTER\"
-  -map \"$FINAL_OUT\" -map \"$IMAGE_COUNT:a\" -shortest
-  -c:v libx264 -pix_fmt yuv420p output.mp4"
-echo "$CMD"
-exit
+# Run FFmpeg
+CMD=(
+  -y "${INPUTS[@]}" -i "$TRIMMED_AUDIO"
+  -filter_complex "$FILTER"
+  -map "[vout]" -map "$IMAGE_COUNT:a"
+  -shortest -c:v libx264 -pix_fmt yuv420p output.mp4
+)
 
-ffmpeg "$CMD"
+echo "🎬 Running FFmpeg..."
+ffmpeg "${CMD[@]}"
 
-echo "✅ Done! output.mp4 created. Total duration ~ $TOTAL_VIDEO seconds"
+echo "✅ Done! output.mp4 created (≈ ${TOTAL_VIDEO}s)"
