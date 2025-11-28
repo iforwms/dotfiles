@@ -101,7 +101,7 @@ XDG_CONFIG_HOME=/Users/ifor/.config
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(zsh-syntax-highlighting zsh-autosuggestions)
+plugins=(zsh-syntax-highlighting zsh-autosuggestions zsh-vi-man)
 source $ZSH/oh-my-zsh.sh
 
 # Reduce key timeout (switching from insert to normal mode in vim)
