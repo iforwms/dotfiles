@@ -3,6 +3,11 @@
 destination="/Users/ifor/Documents/backup/db_json"
 today="$(date +%Y-%m-%d)"
 
+echo "Backing up gridfinity..."
+base_dir="/var/www/gridfinity-inventory"
+rsync --verbose --times --compress "me:${base_dir}/gridfinity.sqlite" "${destination}/gridfinity/gridfinity-${today}.sqlite"
+exit
+
 echo "Backing up filamentz..."
 filename="filamentz_${today}"
 base_dir="/var/www/filamentz"
@@ -16,6 +21,10 @@ rsync --verbose --times --compress "me:${base_dir}/*" "${destination}/kuaidi"
 echo "Backing up ego buster..."
 base_dir="/var/www/ego_buster"
 rsync --verbose --times --compress "me:${base_dir}/results/*" "${destination}/ego_buster/results_${today}"
+
+echo "Backing up gridfinity..."
+base_dir="/var/www/gridfinity-inventory"
+rsync --verbose --times --compress "me:${base_dir}/gridfinity.sqlite" "${destination}/gridfinity/gridfinity-${today}.sqlite"
 
 echo "Backing up jukebox..."
 base_dir="/var/www/jukebox"
