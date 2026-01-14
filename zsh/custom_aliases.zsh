@@ -43,7 +43,7 @@ if command -v eza &> /dev/null; then
   )
   alias ls="eza -F --group --header ${eza_params}"
   alias la='ls --all'
-  alias l='ls --long'
+  alias l='ls --long --all'
 else
   alias l='ls -vlAh --color=auto --time-style="+%Y %b %d %H:%M"'
   alias ls='ls -vA --color=auto --time-style="+%Y %b %d %H:%M"'
