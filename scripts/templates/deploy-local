@@ -7,12 +7,12 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
-fpm_version=8.3
+fpm_version=8.4
 script_name=PROJECT-local
 base_dir="/var/www/${script_name/-local/}"
 
 echo -e "${GREEN}[${script_name}] Enabling maintenance mode...${NC}"
-php "${base_dir}/artisan" down
+php "${base_dir}/artisan" down --message="Deploy in progress" --retry=60
 
 echo -e "${GREEN}[${script_name}] Removing fonts.bunny.net and cdn.tailwindcss.com references.${NC}"
 for f in vendor/laravel/framework/src/Illuminate/Foundation/resources/exceptions/renderer/components/layout.blade.php \
@@ -29,16 +29,19 @@ sed -i 's|\$group = basename($group)\;|\/\/ \$group =basename($group)\;|' "${bas
 sed -i 's:\\JSON_PRETTY_PRINT | \\JSON_UNESCAPED_UNICODE):\\JSON_PRETTY_PRINT | \\JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES):' "${base_dir}/vendor/barryvdh/laravel-translation-manager/src/Manager.php"
 
 echo -e "${GREEN}[${script_name}] Updating composer dependencies...${NC}"
-composer --working-dir "$base_dir" install --no-interaction --optimize-autoloader --no-dev --prefer-dist
+composer --working-dir "$base_dir" install --no-interaction --optimize-autoloader --classmap-authoritative --no-dev --prefer-dist
 
 echo -e "${GREEN}[${script_name}] Running migrations...${NC}"
 php "${base_dir}/artisan" migrate --force
 
 echo -e "${GREEN}[${script_name}] Busting cache...${NC}"
+php "${base_dir}/artisan" config:clear
+php "${base_dir}/artisan" route:clear
+php "${base_dir}/artisan" view:clear
 php "${base_dir}/artisan" route:cache
 php "${base_dir}/artisan" config:cache
 php "${base_dir}/artisan" view:cache
-# php "${base_dir}/artisan" queue:restart
+php "${base_dir}/artisan" queue:restart
 
 echo -e "${GREEN}[${script_name}] Disabling maintenance mode...${NC}"
 php "${base_dir}/artisan" up
