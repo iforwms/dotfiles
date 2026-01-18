@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# deploy-file.sh
+# Usage: deploy-file.sh <local_path> <ssh_host> <remote_path>
+
+set -e
+
+LOCAL_PATH="$1"
+REMOTE="$2"
+REMOTE_PATH="$3"
+
+if [[ -z "$LOCAL_PATH" || -z "$REMOTE" || -z "$REMOTE_PATH" ]]; then
+  echo "Usage: $0 <local_path> <ssh_host> <remote_path>"
+  exit 1
+fi
+
+BASENAME=$(basename "$LOCAL_PATH")
+TMP_REMOTE="/tmp/$BASENAME"
+
+echo "[*] Deploying $LOCAL_PATH to $REMOTE:$REMOTE_PATH"
+
+# Copy local file/folder to remote /tmp first
+echo "[*] Copying via rsync to remote /tmp..."
+rsync -avz --progress "$LOCAL_PATH" "$REMOTE:$TMP_REMOTE"
+
+# Move file/folder to final destination with correct permissions
+ssh "$REMOTE" "
+  sudo mv -f $TMP_REMOTE $REMOTE_PATH/$BASENAME && \
+  sudo chown -R www-data:www-data $REMOTE_PATH/$BASENAME && \
+  if [ -d $REMOTE_PATH/$BASENAME ]; then
+    # Set permissions for directories and files separately
+    sudo find $REMOTE_PATH/$BASENAME -type d -exec chmod 750 {} \; && \
+    sudo find $REMOTE_PATH/$BASENAME -type f -exec chmod 640 {} \;
+  else
+    # Single file: set safe permissions
+    sudo chmod 640 $REMOTE_PATH/$BASENAME
+  fi
+"
+
+echo "[✓] Deployment complete: $REMOTE_PATH/$BASENAME"
+
