@@ -1,0 +1,27 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
+class {{ class }} extends Model
+{
+  use HasUuids;
+
+  public function transform()
+  {
+    $arr = $this->toArray();
+    if (property_exists($this, 'name')) {
+      $arr['_name'] = $this->name();
+    }
+    return $arr;
+  }
+
+  public function name()
+  {
+    return app()->getLocale() === 'zh'
+      ? $this->chinese_name ?? $this->name
+      : $this->name;
+  }
+}
+
