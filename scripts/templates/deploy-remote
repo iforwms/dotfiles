@@ -10,7 +10,7 @@ script_name=PROJECT
 remote_dir="/var/www/${script_name}"
 
 echo -e "${GREEN}[${script_name}] Running git pull...${NC}"
-ssh "$server" "git -C ${remote_dir} pull"
+ssh -tt "$server" "sudo -u www-data /bin/git -C ${remote_dir} pull"
 
 echo -e "${GREEN}[${script_name}] Building assets...${NC}"
 if ! command -v npm &>/dev/null; then
