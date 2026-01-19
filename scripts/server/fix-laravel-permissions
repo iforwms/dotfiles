@@ -40,8 +40,8 @@ if [[ -d "$APP_ROOT"/storage/app/public ]]; then
     sudo find "$APP_ROOT"/storage/app/public -type d -exec chmod 775 {} \;
 fi
 
-echo -e "${GREEN}[${script_name}] [*] Setting file permissions to 644"
-sudo find "$APP_ROOT"/storage "$APP_ROOT"/bootstrap/cache -type f -exec chmod 644 {} \;
+echo -e "${GREEN}[${script_name}] [*] Setting file permissions to 664"
+sudo find "$APP_ROOT"/storage "$APP_ROOT"/bootstrap/cache -type f -exec chmod 664 {} \;
 if [[ -f "$APP_ROOT"/.env ]]; then
     sudo chmod 640 "$APP_ROOT"/.env
 fi
