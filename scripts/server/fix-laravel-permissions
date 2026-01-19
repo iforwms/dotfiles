@@ -33,20 +33,20 @@ sudo chown -R "${code_owner}:www-data" "$APP_ROOT"
 echo -e "${GREEN}[${script_name}] [*] Fixing ownership for /storage, /cache, .env www-data:www-data"
 sudo chown -R www-data:www-data "$APP_ROOT"/storage "$APP_ROOT"/bootstrap/cache "$APP_ROOT"/.env
 
-echo -e "${GREEN}[${script_name}] [*] Setting directory permissions to 750"
-sudo find "$APP_ROOT"/storage "$APP_ROOT"/bootstrap/cache -type d -exec chmod 750 {} \;
+echo -e "${GREEN}[${script_name}] [*] Setting directory permissions to 775"
+sudo find "$APP_ROOT"/storage "$APP_ROOT"/bootstrap/cache -type d -exec chmod 775 {} \;
 # optional: make public/uploads directories writable
 if [[ -d "$APP_ROOT"/storage/app/public ]]; then
-    sudo find "$APP_ROOT"/storage/app/public -type d -exec chmod 750 {} \;
+    sudo find "$APP_ROOT"/storage/app/public -type d -exec chmod 775 {} \;
 fi
 
-echo -e "${GREEN}[${script_name}] [*] Setting file permissions to 640"
-sudo find "$APP_ROOT"/storage "$APP_ROOT"/bootstrap/cache -type f -exec chmod 640 {} \;
+echo -e "${GREEN}[${script_name}] [*] Setting file permissions to 644"
+sudo find "$APP_ROOT"/storage "$APP_ROOT"/bootstrap/cache -type f -exec chmod 644 {} \;
 if [[ -f "$APP_ROOT"/.env ]]; then
     sudo chmod 640 "$APP_ROOT"/.env
 fi
 if [[ -d "$APP_ROOT"/storage/app/public ]]; then
-    sudo find "$APP_ROOT"/storage/app/public -type f -exec chmod 640 {} \;
+    sudo find "$APP_ROOT"/storage/app/public -type f -exec chmod 644 {} \;
 fi
 
 echo -e "${GREEN}[${script_name}] Making artisan and deploy scripts executable...${NC}"
