@@ -27,33 +27,33 @@ if [[ ! -e "${APP_ROOT}/artisan" ]]; then
   exit 1
 fi
 
-# echo -e "${GREEN}[${script_name}] Setting ownership to ${code_owner}:www-data...${NC}"
-# chown -R "${code_owner}:www-data" "$APP_ROOT"
+echo -e "${GREEN}[${script_name}] Setting ownership to ${code_owner}:www-data...${NC}"
+sudo chown -R "${code_owner}:www-data" "$APP_ROOT"
 
 echo -e "${GREEN}[${script_name}] [*] Fixing ownership for /storage, /cache, .env www-data:www-data"
-chown -R www-data:www-data "$APP_ROOT"/storage "$APP_ROOT"/bootstrap/cache "$APP_ROOT"/.env
+sudo chown -R www-data:www-data "$APP_ROOT"/storage "$APP_ROOT"/bootstrap/cache "$APP_ROOT"/.env
 
 echo -e "${GREEN}[${script_name}] [*] Setting directory permissions to 775"
-find "$APP_ROOT"/storage "$APP_ROOT"/bootstrap/cache -type d -exec chmod 775 {} \;
+sudo find "$APP_ROOT"/storage "$APP_ROOT"/bootstrap/cache -type d -exec chmod 775 {} \;
 # optional: make public/uploads directories writable
 if [[ -d "$APP_ROOT"/storage/app/public ]]; then
-    find "$APP_ROOT"/storage/app/public -type d -exec chmod 775 {} \;
+    sudo find "$APP_ROOT"/storage/app/public -type d -exec chmod 775 {} \;
 fi
 
 echo -e "${GREEN}[${script_name}] [*] Setting file permissions to 664"
-find "$APP_ROOT"/storage "$APP_ROOT"/bootstrap/cache -type f -exec chmod 664 {} \;
+sudo find "$APP_ROOT"/storage "$APP_ROOT"/bootstrap/cache -type f -exec chmod 664 {} \;
 if [[ -f "$APP_ROOT"/.env ]]; then
-    chmod 640 "$APP_ROOT"/.env
+    sudo chmod 640 "$APP_ROOT"/.env
 fi
 if [[ -d "$APP_ROOT"/storage/app/public ]]; then
-    find "$APP_ROOT"/storage/app/public -type f -exec chmod 644 {} \;
+    sudo find "$APP_ROOT"/storage/app/public -type f -exec chmod 644 {} \;
 fi
 
 echo -e "${GREEN}[${script_name}] Making artisan and deploy scripts executable...${NC}"
-chmod 755 "${APP_ROOT}/"{artisan,deploy-remote,deploy-local}
+sudo chmod 755 "${APP_ROOT}/"{artisan,deploy-remote,deploy-local}
 
 echo -e "${GREEN}[${script_name}] Fixing .gitignore permissions...${NC}"
-find "$APP_ROOT" -type f -name '.gitignore' -exec chmod 664 {} \;
+sudo find "$APP_ROOT" -type f -name '.gitignore' -exec chmod 664 {} \;
 
 echo -e "${GREEN}[${script_name}] [✓] All done! Permissions fixed for $APP_ROOT"
 
