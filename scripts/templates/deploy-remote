@@ -10,7 +10,13 @@ script_name=PROJECT
 remote_dir="/var/www/${script_name}"
 
 echo -e "${GREEN}[${script_name}] Running git pull...${NC}"
-ssh -tt "$server" "sudo -u www-data /bin/git -C ${remote_dir} pull"
+ssh "$server" "git -C ${remote_dir} pull"
+
+echo -e "${GREEN}[${script_name}] Running composer install...${NC}"
+ssh "$server" "composer --working-dir ${remote_dir} install --no-interaction --optimize-autoloader --classmap-authoritative --no-dev --prefer-dist"
+
+echo -e "${GREEN}[${script_name}] Fixing ownership for runtime dirs...${NC}"
+ssh "$server" "sudo chown -R www-data:www-data ${remote_dir}/storage ${remote_dir}/bootstrap/cache"
 
 echo -e "${GREEN}[${script_name}] Building assets...${NC}"
 if ! command -v npm &>/dev/null; then
@@ -39,7 +45,7 @@ rsync \
 #   "${server}:${remote_dir}/storage/app/public"
 
 echo -e "${GREEN}[${script_name}] Running deploy script on remote...${NC}"
-ssh "$server" "${remote_dir}/deploy-local"
+ssh "$server" "cd ${remote_dir} && ./deploy-local"
 
 echo -e "${GREEN}[${script_name}] All done!${NC}"
 exit 0
