@@ -11,8 +11,18 @@ fpm_version=8.4
 script_name=PROJECT-local
 base_dir="/var/www/${script_name/-local/}"
 
+cd "$base_dir" || exit 1
+
 echo -e "${GREEN}[${script_name}] Enabling maintenance mode...${NC}"
-php "${base_dir}/artisan" down --render=maintenance --retry=60
+php artisan down --render=maintenance --retry=60
+
+echo -e "${GREEN}[${script_name}] Fixing Laravel permissions...${NC}"
+if [ -x "$HOME/.dotfiles/scripts/fix-laravel-permissions" ]; then
+  "$HOME/.dotfiles/scripts/fix-laravel-permissions" "$base_dir"
+else
+  echo -e "${RED}[${script_name}] fix-laravel-permissions script not found or not executable!${NC}"
+  exit 1
+fi
 
 echo -e "${GREEN}[${script_name}] Removing fonts.bunny.net and cdn.tailwindcss.com references.${NC}"
 for f in vendor/laravel/framework/src/Illuminate/Foundation/resources/exceptions/renderer/components/layout.blade.php \
@@ -28,23 +38,20 @@ echo -e "${GREEN}[${script_name}] Fixing Translation Manager bugs.${NC}"
 sed -i 's|\$group = basename($group)\;|\/\/ \$group =basename($group)\;|' "${base_dir}/vendor/barryvdh/laravel-translation-manager/src/Manager.php"
 sed -i 's:\\JSON_PRETTY_PRINT | \\JSON_UNESCAPED_UNICODE):\\JSON_PRETTY_PRINT | \\JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES):' "${base_dir}/vendor/barryvdh/laravel-translation-manager/src/Manager.php"
 
-echo -e "${GREEN}[${script_name}] Updating composer dependencies...${NC}"
-sudo -n -u www-data /usr/local/bin/composer --working-dir "$base_dir" install --no-interaction --optimize-autoloader --classmap-authoritative --no-dev --prefer-dist
-
 echo -e "${GREEN}[${script_name}] Running migrations...${NC}"
-php "${base_dir}/artisan" migrate --force
+php artisan config:clear
+php artisan migrate --force || { echo -e "${RED}[${script_name}] Migration failed${NC}"; exit 1; }
 
 echo -e "${GREEN}[${script_name}] Busting cache...${NC}"
-php "${base_dir}/artisan" config:clear
-php "${base_dir}/artisan" route:clear
-php "${base_dir}/artisan" view:clear
-php "${base_dir}/artisan" route:cache
-php "${base_dir}/artisan" config:cache
-php "${base_dir}/artisan" view:cache
-php "${base_dir}/artisan" queue:restart
+php artisan route:clear
+php artisan view:clear
+php artisan route:cache
+php artisan config:cache
+php artisan view:cache
+php artisan queue:restart
 
 echo -e "${GREEN}[${script_name}] Disabling maintenance mode...${NC}"
-php "${base_dir}/artisan" up
+php artisan up
 
 fpm_bin="php-fpm${fpm_version}"
 if ! [[ $(command -v "$fpm_bin") ]]; then
@@ -52,7 +59,7 @@ if ! [[ $(command -v "$fpm_bin") ]]; then
   exit 1
 else
   echo -e "${GREEN}[${script_name}] Restarting php-fpm server...${NC}"
-  SUDO_ASKPASS="${HOME}/.sdconfig" sudo -A systemctl reload "php${fpm_version}-fpm"
+  sudo systemctl reload "php${fpm_version}-fpm"
 fi
 
 echo -e "${GREEN}[${script_name}] All done!${NC}"
