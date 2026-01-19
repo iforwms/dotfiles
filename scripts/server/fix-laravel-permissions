@@ -27,8 +27,8 @@ if [[ ! -e "${APP_ROOT}/artisan" ]]; then
   exit 1
 fi
 
-echo -e "${GREEN}[${script_name}] Setting ownership to ${code_owner}:www-data...${NC}"
-sudo -n chown -R "${code_owner}:www-data" "$APP_ROOT"
+# echo -e "${GREEN}[${script_name}] Setting ownership to ${code_owner}:www-data...${NC}"
+# sudo -n chown -R "${code_owner}:www-data" "$APP_ROOT"
 
 echo -e "${GREEN}[${script_name}] [*] Fixing ownership for /storage, /cache, .env www-data:www-data"
 sudo -n chown -R www-data:www-data "$APP_ROOT"/storage "$APP_ROOT"/bootstrap/cache "$APP_ROOT"/.env
