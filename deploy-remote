@@ -16,7 +16,7 @@ rsync --verbose --no-times --compress \
   "${server}:/var/www/downloads/termux"
 
 echo -e "${GREEN}[${script_name}] [felix] Updating server...${NC}"
-ssh clients "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa_deploy' && git -C ${base_dir} pull"
+ssh felix "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa_deploy' && git -C ${base_dir} pull"
 
 echo -e "${GREEN}[${script_name}] [clients] Updating server...${NC}"
 ssh clients "git -C ${base_dir} config core.sshCommand 'ssh -i /home/ifor/.ssh/id_rsa' && git -C ${base_dir} pull"
