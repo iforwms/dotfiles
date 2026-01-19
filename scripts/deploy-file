@@ -24,17 +24,23 @@ rsync -avz --progress "$LOCAL_PATH" "$REMOTE:$TMP_REMOTE"
 
 # Move file/folder to final destination with correct permissions
 ssh "$REMOTE" "
-  sudo mv -f $TMP_REMOTE $REMOTE_PATH/$BASENAME && \
-  sudo chown -R www-data:www-data $REMOTE_PATH/$BASENAME && \
-  if [ -d $REMOTE_PATH/$BASENAME ]; then
+  # Determine if REMOTE_PATH is a directory (ends with /) or a filename
+  if [[ -d \"$REMOTE_PATH\" || \"${REMOTE_PATH: -1}\" == '/' ]]; then
+    FINAL_PATH=\"$REMOTE_PATH/$BASENAME\"
+  else
+    FINAL_PATH=\"$REMOTE_PATH\"
+  fi
+
+  sudo mv -f \"$TMP_REMOTE\" \"\$FINAL_PATH\" && \
+  sudo chown -R www-data:www-data \"\$FINAL_PATH\" && \
+  if [ -d \"\$FINAL_PATH\" ]; then
     # Set permissions for directories and files separately
-    sudo find $REMOTE_PATH/$BASENAME -type d -exec chmod 750 {} \; && \
-    sudo find $REMOTE_PATH/$BASENAME -type f -exec chmod 640 {} \;
+    sudo find \"\$FINAL_PATH\" -type d -exec chmod 750 {} \; && \
+    sudo find \"\$FINAL_PATH\" -type f -exec chmod 640 {} \;
   else
     # Single file: set safe permissions
-    sudo chmod 640 $REMOTE_PATH/$BASENAME
+    sudo chmod 640 \"\$FINAL_PATH\"
   fi
 "
 
-echo "[✓] Deployment complete: $REMOTE_PATH/$BASENAME"
-
+echo "[✓] Deployment complete: $REMOTE_PATH"
