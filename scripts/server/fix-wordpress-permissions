@@ -26,8 +26,8 @@ sudo chown -R "${code_owner}:www-data" "$APP_ROOT"
 
 echo -e "${GREEN}[${script_name}] Setting writable WordPress dirs to www-data:www-data...${NC}"
 for dir in wp-content wp-content/uploads wp-content/plugins wp-content/themes wp-content/upgrade; do
-    if [[ -d "$APP_ROOT/$dir" ]]; then
-        sudo chown -R www-data:www-data "$APP_ROOT/$dir"
+    if [[ -d "${APP_ROOT}/${dir}" ]]; then
+        sudo chown -R www-data:www-data "${APP_ROOT}/${dir}"
     fi
 done
 
@@ -37,20 +37,21 @@ sudo find "$APP_ROOT" -type f -exec chmod 644 {} \;
 
 echo -e "${GREEN}[${script_name}] Making update dirs writable (775/664)...${NC}"
 for dir in wp-content wp-content/uploads wp-content/plugins wp-content/themes wp-content/upgrade; do
-    if [[ -d "$APP_ROOT/$dir" ]]; then
-        sudo find "$APP_ROOT/$dir" -type d -exec chmod 775 {} \;
-        sudo find "$APP_ROOT/$dir" -type f -exec chmod 664 {} \;
+    if [[ -d "${APP_ROOT}/${dir}" ]]; then
+        sudo find "${APP_ROOT}/${dir}" -type d -exec chmod 775 {} \;
+        sudo find "${APP_ROOT}/${dir}" -type f -exec chmod 664 {} \;
     fi
 done
 
 echo -e "${GREEN}[${script_name}] Making wp-cli executable if present...${NC}"
-if [[ -f "$APP_ROOT/wp-cli.phar" ]]; then
-    sudo chmod 755 "$APP_ROOT/wp-cli.phar"
+if [[ -f "${APP_ROOT}/wp-cli.phar" ]]; then
+    sudo chmod 755 "${APP_ROOT}/wp-cli.phar"
 fi
 
 echo -e "${GREEN}[${script_name}] Locking wp-config.php (640)...${NC}"
-sudo chmod 640 "$APP_ROOT/wp-config.php"
+sudo chown "${code_owner}:www-data" "${APP_ROOT}/wp-config.php"
+sudo chmod 640 "${APP_ROOT}/wp-config.php"
 
-echo -e "${GREEN}[${script_name}] [✓] Production WordPress permissions fixed for $APP_ROOT${NC}"
+echo -e "${GREEN}[${script_name}] [✓] Production WordPress permissions fixed for ${APP_ROOT}${NC}"
 
 exit 0
