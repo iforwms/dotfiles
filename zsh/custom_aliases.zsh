@@ -49,6 +49,11 @@ else
   alias ls='ls -vA --color=auto --time-style="+%Y %b %d %H:%M"'
 fi
 
+# systemctl
+alias sc='sudo systemctl'
+alias scr='sudo systemctl reload'
+alias scrs='sudo systemctl reload'
+alias scs='sudo systemctl status'
 
 # Apt
 alias iap='sudo apt install'
