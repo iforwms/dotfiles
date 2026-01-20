@@ -55,6 +55,7 @@ alias scr='sudo systemctl reload'
 alias scrs='sudo systemctl reload'
 alias scs='sudo systemctl status'
 
+
 # Apt
 alias iap='sudo apt install'
 alias uap='sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y'
@@ -329,8 +330,10 @@ alias lon='lproxy && ssht'
 alias don='dproxy && ssht'
 alias pc='proxychains4'
 
-alias nse='cd /etc/nginx/sites-enabled'
-alias nsa='cd /etc/nginx/sites-available'
+# nginx
+# alias nse='cd /etc/nginx/sites-enabled'
+# alias nsa='cd /etc/nginx/sites-available'
+alias tnx='sudo nginx -t'
 
 # Tmux
 alias t="tmux"
