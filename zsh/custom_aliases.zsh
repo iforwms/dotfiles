@@ -52,6 +52,16 @@ fi
 # vim
 alias svi='sudoedit'
 
+# network tab
+function urls() {
+  pbpaste | jq -r '.log.entries[] | select(.request.url | test("xvyshismvnsmhvdphyes.supabase.co")) | "\(.response.status)|\(.request.url)"' | tee >(pbcopy) | wc -l
+
+}
+
+function urlsc() {
+  pbpaste | jq -r '[.log.entries[].request.url] | group_by(.) | map("\(length)|\(.[] | .)") | .[]' | tee >(pbcopy) | wc -l
+}
+
 # systemctl
 alias sc='sudo systemctl'
 alias scr='sudo systemctl reload'
