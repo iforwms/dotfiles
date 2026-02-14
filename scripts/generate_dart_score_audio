@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+output_dir=/Users/ifor/Downloads/dart_scores
+mkdir -p $output_dir
+cd $output_dir || exit
+
+for i in {0..180}; do
+  if [ "$i" -eq 0 ]; then
+    text="No Score"
+  else
+    text="$i"
+  fi
+
+  echo "Generating score_$i.mp3..."
+  espeak "$text" --stdout > "${output_dir}/score_${i}.wav"
+  ffmpeg -y -i "${output_dir}/score_${i}.wav" -codec:a libmp3lame -qscale:a 2 "${output_dir}/score_${i}.mp3"
+  rm "${output_dir}/score_${i}.wav"
+done
+
+echo "All 181 score MP3s generated in ${output_dir}"
+
