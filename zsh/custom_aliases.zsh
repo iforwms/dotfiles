@@ -65,7 +65,7 @@ function urlsc() {
 # systemctl
 alias sc='sudo systemctl'
 alias scr='sudo systemctl reload'
-alias scrs='sudo systemctl reload'
+alias scrs='sudo systemctl restart'
 alias scs='sudo systemctl status'
 
 
