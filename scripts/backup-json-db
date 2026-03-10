@@ -3,10 +3,13 @@
 destination="/Users/ifor/Documents/backup/db_json"
 today="$(date +%Y-%m-%d)"
 
+echo "Backing up grocy..."
+base_dir="/var/www/grocy/data/backups"
+rsync --verbose --archive --delete-delay --partial --compress "me:${base_dir}/" "${destination}/grocy/"
+
 echo "Backing up gridfinity..."
 base_dir="/var/www/gridfinity-inventory"
 rsync --verbose --times --compress "me:${base_dir}/gridfinity.sqlite" "${destination}/gridfinity/gridfinity-${today}.sqlite"
-exit
 
 echo "Backing up filamentz..."
 filename="filamentz_${today}"
