@@ -55,7 +55,6 @@ alias svi='sudoedit'
 # network tab
 function urls() {
   pbpaste | jq -r '.log.entries[] | select(.request.url | test("xvyshismvnsmhvdphyes.supabase.co")) | "\(.response.status)|\(.request.url)"' | tee >(pbcopy) | wc -l
-
 }
 
 function urlsc() {
