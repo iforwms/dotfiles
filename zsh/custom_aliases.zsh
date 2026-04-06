@@ -40,6 +40,7 @@ if command -v eza &> /dev/null; then
   eza_params=(
     '--git' '--icons' '--group' '--group-directories-first'
     '--time-style=long-iso' '--color-scale=all' '--hyperlink'
+    '--ignore-glob=.DS_Store\|.localized'
   )
   alias ls="eza -F --group --header ${eza_params}"
   alias la='ls --all'
