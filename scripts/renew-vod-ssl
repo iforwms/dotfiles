@@ -3,11 +3,34 @@
 # Script to update the SSL certificate for video.dominoedu.com in Aliyun
 
 # Check if the domain argument is provided
-domain="${1:-video.dominoedu.com}"
+profile="${1:-domino}"
+
+if [ "$profile" = "domino" ]; then
+  domain="video.dominoedu.com"
+  vodId="249878"
+  contactId="230"
+  aliyunProfile="default"
+  aliyunRegion="cn-hangzhou"
+elif [ "$profile" = "exped" ]; then
+  domain="video.expednet.cn"
+  vodId="7341412"
+  contactId="758635"
+  aliyunProfile="expednet"
+  aliyunRegion="cn-hangzhou"
+else
+  domain="$1"
+  vodId="$2"
+  contactId="$3"
+  aliyunProfile="$4"
+  aliyunRegion="$5"
+fi
+
 if [ -z "$domain" ]; then
-  echo "Usage: $0 <domain>"
+  echo "Usage: $0 <domain> [VOD Service ID] [Contact ID]"
   exit 1
 fi
+
+# Settings for the deployment job
 
 acme="${HOME}/.acme.sh/acme.sh"
 if ! [[ $(command -v "$acme") ]]; then
@@ -24,32 +47,80 @@ if ! [[ $(command -v aliyun) ]]; then
   exit 1
 fi
 
+echo "----------------------------------------"
+echo "SSL Deployment Script - Confirmation"
+echo "----------------------------------------"
+
+echo "Resolved configuration:"
+echo "  Domain         : $domain"
+echo "  VOD ID         : $vodId"
+echo "  Contact ID     : $contactId"
+echo "  Aliyun Region  : $aliyunRegion"
+echo "  Aliyun Profile : $aliyunProfile"
+echo ""
+
+echo "Raw arguments passed ($#):"
+i=1
+for arg in "$@"; do
+  echo "  Arg $i: $arg"
+  ((i++))
+done
+
+echo ""
+echo "Proceed with these settings? (y/Y to continue, anything else to quit)"
+read -r -p "> " confirm
+
+if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+  echo "Aborted."
+  exit 0
+fi
+
+echo "Continuing..."
+echo "----------------------------------------"
 # Aliyun credentials should be stored in ~/.acme.sh/account.conf (Ali_Key and Ali_Secret)
 echo "Running acme.sh to create a new certificate for ${domain}..."
 "$acme" --issue -d "$domain" --dns dns_ali
-cert="$(cat "${HOME}/.acme.sh/${domain}_ecc/${domain}.cer")"
+# cert="$(cat "${HOME}/.acme.sh/${domain}_ecc/${domain}.cer")"
+fullchain="$(cat "${HOME}/.acme.sh/${domain}_ecc/fullchain.cer")"
 key="$(cat "${HOME}/.acme.sh/${domain}_ecc/${domain}.key")"
-echo "$cert"
-echo "$key"
+# echo "$cert"
+# echo "$key"
 
 echo "Uploading the certificate to Aliyun..."
 now=$(date +%Y%m%d%H%M)
-output=$(aliyun cas UploadUserCertificate --region cn-hangzhou --Name "${domain}_${now}" --Cert="$cert" --Key="$key")
+output=$(aliyun cas UploadUserCertificate \
+  --profile "$aliyunProfile" \
+  --region "$aliyunRegion" \
+  --Name "${domain}_${now}" \
+  --Cert="$fullchain" \
+  --Key="$key")
+
 certId=$(echo "$output" | jq -r '.CertId')
 echo "New Certificate ID: ${certId}"
-
-# Settings for the deployment job
-vodId=249878 # VOD service ID
-contactId=230 # Charlie
 
 echo "Creating a deployment job in Aliyun..."
 randomJobName=$(openssl rand -hex 4)
 jobName="deploy-video-certificate-$randomJobName"
-job=$(aliyun cas CreateDeploymentJob --region cn-hangzhou --JobType user --CertIds "$certId" --Name "$jobName" --ResourceIds "$vodId" --ContactIds "$contactId")
+job=$(aliyun cas CreateDeploymentJob \
+  --profile "$aliyunProfile" \
+  --region "$aliyunRegion" \
+  --JobType user \
+  --CertIds "$certId" \
+  --Name "$jobName" \
+  --ResourceIds "$vodId" \
+  --ContactIds "$contactId")
 jobId=$(echo "$job" | jq -r '.JobId')
 
 echo "Setting the deployment job status to pending..."
-aliyun cas UpdateDeploymentJobStatus --region cn-hangzhou --JobId "$jobId" --Status pending
+aliyun cas UpdateDeploymentJobStatus \
+  --profile "$aliyunProfile" \
+  --region "$aliyunRegion" \
+  --JobId "$jobId" \
+  --Status pending
 
 echo "Deployment job created with ID: ${jobId}"
+
+echo "To check job status:"
+echo
+echo "aliyun cas --profile ${aliyunProfile} --region ${aliyunRegion} DescribeDeploymentJob --JobId ${jobID}"
 exit 0
