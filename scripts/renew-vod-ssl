@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Script to update the SSL certificate for video.dominoedu.com in Aliyun
+# Script to update the SSL certificate for VOD in Aliyun
 
 # Check if the domain argument is provided
 profile="${1:-domino}"
