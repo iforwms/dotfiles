@@ -40,6 +40,7 @@ if command -v eza &> /dev/null; then
   eza_params=(
     '--git' '--icons' '--group' '--group-directories-first'
     '--time-style=long-iso' '--color-scale=all' '--hyperlink'
+    '--ignore-glob=.DS_Store\|.localized'
   )
   alias ls="eza -F --group --header ${eza_params}"
   alias la='ls --all'
@@ -55,7 +56,6 @@ alias svi='sudoedit'
 # network tab
 function urls() {
   pbpaste | jq -r '.log.entries[] | select(.request.url | test("xvyshismvnsmhvdphyes.supabase.co")) | "\(.response.status)|\(.request.url)"' | tee >(pbcopy) | wc -l
-
 }
 
 function urlsc() {
@@ -65,7 +65,7 @@ function urlsc() {
 # systemctl
 alias sc='sudo systemctl'
 alias scr='sudo systemctl reload'
-alias scrs='sudo systemctl reload'
+alias scrs='sudo systemctl restart'
 alias scs='sudo systemctl status'
 
 

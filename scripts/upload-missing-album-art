@@ -3,18 +3,58 @@
 base_dir="/Users/ifor/Downloads/jukebox"
 remote_dir="/var/www/jukebox/album_art"
 
+# List of supported input extensions
+extensions=("jpg" "jpeg" "png" "webp")
+
 echo "Optimising images."
-for f in "$base_dir"/*.jpg; do
-  cp -v "$f" "${f/.jpg/_orig.jpg}"
-  magick convert -quality 75 -geometry 1200x\> "${f/.jpg/_orig.jpg}" "${f/_orig.jpg/.jpg}"
-  magick convert -quality 75 -geometry 240x\> "${f/.jpg/_orig.jpg}" "${f/.jpg/_thumb.jpg}"
-  rm -v "${f/.jpg/_orig.jpg}"
+
+for ext in "${extensions[@]}"; do
+  for f in "$base_dir"/*."$ext"; do
+    # Skip if no files match the pattern
+    [ -e "$f" ] || continue
+
+    # Skip files that are already thumbnails
+    [[ "$f" == *_thumb.* ]] && continue
+
+    # Define output file names as JPG
+    base_name="${f%.*}"
+    output_file="$base_name.jpg"
+    thumb_file="$base_name"_thumb.jpg
+
+    # Get image dimensions
+    read width height < <(identify -format "%w %h" "$f")
+
+    # Resize main image if larger than 1200px
+    if [ "$width" -gt 1200 ] || [ "$height" -gt 1200 ]; then
+      cp -v "$f" "${base_name}_orig.${f##*.}"
+      magick "${base_name}_orig.${f##*.}" -quality 75 -geometry "1200x>" "$output_file"
+      rm -v "${base_name}_orig.${f##*.}"
+    else
+      # Convert to JPG even if no resize
+      magick "$f" -quality 75 "$output_file"
+      echo "Skipped resize for main image; converted to JPG: $output_file"
+    fi
+
+    # Create thumbnail if larger than 240px
+    if [ "$width" -gt 240 ] || [ "$height" -gt 240 ]; then
+      cp -v "$f" "${base_name}_thumb_orig.${f##*.}"
+      magick "${base_name}_thumb_orig.${f##*.}" -quality 75 -geometry "240x>" "$thumb_file"
+      rm -v "${base_name}_thumb_orig.${f##*.}"
+    else
+      # Convert to JPG for thumbnail
+      magick "$f" -quality 75 -geometry "240x>" "$thumb_file"
+      echo "Skipped resize for thumbnail; converted to JPG: $thumb_file"
+    fi
+  done
 done
 
 echo "Uploading images."
-scp "$base_dir"/*.jpg "me:${remote_dir}"
+# Only upload files that exist
+shopt -s nullglob
+files_to_upload=("$base_dir"/*.jpg)
+[ ${#files_to_upload[@]} -gt 0 ] && scp "${files_to_upload[@]}" "me:${remote_dir}"
+shopt -u nullglob
 
 echo "All done!"
 
 exit 0
-
