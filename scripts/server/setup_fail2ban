@@ -1,0 +1,201 @@
+#!/usr/bin/env bash
+set -e
+
+GREEN="\033[0;32m"
+YELLOW='\033[0;33m'
+RED='\033[0;31m'
+NC="\033[0m"
+
+prompt_and_run() {
+  local cmd="$1"
+  local msg="$2"
+
+  echo -e "${GREEN}Command:${NC} $cmd"
+  echo -e "${YELLOW}Description:${NC} $msg"
+  read -rp "Run this command? [Y/n] " response
+  response="${response,,}" # convert to lowercase
+  if [[ -z "$response" || "$response" == "y" ]]; then
+    eval "$cmd"
+    echo -e "${GREEN}Done!${NC}\n"
+  else
+    echo -e "${RED}Skipped.${NC}\n"
+  fi
+}
+
+# --- Start of commands ---
+prompt_and_run "sudo apt install -y fail2ban ufw" "Install fail2ban and ufw firewall."
+prompt_and_run "sudo systemctl start fail2ban" "Start the fail2ban service."
+prompt_and_run "sudo systemctl enable fail2ban" "Enable fail2ban to start on boot."
+prompt_and_run "sudo systemctl status fail2ban" "Check the status of fail2ban."
+
+prompt_and_run "sudo tee /etc/fail2ban/jail.d/custom.conf > /dev/null <<'EOF'
+[DEFAULT]
+bantime = 1d
+findtime = 1d
+ignoreip = 127.0.0.1/8 192.168.0.0/16
+maxretry = 1
+
+banaction = ufw
+banaction_allports = ufw
+EOF" "Create a custom fail2ban configuration for default bans."
+
+prompt_and_run "sudo tee /etc/fail2ban/filter.d/ufw.conf > /dev/null <<'EOF'
+[Definition]
+failregex = [UFW BLOCK].+SRC=<HOST> DST
+ignoreregex =
+EOF" "Create a fail2ban filter to catch UFW block logs."
+
+prompt_and_run "sudo systemctl restart fail2ban" "Restart fail2ban to apply changes."
+prompt_and_run "sudo fail2ban-client status" "Show current fail2ban status."
+
+prompt_and_run "sudo ufw default deny incoming" "Set firewall default policy to deny incoming traffic."
+prompt_and_run "sudo ufw default allow outgoing" "Allow all outgoing traffic by default."
+prompt_and_run "sudo ufw allow OpenSSH" "Allow incoming SSH connections."
+prompt_and_run "sudo ufw allow 'Nginx Full'" "Allow Nginx HTTP and HTTPS."
+prompt_and_run "sudo ufw allow out http" "Allow outgoing HTTP traffic."
+prompt_and_run "sudo ufw allow out https" "Allow outgoing HTTPS traffic."
+prompt_and_run "sudo ufw allow out 465" "Allow outgoing SMTP (SSL)."
+prompt_and_run "sudo ufw allow out 587" "Allow outgoing SMTP (TLS)."
+prompt_and_run "sudo ufw allow out 22" "Allow outgoing SSH connections."
+prompt_and_run "sudo ufw allow out 53" "Allow outgoing DNS queries."
+prompt_and_run "sudo ufw enable" "Enable UFW firewall."
+prompt_and_run "sudo ufw status verbose" "Show detailed firewall status."
+
+prompt_and_run "sudo ls -alt /etc/fail2ban/filter.d/nginx*" "List existing Nginx-related fail2ban filters."
+
+# Nginx filters
+prompt_and_run "sudo tee /etc/fail2ban/filter.d/nginx-sslerror.conf > /dev/null <<'EOF'
+# Fail2Ban filter for Nginx SSL handshake failures
+[Definition]
+failregex = \\[crit\\] \\d+#\\d+: \\*\\d+ SSL_do_handshake\\(\\) failed \\(SSL: error:1417D18C:SSL routines:tls_process_client_hello:version too low\\) while SSL handshaking, client: <HOST>, server: \\S*\\s*$
+ignoreregex =
+EOF" "Create Nginx SSL handshake error filter."
+
+prompt_and_run "sudo tee /etc/fail2ban/filter.d/nginx-4xx.conf > /dev/null <<'EOF'
+# Fail2Ban filter for Nginx 4xx errors
+[Definition]
+failregex = ^<HOST>.*\"(GET|POST).*\" (404|444|403|400) .*
+ignoreregex = .*(robots.txt|favicon.ico|jpg|png)
+EOF" "Create Nginx 4xx error filter."
+
+prompt_and_run "sudo tee /etc/fail2ban/filter.d/nginx-forbidden.conf > /dev/null <<'EOF'
+# Fail2Ban filter for directory index forbidden errors
+[Definition]
+failregex = directory index of .+ is forbidden, client: <HOST>, server: .+
+ignoreregex =
+EOF" "Create Nginx forbidden directory filter."
+
+prompt_and_run "sudo tee /etc/fail2ban/filter.d/nginx-wp-login.conf > /dev/null <<'EOF'
+# Fail2Ban filter for WordPress wp-login.php attempts
+[Definition]
+failregex = ^<HOST>.*\"(POST|GET) /wp-login.php
+ignoreregex =
+EOF" "Create WordPress wp-login filter."
+
+prompt_and_run "sudo tee /etc/fail2ban/filter.d/nginx-botsearch.conf > /dev/null <<'EOF'
+# Fail2Ban filter to match web requests for selected URLs that don't exist
+[INCLUDES]
+before = botsearch-common.conf
+[Definition]
+failregex = ^<HOST> - \\S+ \\[\\] \"(GET|POST|HEAD) /<block> \\S+\" 404 .*
+failregex += ^\\[error\\] \\d+#\\d+: \\*\\d+ (\\S+ )?\"\\S+\" (failed|is not found) \\(2: No such file or directory\\), client: <HOST>, server: \\S*, request: \"(GET|POST|HEAD) /<block> \\S+\",.*
+ignoreregex =
+EOF" "Create Nginx botsearch filter."
+
+prompt_and_run "sudo tee /etc/fail2ban/filter.d/nginx-http-auth.conf > /dev/null <<'EOF'
+# Fail2Ban filter for Nginx HTTP auth failures
+[Definition]
+failregex = ^\\[error\\] \\d+#\\d+: \\*\\d+ user \"(?:[^\"]+|.*?)\":? (password mismatch|was not found in \"[^\"]*\"), client: <HOST>, server: \\S*, request: \"\\S+ \\S+ HTTP/\\d\\.\\d\", host: \"\\S+\"(?:, referrer: \"\\S+\")?\\s*$
+ignoreregex =
+EOF" "Create Nginx HTTP auth failure filter."
+
+prompt_and_run "sudo tee /etc/fail2ban/filter.d/nginx-limit-req.conf > /dev/null <<'EOF'
+# Fail2Ban filter for Nginx limit_req module
+[Definition]
+ngx_limit_req_zones = [^\"]+
+failregex = ^\\s*\\[[a-z]+\\] \\d+#\\d+: \\*\\d+ limiting requests, excess: [\\d\\.]+ by zone \"(?:%(ngx_limit_req_zones)s)\", client: <HOST>,
+ignoreregex =
+EOF" "Create Nginx limit_req filter."
+
+prompt_and_run "sudo tee /etc/fail2ban/filter.d/nginx-wp-xmlrpc.conf > /dev/null <<'EOF'
+[Definition]
+failregex = ^<HOST>.*\"(POST|GET) /xmlrpc.php
+ignoreregex =
+EOF" "Create Nginx WordPress xmlrpc.php filter."
+
+# Append additional jail configurations
+prompt_and_run "sudo tee -a /etc/fail2ban/jail.d/custom.conf > /dev/null <<'EOF'
+[sshd]
+enabled = true
+[nginx-4xx]
+enabled  = true
+port     = http,https
+filter   = nginx-4xx
+logpath  = %(nginx_access_log)s
+maxretry = 15
+findtime = 10m
+bantime  = 1h
+[nginx-http-auth]
+enabled = true
+port     = http,https
+filter   = nginx-http-auth
+logpath = %(nginx_error_log)s
+[nginx-botsearch]
+enabled = true
+port     = http,https
+filter   = nginx-botsearch
+logpath = %(nginx_access_log)s
+[nginx-forbidden]
+enabled = true
+port    = http,https
+filter  = nginx-forbidden
+logpath = %(nginx_error_log)s
+[nginx-sslerror]
+enabled = true
+port    = http,https
+filter  = nginx-sslerror
+logpath = %(nginx_error_log)s
+[nginx-wp-login]
+enabled   = true
+filter    = nginx-wp-login
+port      = http,https
+logpath   = %(nginx_access_log)s
+maxretry  = 5
+findtime  = 10m
+bantime   = 12h
+[nginx-wp-xmlrpc]
+enabled   = true
+filter    = nginx-wp-xmlrpc
+port      = http,https
+logpath   = %(nginx_access_log)s
+maxretry  = 3
+findtime  = 10m
+bantime   = 24h
+[ufw]
+enabled = true
+filter  = ufw
+logpath = /var/log/ufw.log
+EOF" "Append Fail2Ban jail configurations."
+
+# Jail.local
+prompt_and_run "sudo tee /etc/fail2ban/jail.local > /dev/null <<'EOF'
+[DEFAULT]
+banaction = iptables-multiport
+bantime   = 1h
+findtime  = 10m
+maxretry  = 5
+backend   = systemd
+[sshd]
+enabled = true
+port    = ssh
+filter  = sshd
+logpath = /var/log/auth.log
+maxretry = 3
+bantime = 3600
+EOF" "Create /etc/fail2ban/jail.local for SSH default settings."
+
+prompt_and_run "sudo systemctl restart fail2ban" "Restart fail2ban to apply all configurations."
+prompt_and_run "sudo fail2ban-client status" "Check final fail2ban status."
+
+echo -e "${GREEN}All steps completed.${NC}"
+

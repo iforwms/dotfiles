@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
 name=SECURE_SSH
+DEPLOY_USER="ifor"
+SSH_PORT=22
+BACKUP_DIR="/etc/ssh/backup_ssh_$(date +%F_%H%M%S)"
+
 echo "[${name}] Current settings:"
 grep -n 'PermitRootLogin\|PasswordAuthentication\|ChallengeResponseAuthentication\|UsePam' /etc/ssh/sshd_config|grep -v '#'
 echo
@@ -13,25 +17,56 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
    exit 1
 fi
 
-echo
-echo "[${name}] Disabling root login and password login"
-sed '/^PermitRootLogin/s/yes/no/; /^PasswordAuthentication/s/yes/no/; /^ChallengeResponseAuthentication/s/yes/no/; /^UsePAM/s/yes/no/        ' /etc/ssh/sshd_config|sudo tee /etc/ssh/sshd_config >/dev/null
+
+echo "[$NAME] Backing up sshd_config to $BACKUP_DIR"
+sudo mkdir -p "$BACKUP_DIR"
+sudo cp /etc/ssh/sshd_config "$BACKUP_DIR/sshd_config.bak"
+
+
+echo "[$NAME] Updating sshd_config"
+sudo sed -i \
+    -e "s/^#Port.*/Port $SSH_PORT/" \
+    -e 's/^PermitRootLogin.*/PermitRootLogin no/' \
+    -e 's/^PasswordAuthentication.*/PasswordAuthentication no/' \
+    -e 's/^ChallengeResponseAuthentication.*/ChallengeResponseAuthentication no/' \
+    -e 's/^UsePAM.*/UsePAM yes/' \
+    /etc/ssh/sshd_config
+
+# Ensure key auth is enabled
+sudo sed -i 's/^#PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+sudo sed -i 's/^#PermitEmptyPasswords.*/PermitEmptyPasswords no/' /etc/ssh/sshd_config
+sudo sed -i 's/^#X11Forwarding.*/X11Forwarding no/' /etc/ssh/sshd_config
+
+# Only allow the deploy user
+if ! grep -q "^AllowUsers" /etc/ssh/sshd_config; then
+    echo "AllowUsers $DEPLOY_USER" | sudo tee -a /etc/ssh/sshd_config
+fi
+
+
+# -----------------------------
+# Test SSH config
+# -----------------------------
+echo "[$NAME] Testing sshd_config"
+sudo sshd -t
+
+# -----------------------------
+# Reload SSH
+# -----------------------------
+echo "[$NAME] Reloading SSH"
+sudo systemctl reload ssh
+echo "[$NAME] SSH reloaded successfully! Current port: $SSH_PORT"
 
 echo
 echo "[${name}] Secured settings:"
 grep -n 'PermitRootLogin\|PasswordAuthentication\|ChallengeResponseAuthentication\|UsePam' /etc/ssh/sshd_config|grep -v '#'
 
-read -p "[${name}] Settings updated, you need to restart the ssh service for these changes to take effect, restart now? (y/n) " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-   echo
-   echo "[${name}] Service not restarted."
-else
-   echo
-   echo "[${name}] Restarting ssh service"
-   sudo service ssh restart
-   echo "[${name}] All done!"
-fi
-
+echo "[$NAME] SSH hardening complete!"
+echo " - Root login disabled"
+echo " - Password login disabled"
+echo " - Only '$DEPLOY_USER' can login"
+echo " - Key-based auth enabled"
+echo " - X11 forwarding disabled"
+echo " - SSH service reloaded"
+echo "Backup stored at $BACKUP_DIR"
 exit 0
 

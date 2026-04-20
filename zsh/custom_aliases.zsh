@@ -43,11 +43,30 @@ if command -v eza &> /dev/null; then
   )
   alias ls="eza -F --group --header ${eza_params}"
   alias la='ls --all'
-  alias l='ls --long'
+  alias l='ls --long --all'
 else
   alias l='ls -vlAh --color=auto --time-style="+%Y %b %d %H:%M"'
   alias ls='ls -vA --color=auto --time-style="+%Y %b %d %H:%M"'
 fi
+
+# vim
+alias svi='sudoedit'
+
+# network tab
+function urls() {
+  pbpaste | jq -r '.log.entries[] | select(.request.url | test("xvyshismvnsmhvdphyes.supabase.co")) | "\(.response.status)|\(.request.url)"' | tee >(pbcopy) | wc -l
+
+}
+
+function urlsc() {
+  pbpaste | jq -r '[.log.entries[].request.url] | group_by(.) | map("\(length)|\(.[] | .)") | .[]' | tee >(pbcopy) | wc -l
+}
+
+# systemctl
+alias sc='sudo systemctl'
+alias scr='sudo systemctl reload'
+alias scrs='sudo systemctl reload'
+alias scs='sudo systemctl status'
 
 
 # Apt
@@ -324,8 +343,10 @@ alias lon='lproxy && ssht'
 alias don='dproxy && ssht'
 alias pc='proxychains4'
 
-alias nse='cd /etc/nginx/sites-enabled'
-alias nsa='cd /etc/nginx/sites-available'
+# nginx
+# alias nse='cd /etc/nginx/sites-enabled'
+# alias nsa='cd /etc/nginx/sites-available'
+alias tnx='sudo nginx -t'
 
 # Tmux
 alias t="tmux"

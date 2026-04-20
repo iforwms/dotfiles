@@ -18,19 +18,19 @@ websites=(
   dominochinese.com
   expednet.cn
   felixweddings.com
+  husfokus.com
   iforwms.com
   indier.net
   indier.org
+  karstclimber.com
   kimtaichichina.com
   plan.cindra.se
+  portal.karstclimber.com
   theindier.org
   thyme.cors.tech
   wildmed.asia
   wmai.wildmed.asia
   yangshuotaichi.com
-  husfokus.info
-  portal.karstclimber.com
-  karstclimber.com
 )
 
 if [[ $# -eq 0 ]]; then

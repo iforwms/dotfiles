@@ -1,40 +1,60 @@
 #!/usr/bin/env bash
 
+set -e
+
+# For multiple sites
+# for APP in /var/www/*-laravel; do
+#   sudo ./fix-laravel-permissions "$APP"
+# done
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 # YELLOW='\033[0;33m'
 NC='\033[0m'
 
 script_name=fix-laravel-permissions
-base_dir="$1"
+code_owner=ifor
 
-if [[ ! -e "${base_dir}/artisan" ]]; then
+APP_ROOT="$1"
+
+if [[ -z "$APP_ROOT" ]]; then
+    echo -e "${RED}[${script_name}] Usage: $0 /path/to/laravel-app"
+    exit 1
+fi
+
+if [[ ! -e "${APP_ROOT}/artisan" ]]; then
   echo -e "${RED}[${script_name}] Not a Laravel installation, aborting...${NC}"
   exit 1
 fi
 
-echo -e "${GREEN}[${script_name}] Setting ownership to ifor:www-data...${NC}"
-sudo chown -R ifor:www-data "$base_dir"
+echo -e "${GREEN}[${script_name}] Setting ownership to ${code_owner}:www-data...${NC}"
+sudo chown -R "${code_owner}:www-data" "$APP_ROOT"
 
-echo -e "${GREEN}[${script_name}] Setting directory permissions to 775...${NC}"
-sudo find "$base_dir" -type d -exec chmod 775 {} \;
+echo -e "${GREEN}[${script_name}] [*] Fixing ownership for /storage, /cache, .env www-data:www-data"
+sudo chown -R www-data:www-data "$APP_ROOT"/storage "$APP_ROOT"/bootstrap/cache "$APP_ROOT"/.env
 
-echo -e "${GREEN}[${script_name}] Setting file permissions to 664...${NC}"
-sudo find "$base_dir" -type f -exec chmod 664 {} \;
+echo -e "${GREEN}[${script_name}] [*] Setting directory permissions to 775"
+sudo find "$APP_ROOT"/storage "$APP_ROOT"/bootstrap/cache -type d -exec chmod 775 {} \;
+# optional: make public/uploads directories writable
+if [[ -d "$APP_ROOT"/storage/app/public ]]; then
+    sudo find "$APP_ROOT"/storage/app/public -type d -exec chmod 775 {} \;
+fi
 
-# echo -e "${GREEN}[${script_name}] Setting 'storage' and 'bootstrap/cache' directory permissions to 775...${NC}"
-# sudo chmod -R 775 "${base_dir}/storage"
-# sudo chmod -R 775 "${base_dir}/bootstrap/cache"
-# sudo chmod -R ugo+rw "${base_dir}/storage"
-
-echo -e "${GREEN}[${script_name}] Setting 'storage' owner to www-data...${NC}"
-sudo chown -R www-data "${base_dir}/storage"
+echo -e "${GREEN}[${script_name}] [*] Setting file permissions to 664"
+sudo find "$APP_ROOT"/storage "$APP_ROOT"/bootstrap/cache -type f -exec chmod 664 {} \;
+if [[ -f "$APP_ROOT"/.env ]]; then
+    sudo chmod 640 "$APP_ROOT"/.env
+fi
+if [[ -d "$APP_ROOT"/storage/app/public ]]; then
+    sudo find "$APP_ROOT"/storage/app/public -type f -exec chmod 644 {} \;
+fi
 
 echo -e "${GREEN}[${script_name}] Making artisan and deploy scripts executable...${NC}"
-sudo chmod 755 "${base_dir}/"{artisan,deploy-remote,deploy-local}
+sudo chmod 755 "${APP_ROOT}/"{artisan,deploy-remote,deploy-local}
 
 echo -e "${GREEN}[${script_name}] Fixing .gitignore permissions...${NC}"
-sudo find "$base_dir" -type f -name '.gitignore' -exec chmod 664 {} \;
+sudo find "$APP_ROOT" -type f -name '.gitignore' -exec chmod 664 {} \;
 
-echo -e "${GREEN}[${script_name}] All done!${NC}"
+echo -e "${GREEN}[${script_name}] [✓] All done! Permissions fixed for $APP_ROOT"
+
 exit 0
