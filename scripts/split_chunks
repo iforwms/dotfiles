@@ -1,0 +1,14 @@
+#!/bin/bash
+FILE="$1"
+LINES_PER_CHUNK=300
+TOTAL_LINES=$(wc -l < "$FILE")
+NUM_CHUNKS=$(( (TOTAL_LINES + LINES_PER_CHUNK - 1) / LINES_PER_CHUNK ))
+
+for ((i=0; i<NUM_CHUNKS; i++)); do
+  START=$((i * LINES_PER_CHUNK + 1))
+  END=$((START + LINES_PER_CHUNK - 1))
+  CHUNK_FILE="chunk_$((i+1)).tsx"
+  tail -n +"$START" "$FILE" | head -n $LINES_PER_CHUNK > "$CHUNK_FILE"
+  echo "Created $CHUNK_FILE (lines $START–$END)"
+done
+

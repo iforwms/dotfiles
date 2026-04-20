@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+# Usage: ./make_reel.sh <image_dir> <text_overlay> <audio_file> [audio_start]
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+# REPLACE='\e[1A\e[K' # To go N lines up: \e[<N>A (\e[K clears the line)
+
+script_name=make-movie-reel
+usage="Usage: ${script_name} <image_dir> <text_overlay> <audio_file> [audio_start]"
+
+img_dir="$1"
+text_overlay="$2"
+audio_file="$3"
+audio_start_time="${4:-0}"        # default = 0 (start of audio)
+
+duration_per_image=3      # seconds each image shows (excluding transition)
+transition_duration=1     # seconds per xfade
+video_fade_in=2
+video_fade_out=3
+text_end=10
+fade_duration=2
+
+workdir=$(mktemp -d)
+# trap 'rm -rf "$workdir"' EXIT
+
+echo -e "${YELLOW}[${script_name}] Collecting images..."
+shopt -s nullglob
+images=("$img_dir"/*.{jpg,jpeg,png,JPG,PNG})
+image_count=${#images[@]}
+if [ "$image_count" -eq 0 ]; then
+  echo -e "${RED}[${script_name}] No images found in ${img_dir}...${NC}"
+  echo -e "${YELLOW}[${script_name}] ${usage}"
+  exit 1
+fi
+
+IFS=',' read -r width height < <(ffprobe -v error -select_streams v:0 \
+    -show_entries stream=width,height -of csv=p=0:s=, "${images[0]}")
+
+echo -e "${GREEN}[${script_name}] Found ${image_count} images: ${images[@]}"
+echo -e "${GREEN}[${script_name}] Duration per image: ${duration_per_image}s"
+echo -e "${GREEN}[${script_name}] Transition duration: ${transition_duration}s"
+echo -e "${GREEN}[${script_name}] Using resolution ${width}x${height}"
+
+temp_clips=()
+
+echo -e "${YELLOW}[${script_name}] Creating per-image video clips with random Ken Burns effect..."
+for ((i=0;i<image_count;i++)); do
+  img="${images[$i]}"
+  clip="${workdir}/clip_${i}.mp4"
+
+  "${DOTFILES}/scripts/single-image-reel" "$img" "$clip" "$width" "$height"
+
+  echo -e "${YELLOW}[${script_name}] Clip: ${clip}"
+  # open "$clip"
+  # exit
+  temp_clips+=("$clip")
+done
+# exit
+
+# Trim/pad audio to match total video duration
+total_video=$(echo "$image_count * $duration_per_image + $transition_duration" | bc)
+trimmed_audio="${workdir}/audio_trimmed.mp3"
+
+ffmpeg -y -i "$audio_file" \
+  -filter_complex "[0:a]atrim=start=$audio_start_time:end=$(echo "$audio_start_time + $total_video" | bc),asetpts=PTS-STARTPTS,afade=t=in:st=0:d=$fade_duration,afade=t=out:st=$(echo "$total_video - $fade_duration" | bc):d=${fade_duration}[a]" \
+  -map "[a]" -ac 2 -c:a mp3 "$trimmed_audio"
+
+# Generate xfade chain
+transitions=(wipeleft wiperight wipeup wipedown smoothleft smoothright vertopen vertclose)
+filter=""
+for ((i=0;i<image_count;i++)); do
+  filter+="[$i:v]setpts=PTS-STARTPTS[v$i];"
+done
+
+offset=$duration_per_image
+for ((i=1;i<image_count;i++)); do
+  T="${transitions[$RANDOM % ${#transitions[@]}]}"
+  if [ $i -eq 1 ]; then
+    filter+="[v0][v1]xfade=transition=$T:duration=$transition_duration:offset=${duration_per_image}[vx$i];"
+  else
+    PREV=$((i-1))
+    filter+="[vx$PREV][v$i]xfade=transition=$T:duration=$transition_duration:offset=${offset}[vx$i];"
+  fi
+  offset=$(echo "$offset + $duration_per_image" | bc)
+done
+
+# Final fade + text overlay
+filter+="[vx$((image_count-1))]fade=t=in:st=0:d=$video_fade_in,fade=t=out:st=$(echo "$total_video - $video_fade_out" | bc):d=$video_fade_out,\
+drawtext=fontfile=/System/Library/Fonts/Supplemental/AmericanTypewriter.ttc:text='$text_overlay':fontcolor=white:fontsize=48:box=1:boxcolor=black@0.5:boxborderw=10:x=(w-text_w)/2:y=(h-text_h)/2:enable='lte(t,$text_end)',format=yuv420p[vout]"
+
+# Build ffmpeg input arguments
+input_args=()
+for clip in "${temp_clips[@]}"; do
+  input_args+=("-i" "$clip")
+done
+input_args+=("-i" "$trimmed_audio")
+
+# Run ffmpeg
+ffmpeg -y "${input_args[@]}" \
+  -filter_complex "$filter" \
+  -map "[vout]" -map "$((image_count))":a -shortest \
+  -c:v libx264 -pix_fmt yuv420p output.mp4
+
+echo "Done! output.mp4 created (~${total_video}s)"

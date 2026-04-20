@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+set -e
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+script_name=fix-wordpress-permissions
+code_owner=ifor
+
+APP_ROOT="$1"
+
+if [[ -z "$APP_ROOT" ]]; then
+    echo -e "${RED}[${script_name}] Usage: $0 /path/to/wordpress-site${NC}"
+    exit 1
+fi
+
+if [[ ! -f "${APP_ROOT}/wp-config.php" ]]; then
+    echo -e "${RED}[${script_name}] Not a WordPress install, aborting...${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}[${script_name}] Setting base ownership to ${code_owner}:www-data...${NC}"
+sudo chown -R "${code_owner}:www-data" "$APP_ROOT"
+
+echo -e "${GREEN}[${script_name}] Setting writable WordPress dirs to www-data:www-data...${NC}"
+for dir in wp-content wp-content/uploads wp-content/plugins wp-content/themes wp-content/upgrade; do
+    if [[ -d "${APP_ROOT}/${dir}" ]]; then
+        sudo chown -R www-data:www-data "${APP_ROOT}/${dir}"
+    fi
+done
+
+echo -e "${GREEN}[${script_name}] Secure defaults (dirs 755 / files 644)...${NC}"
+sudo find "$APP_ROOT" -type d -exec chmod 755 {} \;
+sudo find "$APP_ROOT" -type f -exec chmod 644 {} \;
+
+echo -e "${GREEN}[${script_name}] Making update dirs writable (775/664)...${NC}"
+for dir in wp-content wp-content/uploads wp-content/plugins wp-content/themes wp-content/upgrade; do
+    if [[ -d "${APP_ROOT}/${dir}" ]]; then
+        sudo find "${APP_ROOT}/${dir}" -type d -exec chmod 775 {} \;
+        sudo find "${APP_ROOT}/${dir}" -type f -exec chmod 664 {} \;
+    fi
+done
+
+echo -e "${GREEN}[${script_name}] Making wp-cli executable if present...${NC}"
+if [[ -f "${APP_ROOT}/wp-cli.phar" ]]; then
+    sudo chmod 755 "${APP_ROOT}/wp-cli.phar"
+fi
+
+echo -e "${GREEN}[${script_name}] Locking wp-config.php (640)...${NC}"
+sudo chown "${code_owner}:www-data" "${APP_ROOT}/wp-config.php"
+sudo chmod 640 "${APP_ROOT}/wp-config.php"
+
+echo -e "${GREEN}[${script_name}] [✓] Production WordPress permissions fixed for ${APP_ROOT}${NC}"
+
+exit 0
