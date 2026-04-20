@@ -199,3 +199,5 @@ prompt_and_run "sudo fail2ban-client status" "Check final fail2ban status."
 
 echo -e "${GREEN}All steps completed.${NC}"
 
+exit 0
+

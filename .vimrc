@@ -590,6 +590,10 @@ augroup phpSyntaxOverride
   autocmd FileType php call PhpSyntaxOverride()
 augroup END
 
+augroup ForceIndent
+  autocmd!
+  autocmd FileType * setlocal shiftwidth=2 tabstop=2 softtabstop=2 expandtab
+augroup END
 "--------Reference Guide--------"
 " [count] [operator] [text object / motion]
 "
