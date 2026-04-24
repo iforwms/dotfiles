@@ -209,3 +209,5 @@ if [ -f '/Users/ifor/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/
 
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/ifor/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/ifor/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
+
+eval "$(/opt/homebrew/bin/brew shellenv)"
