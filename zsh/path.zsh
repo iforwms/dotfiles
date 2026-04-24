@@ -1,5 +1,7 @@
 export DOTFILES=$HOME/.dotfiles
 
+export PATH="/opt/homebrew/bin:$PATH"
+
 export PATH="/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:$PATH"
 
 # Load Composer tools

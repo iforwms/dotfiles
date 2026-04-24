@@ -11,6 +11,7 @@ tap 'homebrew/cask-fonts'
 tap 'homebrew/cask-versions'
 
 # Binaries
+# mupdf
 brew 'aliyun-cli'
 brew 'arduino-cli'
 brew 'awscli'
@@ -23,6 +24,7 @@ brew 'dfu-programmer' # Flashing Arduino bootloaders
 brew 'dnsmasq'
 brew 'dos2unix'
 brew 'entr'
+brew 'eza'
 brew 'findutils'
 brew 'gawk'
 brew 'gnu-getopt'
@@ -45,7 +47,6 @@ brew 'reattach-to-user-namespace' # Required for tmux copy paste
 brew 'scrcpy' # Android screen mirroring
 brew 'shellcheck'
 brew 'sox'
-# mupdf
 brew 'telnet'
 brew 'trash' # Manage the Trash bin
 brew 'yq'
