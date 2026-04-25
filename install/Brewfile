@@ -16,7 +16,7 @@ brew 'aliyun-cli'
 brew 'arduino-cli'
 brew 'awscli'
 brew 'binwalk'
-brew 'cash-cli' # currency rates
+# brew 'cash-cli' # currency rates
 brew 'cmus' # terminal player
 brew 'colordiff'
 brew 'coreutils' # Those that come with macOS are outdated
@@ -24,7 +24,7 @@ brew 'dfu-programmer' # Flashing Arduino bootloaders
 brew 'dnsmasq'
 brew 'dos2unix'
 brew 'entr'
-brew 'eza'
+# brew 'eza'
 brew 'findutils'
 brew 'gawk'
 brew 'gnu-getopt'
@@ -39,8 +39,8 @@ brew 'mas' # Mac App Store manager
 brew 'ncdu'
 brew 'pandoc'
 brew 'parallels'
-brew 'pass'
-brew 'pinentry-mac'
+# brew 'pass'
+# brew 'pinentry-mac'
 brew 'pkg-config' # https://github.com/driesvints/dotfiles/issues/20
 brew 'qpdf'
 brew 'reattach-to-user-namespace' # Required for tmux copy paste
@@ -69,22 +69,22 @@ brew 'svgo'
 brew 'evince'
 
 # Apps
-cask 'alfred'
+# cask 'alfred'
 # cask 'android-file-transfer'
-cask 'android-platform-tools'
+# cask 'android-platform-tools'
 # cask 'android-studio'
-cask 'arduino'
+# cask 'arduino'
 # cask 'balsamiq-wireframes'
-cask 'bartender'
+# cask 'bartender'
 # cask 'clippy'
 # cask 'coda'
 cask 'docker'
-cask 'firefox'
+# cask 'firefox'
 cask 'github'
 cask 'google-chrome'
 cask 'handbrake'
 # cask 'insomnia'
-cask 'iterm2'
+# cask 'iterm2'
 cask 'java'
 cask 'lilypond'
 cask 'machoview'
@@ -96,15 +96,15 @@ cask 'openmtp'
 cask 'pinta' # Paint.NET copy
 cask 'postman'
 cask 'qlvideo'
-cask 'sublime-text'
+# cask 'sublime-text'
 cask 'tableplus'
-cask 'the-unarchiver'
+# cask 'the-unarchiver'
 cask 'tinkerwell'
 cask 'tomatobar'
 # cask 'transmission'
 cask 'vagrant'
 cask 'virtualbox' # Might need to allow access in Security settings
-cask 'virtualbox-extension-pack'
+# cask 'virtualbox-extension-pack'
 cask 'vlc'
 
 # Quicklook
@@ -115,17 +115,17 @@ cask 'quicklook-csv'
 cask 'quicklook-json'
 
 # Fonts
-cask 'font-fira-code'
+# cask 'font-fira-code'
 cask 'font-lato'
 cask 'font-open-sans'
 cask 'font-roboto'
 
 # Mac App Store
-mas 'Bandwidth+', id: 490461369
+# mas 'Bandwidth+', id: 490461369
 mas 'Clocker', id: 1056643111
-mas 'Microsoft Excel', id: 462058435
+# mas 'Microsoft Excel', id: 462058435
 # mas 'Microsoft PowerPoint', id: 462062816
 # mas 'Microsoft Word', id: 462054704
-mas 'Trello', id: 1278508951
-mas 'WeChat', id: 836500024
+# mas 'Trello', id: 1278508951
+# mas 'WeChat', id: 836500024
 # mas 'Wunderlist', id: 410628904
