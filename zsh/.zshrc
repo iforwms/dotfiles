@@ -211,3 +211,11 @@ if [ -f '/Users/ifor/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/
 if [ -f '/Users/ifor/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/ifor/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
 
 eval "$(/opt/homebrew/bin/brew shellenv)"
+
+
+# Herd injected PHP 8.4 configuration.
+export HERD_PHP_84_INI_SCAN_DIR="/Users/ifor/Library/Application Support/Herd/config/php/84/"
+
+
+# Herd injected PHP binary.
+export PATH="/Users/ifor/Library/Application Support/Herd/bin/":$PATH

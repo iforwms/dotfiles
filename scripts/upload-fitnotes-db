@@ -1,0 +1,29 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+set -e
+
+DOWNLOAD_DIR="$HOME/storage/downloads"
+
+# 1. Check if any .fitnotes files exist
+if ! ls "$DOWNLOAD_DIR"/*.fitnotes 1> /dev/null 2>&1; then
+  echo "No .fitnotes files found in $DOWNLOAD_DIR"
+  exit 1
+fi
+
+# 2. Find the newest .fitnotes file
+latest_file=$(find "$DOWNLOAD_DIR" -maxdepth 1 -type f -name "*.fitnotes" \
+  -printf '%T@ %p\n' | sort -nr | head -1 | cut -d' ' -f2-)
+
+if [ -z "$latest_file" ]; then
+  echo "Failed to determine latest .fitnotes file"
+  exit 1
+fi
+
+echo "Latest file found: $latest_file"
+
+echo "Uploading to server..."
+rsync -avz --progress "$latest_file" \
+  "me:/var/www/fitnotes/db/FitNotes_latest.fitnotes"
+
+echo "Upload complete."
+exit 0
