@@ -2,16 +2,21 @@
 
 set -e
 
-DOWNLOAD_DIR="$HOME/storage/downloads"
+download_dir="$HOME/storage/downloads"
+db_filename_prefix=${1:-ifor}
+db_filename="${db_filename_prefix}_db.sqlite"
+db_fullpath="/var/www/fitnotes/db/${db_filename}"
+echo $db_fullpath
+exit
 
 # 1. Check if any .fitnotes files exist
-if ! ls "$DOWNLOAD_DIR"/*.fitnotes 1> /dev/null 2>&1; then
-  echo "No .fitnotes files found in $DOWNLOAD_DIR"
+if ! ls "$download_dir"/*.fitnotes 1> /dev/null 2>&1; then
+  echo "No .fitnotes files found in $download_dir"
   exit 1
 fi
 
 # 2. Find the newest .fitnotes file
-latest_file=$(find -L "$DOWNLOAD_DIR" -maxdepth 1 -type f -name "*.fitnotes" \
+latest_file=$(find -L "$download_dir" -maxdepth 1 -type f -name "*.fitnotes" \
   -printf '%T@ %p\n' | sort -nr | head -1 | cut -d' ' -f2-)
 
 if [ -z "$latest_file" ]; then
@@ -23,11 +28,11 @@ echo "Latest file found: $latest_file"
 
 echo "Uploading to server..."
 rsync -avz --progress "$latest_file" \
-  "me:/var/www/fitnotes/db/FitNotes_latest.fitnotes"
+  "me:${db_fullpath}"
 
 echo "Fixing permissions..."
-ssh me "chown ifor:www-data /var/www/fitnotes/db/FitNotes_latest.fitnotes"
-ssh me "chmod 664 /var/www/fitnotes/db/FitNotes_latest.fitnotes"
+ssh me "chown ifor:www-data ${db_fullpath}"
+ssh me "chmod 664 ${db_fullpath}"
 
-echo "Upload complete."
+echo "All done!"
 exit 0
