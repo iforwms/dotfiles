@@ -6,8 +6,6 @@ download_dir="$HOME/storage/downloads"
 db_filename_prefix=${1:-ifor}
 db_filename="${db_filename_prefix}_db.sqlite"
 db_fullpath="/var/www/fitnotes/db/${db_filename}"
-echo $db_fullpath
-exit
 
 # 1. Check if any .fitnotes files exist
 if ! ls "$download_dir"/*.fitnotes 1> /dev/null 2>&1; then
