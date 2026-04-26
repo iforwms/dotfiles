@@ -6,23 +6,35 @@ download_dir="$HOME/storage/downloads"
 db_filename_prefix=${1:-ifor}
 db_filename="${db_filename_prefix}_db.sqlite"
 db_fullpath="/var/www/fitnotes/db/${db_filename}"
+local_filepath="$2"
 
-# 1. Check if any .fitnotes files exist
-if ! ls "$download_dir"/*.fitnotes 1> /dev/null 2>&1; then
-  echo "No .fitnotes files found in $download_dir"
-  exit 1
+# If local_filepath is provided, validate and use it
+if [ -n "$local_filepath" ]; then
+  if [ -f "$local_filepath" ] && [ -r "$local_filepath" ]; then
+    latest_file="$local_filepath"
+  else
+    echo "Error: Provided file '$local_filepath' does not exist or is not readable"
+    exit 1
+  fi
+else
+  # No override provided → fallback to existing logic
+
+  if ! ls "$download_dir"/*.fitnotes 1> /dev/null 2>&1; then
+    echo "No .fitnotes files found in $download_dir"
+    exit 1
+  fi
+
+  # Find the newest .fitnotes file
+  latest_file=$(find -L "$download_dir" -maxdepth 1 -type f -name "*.fitnotes" \
+    -printf '%T@ %p\n' | sort -nr | head -1 | cut -d' ' -f2-)
+
+  if [ -z "$latest_file" ]; then
+    echo "Failed to determine latest .fitnotes file"
+    exit 1
+  fi
 fi
 
-# 2. Find the newest .fitnotes file
-latest_file=$(find -L "$download_dir" -maxdepth 1 -type f -name "*.fitnotes" \
-  -printf '%T@ %p\n' | sort -nr | head -1 | cut -d' ' -f2-)
-
-if [ -z "$latest_file" ]; then
-  echo "Failed to determine latest .fitnotes file"
-  exit 1
-fi
-
-echo "Latest file found: $latest_file"
+echo "Using file: $latest_file"
 
 echo "Uploading to server..."
 rsync -avz --progress "$latest_file" \
