@@ -11,7 +11,7 @@ if ! ls "$DOWNLOAD_DIR"/*.fitnotes 1> /dev/null 2>&1; then
 fi
 
 # 2. Find the newest .fitnotes file
-latest_file=$(find "$DOWNLOAD_DIR" -maxdepth 1 -type f -name "*.fitnotes" \
+latest_file=$(find -L "$DOWNLOAD_DIR" -maxdepth 1 -type f -name "*.fitnotes" \
   -printf '%T@ %p\n' | sort -nr | head -1 | cut -d' ' -f2-)
 
 if [ -z "$latest_file" ]; then
