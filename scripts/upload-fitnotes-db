@@ -25,5 +25,9 @@ echo "Uploading to server..."
 rsync -avz --progress "$latest_file" \
   "me:/var/www/fitnotes/db/FitNotes_latest.fitnotes"
 
+echo "Fixing permissions..."
+ssh me "chown ifor:www-data /var/www/fitnotes/db/FitNotes_latest.fitnotes"
+ssh me "chmod 664 /var/www/fitnotes/db/FitNotes_latest.fitnotes"
+
 echo "Upload complete."
 exit 0
