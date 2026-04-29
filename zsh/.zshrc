@@ -210,12 +210,12 @@ if [ -f '/Users/ifor/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/ifor/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/ifor/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
 
-eval "$(/opt/homebrew/bin/brew shellenv)"
-
+brew_path="/opt/homebrew/bin/brew"
+if [[ -e "$brew_path" ]]; then
+  eval "$("$brew_path" shellenv)"
+fi
 
 # Herd injected PHP 8.4 configuration.
 export HERD_PHP_84_INI_SCAN_DIR="/Users/ifor/Library/Application Support/Herd/config/php/84/"
-
-
 # Herd injected PHP binary.
 export PATH="/Users/ifor/Library/Application Support/Herd/bin/":$PATH
