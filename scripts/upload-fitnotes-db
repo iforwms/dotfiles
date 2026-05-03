@@ -37,8 +37,7 @@ fi
 echo "Using file: $latest_file"
 
 echo "Uploading to server..."
-rsync -avz --progress "$latest_file" \
-  "me:${db_fullpath}"
+rsync -avz --progress "$latest_file" "me:${db_fullpath}"
 
 echo "Fixing permissions..."
 ssh me "chown ifor:www-data ${db_fullpath}"
