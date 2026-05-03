@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+image_dir="${HOME}/storage/downloads/bodyshots"
+remote_path="/var/www/fitnotes/bodyshots"
+
+echo "Resizing images..."
+mogrify -strip -resize 800x\> -quality 80 "${image_dir}/*.jpg"
+
+echo "Uploading images..."
+rsync -avz --progress "$image_dir/*.jpg" "me:${remote_path}"
+
+echo "All done!"
+exit 0

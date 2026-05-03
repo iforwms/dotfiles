@@ -3,6 +3,11 @@
 destination="/Users/ifor/Documents/backup/db_json"
 today="$(date +%Y-%m-%d)"
 
+echo "Backing up pool stats..."
+filename="backup_pool_stats_${today}"
+base_dir="/var/www/pool_stats/db"
+rsync --verbose --times --compress "me:${base_dir}/pool.sqlite" "${destination}/${filename}.sqlite"
+
 echo "Backing up grocy..."
 base_dir="/var/www/grocy/data/backups"
 rsync --verbose --archive --delete-delay --partial --compress "me:${base_dir}/" "${destination}/grocy/"
@@ -41,17 +46,10 @@ base_dir="/var/www/darts/db"
 rsync --verbose --times --compress "me:${base_dir}/players.json" "${destination}/${filename}_players.json"
 rsync --verbose --times --compress "me:${base_dir}/matches.json" "${destination}/${filename}_matches.json"
 
-echo "Backing up pool stats..."
-filename="backup_pool_stats_${today}"
-base_dir="/var/www/pool_stats/db"
-rsync --verbose --times --compress "me:${base_dir}/players.json" "${destination}/${filename}_players.json"
-rsync --verbose --times --compress "me:${base_dir}/matches.json" "${destination}/${filename}_matches.json"
-
 echo "Backing up year planner..."
 filename="backup_year_planner_${today}"
 base_dir="/var/www/year_planner/db"
 rsync --verbose --times --compress "me:${base_dir}/data.json" "${destination}/${filename}_data.json"
-rsync --verbose --times --compress "me:${base_dir}/workout.json" "${destination}/${filename}_workout.json"
 
 echo "Backing up basketball shooting logger..."
 filename="backup_bbsl_${today}"
