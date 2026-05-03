@@ -2,6 +2,7 @@
 
 destination="/Users/ifor/Documents/backup/db_json"
 today="$(date +%Y-%m-%d)"
+KEEP=3
 
 echo "Backing up pool stats..."
 filename="backup_pool_stats_${today}"
@@ -58,4 +59,39 @@ rsync --verbose --times --compress "me:${base_dir}/bbsl.json" "${destination}/${
 
 echo "Backing up pedalboard settings..."
 rsync --verbose --times --compress -r me:/var/www/pedalboard/db/* "${destination}/pedbalboard"
+
+# Args: paths in one backup family (e.g. backup_bbsl_*.json).
+# Always deletes empty files/dirs. Keeps the newest $KEEP non-empty ones;
+# deletes the rest. "Newest" is by filename — date is YYYY-MM-DD so lex sort works.
+prune_backups() {
+  local entry kept=0
+  for entry in $(printf '%s\n' "$@" | sort -r); do
+    if [[ -d "$entry" ]]; then
+      if [[ -z "$(ls -A "$entry" 2>/dev/null)" ]]; then
+        echo "  rm (empty dir):  $entry"; rm -rf -- "$entry"; continue
+      fi
+    elif [[ ! -s "$entry" ]]; then
+      echo "  rm (empty file): $entry"; rm -- "$entry"; continue
+    fi
+    if (( kept < KEEP )); then ((kept++)); continue; fi
+    if [[ -d "$entry" ]]; then
+      echo "  rm (old dir):    $entry"; rm -rf -- "$entry"
+    else
+      echo "  rm (old file):   $entry"; rm -- "$entry"
+    fi
+  done
+}
+
+echo "Cleaning up old backups (keeping newest $KEEP non-empty)..."
+shopt -s nullglob
+prune_backups "${destination}"/backup_pool_stats_*.sqlite
+prune_backups "${destination}"/backup_bbsl_*.json
+prune_backups "${destination}"/backup_darts_stats_*_players.json
+prune_backups "${destination}"/backup_darts_stats_*_matches.json
+prune_backups "${destination}"/backup_year_planner_*_data.json
+prune_backups "${destination}"/filamentz_*.json
+prune_backups "${destination}"/gridfinity/gridfinity-*.sqlite
+prune_backups "${destination}"/jukebox/jukebox-*.sqlite
+prune_backups "${destination}"/ego_buster/results_*
+shopt -u nullglob
 
