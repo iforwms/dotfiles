@@ -4,7 +4,7 @@ set -e
 
 download_dir="$HOME/storage/downloads"
 db_filename_prefix=${1:-ifor}
-db_filename="${db_filename_prefix}_db.sqlite"
+db_filename="${db_filename_prefix}_fitnotes.sqlite"
 db_fullpath="/var/www/fitnotes/db/${db_filename}"
 local_filepath="$2"
 
