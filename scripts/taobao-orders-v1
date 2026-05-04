@@ -22,7 +22,7 @@ if ! [[ -d "$local_dir" ]]; then
 fi
 
 echo -e "${GREEN}[${script_name}] Fetching data from TaoBao...${NC}"
-"$(which php)" "${local_dir}/taobao-v1.php"
+/usr/local/opt/php@8.1/bin/php "${local_dir}/taobao-v1.php"
 
 json_file="${local_dir}/db/taobao"
 if ! [[ -e "${json_file}.json" ]]; then
