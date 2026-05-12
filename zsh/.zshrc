@@ -1,3 +1,5 @@
+DISABLE_AUTO_UPDATE=true
+
 # Path to your dotfiles.
 export DOTFILES=$HOME/.dotfiles
 

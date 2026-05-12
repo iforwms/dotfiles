@@ -4,6 +4,11 @@ server=me
 filepath="$1"
 remote_dir="$2"
 
+if [[ -z "$filepath" ]]; then
+  echo "Enter the path to a file, usage: iup <filepath> [remote_dir]"
+  exit 1
+fi
+
 if [[ ! -e "$filepath" ]]; then
   echo "File not found, aborting."
   exit 1
