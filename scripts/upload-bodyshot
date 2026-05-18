@@ -1,13 +1,36 @@
 #!/usr/bin/env bash
 
-image_dir="${HOME}/storage/downloads/bodyshots"
+shopt -s nullglob
+
 remote_path="/var/www/fitnotes/bodyshots"
+if [ "$(uname)" = "Darwin" ]; then
+  image_dir="${HOME}/Downloads/bodyshots"
+else
+  image_dir="${HOME}/storage/downloads/bodyshots"
+fi
+
+for f in "${image_dir}"/*.jpg; do
+  base="$(basename "$f")"
+  clean="${base//[[:space:]]/}"
+  mv "$f" "${image_dir}/$clean"
+done
+
+files=("${image_dir}"/*.jpg)
+if [ ${#files[@]} -eq 0 ]; then
+  echo "No JPG files found"
+  exit 1
+fi
+
+echo "Found ${#files[@]} files:"
+for f in "${files[@]}"; do
+  echo " - $f"
+done
 
 echo "Resizing images..."
-mogrify -strip -resize 800x\> -quality 80 "${image_dir}/*.jpg"
+mogrify -strip -resize 800x\> -quality 80 "${files[@]}"
 
 echo "Uploading images..."
-rsync -avz --progress "$image_dir/*.jpg" "me:${remote_path}"
+rsync -avz --progress "${files[@]}" "me:${remote_path}"
 
 echo "All done!"
 exit 0
