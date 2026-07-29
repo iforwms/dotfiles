@@ -1,5 +1,6 @@
 {
   "python.linting.pylintEnabled": true,
   "python.linting.enabled": true,
-  "suggest.noselect": true
+  "suggest.noselect": true,
+  "tailwindCSS.headwind.runOnSave": false
 }

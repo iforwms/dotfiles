@@ -337,6 +337,13 @@ augroup END
 
 "Prettify current file
 function! Prettify()
+    " Blade isn't understood by @prettier/plugin-php — running prettier on a
+    " .blade.php file strips @if/@endif/@foreach directives and duplicates
+    " attributes. Skip until a Blade-aware formatter is wired up.
+    if expand('%') =~# '\.blade\.php$'
+        echo "Skipping prettier — it mangles Blade"
+        return
+    endif
     let curPos = getcurpos()
     let cmd = "%!prettier --config ~/.dotfiles/.prettierrc.json --tab-width 2 --stdin-filepath %"
     if (&ft=='sh')

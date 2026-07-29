@@ -225,3 +225,5 @@ export PATH="/Users/ifor/Library/Application Support/Herd/bin/":$PATH
 
 # Herd injected PHP 7.4 configuration.
 export HERD_PHP_74_INI_SCAN_DIR="/Users/ifor/Library/Application Support/Herd/config/php/74/"
+export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+export PATH="$JAVA_HOME/bin:$PATH"

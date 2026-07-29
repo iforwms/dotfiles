@@ -1,15 +1,42 @@
 #!/usr/bin/env bash
 
-# Script to update the SSL certificate for VOD in Aliyun
+set -euo pipefail
+IFS=$'\n\t'
 
-# Check if the domain argument is provided
+log() {
+  echo "[$(date '+%F %T')] $*"
+}
+
+fail() {
+  log "ERROR: $*"
+  exit 1
+}
+
+retry() {
+  local n=0
+  local max=5
+  local delay=5
+
+  until "$@"; do
+    n=$((n+1))
+    if [ "$n" -ge "$max" ]; then
+      return 1
+    fi
+    log "Retry $n/$max failed: $*"
+    sleep $delay
+  done
+}
+
+# ----------------------------
+# Profile selection
+# ----------------------------
 profile="${1:-domino}"
 
 if [ "$profile" = "domino" ]; then
   domain="video.dominoedu.com"
   vodId="249878"
   contactId="230"
-  aliyunProfile="default"
+  aliyunProfile="domino"
   aliyunRegion="cn-hangzhou"
 elif [ "$profile" = "exped" ]; then
   domain="video.expednet.cn"
@@ -26,68 +53,107 @@ else
 fi
 
 if [ -z "$domain" ]; then
-  echo "Usage: $0 <domain> [VOD Service ID] [Contact ID]"
-  exit 1
+  fail "Usage: $0 <domain> [VOD Service ID] [Contact ID]"
 fi
 
-# Settings for the deployment job
+CONFIG_FILE="$HOME/.aliyun/config.json"
 
+[[ -f "$CONFIG_FILE" ]] || fail "Missing Aliyun config file"
+
+Ali_Key=$(jq -r --arg p "$aliyunProfile" '
+.profiles[]
+| select(.name == $p)
+| .access_key_id
+' "$CONFIG_FILE")
+
+Ali_Secret=$(jq -r --arg p "$aliyunProfile" '
+.profiles[]
+| select(.name == $p)
+| .access_key_secret
+' "$CONFIG_FILE")
+
+[[ -n "$Ali_Key" && "$Ali_Key" != "null" ]] || fail "Ali_Key not found for profile $aliyunProfile"
+[[ -n "$Ali_Secret" && "$Ali_Secret" != "null" ]] || fail "Ali_Secret not found for profile $aliyunProfile"
+
+export Ali_Key Ali_Secret
+
+echo $Ali_Secret
+echo $Ali_Key
+
+# ----------------------------
+# Dependencies
+# ----------------------------
 acme="${HOME}/.acme.sh/acme.sh"
-if ! [[ $(command -v "$acme") ]]; then
-  echo "Missing required program: acme.sh (https://github.com/acmesh-official/acme.sh)"
-  echo "To install: curl https://get.acme.sh | sh -s email=ifor@cors.tech"
-  echo "Aborting..."
-  exit 1
-fi
 
-if ! [[ $(command -v aliyun) ]]; then
-  echo "Missing required program: aliyun (https://github.com/aliyun/aliyun-cli)"
-  echo 'To install: /bin/bash -c "$(curl -fsSL https://aliyuncli.alicdn.com/install.sh)"'
-  echo "Aborting..."
-  exit 1
-fi
+command -v "$acme" >/dev/null 2>&1 || fail "Missing acme.sh"
+command -v aliyun >/dev/null 2>&1 || fail "Missing aliyun CLI"
+command -v jq >/dev/null 2>&1 || fail "Missing jq"
 
+# ----------------------------
+# Confirmation
+# ----------------------------
 echo "----------------------------------------"
 echo "SSL Deployment Script - Confirmation"
 echo "----------------------------------------"
 
-echo "Resolved configuration:"
 echo "  Domain         : $domain"
 echo "  VOD ID         : $vodId"
 echo "  Contact ID     : $contactId"
-echo "  Aliyun Region  : $aliyunRegion"
 echo "  Aliyun Profile : $aliyunProfile"
+echo "  Region         : $aliyunRegion"
 echo ""
 
-echo "Raw arguments passed ($#):"
-i=1
-for arg in "$@"; do
-  echo "  Arg $i: $arg"
-  ((i++))
-done
+read -r -p "Proceed? (y/Y): " confirm
+[[ "$confirm" =~ ^[Yy]$ ]] || exit 0
 
-echo ""
-echo "Proceed with these settings? (y/Y to continue, anything else to quit)"
-read -r -p "> " confirm
+# ----------------------------
+# ACME ISSUANCE (with fallback CA)
+# ----------------------------
 
-if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-  echo "Aborted."
-  exit 0
+ACME_DIR="${HOME}/.acme.sh/${domain}_ecc"
+CERT_FILE="${ACME_DIR}/fullchain.cer"
+KEY_FILE="${ACME_DIR}/${domain}.key"
+
+issue_cert() {
+  local ca="$1"
+
+  log "Issuing certificate using CA: $ca"
+
+  "$acme" --issue \
+    -d "$domain" \
+    --dns dns_ali \
+    --server "$ca" \
+    --debug 2 || return 1
+
+  [[ -f "$CERT_FILE" ]] || return 1
+  [[ -f "$KEY_FILE" ]] || return 1
+
+  return 0
+}
+
+log "Starting ACME issuance..."
+
+# Primary CA
+if ! issue_cert "letsencrypt"; then
+  log "Let’s Encrypt failed, trying ZeroSSL..."
+
+  if ! issue_cert "zerossl"; then
+    fail "Both Let’s Encrypt and ZeroSSL failed"
+  fi
 fi
 
-echo "Continuing..."
-echo "----------------------------------------"
-# Aliyun credentials should be stored in ~/.acme.sh/account.conf (Ali_Key and Ali_Secret)
-echo "Running acme.sh to create a new certificate for ${domain}..."
-"$acme" --issue -d "$domain" --dns dns_ali
-# cert="$(cat "${HOME}/.acme.sh/${domain}_ecc/${domain}.cer")"
-fullchain="$(cat "${HOME}/.acme.sh/${domain}_ecc/fullchain.cer")"
-key="$(cat "${HOME}/.acme.sh/${domain}_ecc/${domain}.key")"
-# echo "$cert"
-# echo "$key"
+log "Certificate issued successfully"
 
-echo "Uploading the certificate to Aliyun..."
+fullchain="$(cat "$CERT_FILE")"
+key="$(cat "$KEY_FILE")"
+
+# ----------------------------
+# Upload certificate
+# ----------------------------
+log "Uploading certificate to Aliyun..."
+
 now=$(date +%Y%m%d%H%M)
+
 output=$(aliyun cas UploadUserCertificate \
   --profile "$aliyunProfile" \
   --region "$aliyunRegion" \
@@ -95,12 +161,18 @@ output=$(aliyun cas UploadUserCertificate \
   --Cert="$fullchain" \
   --Key="$key")
 
-certId=$(echo "$output" | jq -r '.CertId')
-echo "New Certificate ID: ${certId}"
+certId=$(echo "$output" | jq -e -r '.CertId') || fail "Missing CertId"
 
-echo "Creating a deployment job in Aliyun..."
+log "New Certificate ID: $certId"
+
+# ----------------------------
+# Create deployment job
+# ----------------------------
+log "Creating deployment job..."
+
 randomJobName=$(openssl rand -hex 4)
 jobName="deploy-video-certificate-$randomJobName"
+
 job=$(aliyun cas CreateDeploymentJob \
   --profile "$aliyunProfile" \
   --region "$aliyunRegion" \
@@ -109,18 +181,22 @@ job=$(aliyun cas CreateDeploymentJob \
   --Name "$jobName" \
   --ResourceIds "$vodId" \
   --ContactIds "$contactId")
-jobId=$(echo "$job" | jq -r '.JobId')
 
-echo "Setting the deployment job status to pending..."
+jobId=$(echo "$job" | jq -e -r '.JobId') || fail "Missing JobId"
+
+log "Setting job status to pending..."
+
 aliyun cas UpdateDeploymentJobStatus \
   --profile "$aliyunProfile" \
   --region "$aliyunRegion" \
   --JobId "$jobId" \
   --Status pending
 
-echo "Deployment job created with ID: ${jobId}"
+# ----------------------------
+# Final output
+# ----------------------------
+log "Deployment job created: $jobId"
 
-echo "To check job status:"
 echo
-echo "aliyun cas --profile ${aliyunProfile} --region ${aliyunRegion} DescribeDeploymentJob --JobId ${jobID}"
-exit 0
+echo "Check status with:"
+echo "aliyun cas --profile $aliyunProfile --region $aliyunRegion DescribeDeploymentJob --JobId $jobId"

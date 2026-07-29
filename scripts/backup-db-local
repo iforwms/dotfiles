@@ -4,7 +4,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-script_name=backuop-db-local
+script_name=backup-db-local
 base_dir=/var/www/jukebox
 server=me
 
@@ -29,4 +29,3 @@ success_msg="DB backup success!"
 osascript -e "display notification \"${success_msg}\" sound name \"Blow\""
 
 echo -e "${GREEN}[${script_name}] All done!${NC}"
-exit 0

@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+script_name=domea-sql
+server=felix
+container=supabase-db
+db_user=postgres
+db_name=postgres
+
+usage="usage: ${script_name} <sql | file.sql> [extra psql flags]
+       ${script_name} < query.sql
+
+examples:
+  ${script_name} \"select count(*) from orders\"
+  ${script_name} \"select * from profiles limit 5\" -x
+  ${script_name} report.sql --csv"
+
+query="$1"
+
+if [[ "$query" == "-h" || "$query" == "--help" ]]; then
+    echo "$usage"
+    exit 0
+fi
+
+if [[ -n "$query" ]]; then
+    shift
+    # allow a path to a .sql file instead of an inline query
+    if [[ -f "$query" ]]; then
+        query="$(cat "$query")"
+    fi
+elif [[ ! -t 0 ]]; then
+    query="$(cat)"
+else
+    echo "Please supply an SQL query."
+    echo "$usage"
+    exit 1
+fi
+
+# quote any extra psql flags so they survive the remote shell
+psql_flags=""
+for flag in "$@"; do
+    psql_flags+=" $(printf '%q' "$flag")"
+done
+
+# the query travels on stdin, so it never gets re-parsed by the remote shell
+printf '%s\n' "$query" | ssh "$server" \
+    "docker exec -i ${container} psql -U ${db_user} -d ${db_name} -v ON_ERROR_STOP=1${psql_flags}"
+
+exit 0

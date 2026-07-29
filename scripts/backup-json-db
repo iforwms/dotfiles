@@ -4,6 +4,11 @@ destination="/Users/ifor/Documents/backup/db_json"
 today="$(date +%Y-%m-%d)"
 KEEP=3
 
+echo "Backing up ulystisses..."
+filename="ulystisses_${today}"
+base_dir="/var/www/ulystisses/database"
+rsync --verbose --times --compress "me:${base_dir}/database.sqlite" "${destination}/${filename}.sqlite"
+
 echo "Backing up pool stats..."
 filename="backup_pool_stats_${today}"
 base_dir="/var/www/pool_stats/db"
@@ -84,6 +89,7 @@ prune_backups() {
 
 echo "Cleaning up old backups (keeping newest $KEEP non-empty)..."
 shopt -s nullglob
+prune_backups "${destination}"/ulystisses_*.sqlite
 prune_backups "${destination}"/backup_pool_stats_*.sqlite
 prune_backups "${destination}"/backup_bbsl_*.json
 prune_backups "${destination}"/backup_darts_stats_*_players.json
