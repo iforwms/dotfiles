@@ -1,0 +1,228 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+green='\033[0;32m'
+yellow='\033[0;33m'
+red='\033[0;31m'
+nc='\033[0m'
+
+script_name=le-autorenew
+ssl_root=/etc/nginx/ssl
+
+usage="usage: ${script_name} <web_root> <domain> [domain_2 ...]
+
+Issues a Let's Encrypt certificate for each domain (webroot validation against
+<web_root>), installs it into ${ssl_root}/<domain>/ and registers that path with
+acme.sh, so every renewal from then on is written there and nginx is reloaded.
+
+example:
+  ${script_name} /var/www/husfokus/public husfokus.com www.husfokus.com"
+
+web_root="$1"
+domains=("${@:2}")
+
+if [[ "$web_root" == "-h" || "$web_root" == "--help" ]]; then
+    echo "$usage"
+    exit 0
+fi
+
+if [[ "$#" -lt 2 ]]; then
+    echo -e "${red}[${script_name}] Please supply a web root directory and at least one domain.${nc}"
+    echo "$usage"
+    exit 1
+fi
+
+if [[ ! -d "$web_root" ]]; then
+    echo -e "${red}[${script_name}] Web root '${web_root}' does not exist, aborting.${nc}"
+    exit 1
+fi
+
+# acme.sh has to run as the user that owns the account, so this script is run
+# unprivileged and only escalates for the writes under /etc/nginx.
+if [[ $(id -u) -eq 0 ]]; then
+    sudo=""
+else
+    sudo="sudo"
+fi
+
+acme=""
+for candidate in \
+    "${ACME_SH}" \
+    "$(command -v acme.sh || true)" \
+    "${HOME}/.acme.sh/acme.sh" \
+    "/home/${SUDO_USER:-ifor}/.acme.sh/acme.sh"; do
+    if [[ -n "$candidate" && -x "$candidate" ]]; then
+        acme="$candidate"
+        break
+    fi
+done
+
+if [[ -z "$acme" ]]; then
+    echo -e "${red}[${script_name}] acme.sh not found. Install it or set ACME_SH to its path.${nc}"
+    exit 1
+fi
+
+# absolute paths throughout: cron has a minimal PATH, and a sudoers NOPASSWD
+# rule only matches the fully-qualified command
+nginx_bin="$(command -v nginx || true)"
+if [[ -z "$nginx_bin" ]]; then
+    for candidate in /usr/sbin/nginx /usr/local/sbin/nginx; do
+        if [[ -x "$candidate" ]]; then
+            nginx_bin="$candidate"
+            break
+        fi
+    done
+fi
+
+systemctl_bin="$(command -v systemctl || true)"
+
+if [[ -n "$systemctl_bin" ]]; then
+    reload_bin="$systemctl_bin"
+    reload_args=(reload nginx)
+elif [[ -n "$nginx_bin" ]]; then
+    reload_bin="$nginx_bin"
+    reload_args=(-s reload)
+else
+    echo -e "${red}[${script_name}] Neither systemctl nor nginx found, aborting.${nc}"
+    exit 1
+fi
+
+reload_cmd="${sudo:+sudo }${reload_bin} ${reload_args[*]}"
+
+echo -e "${green}[${script_name}] Using ${acme}${nc}"
+
+installed=()
+failed=()
+
+for domain in "${domains[@]}"; do
+    echo -e "${green}[${script_name}] Issuing certificate for ${domain}...${nc}"
+
+    set +e
+    "$acme" --issue \
+        -d "$domain" \
+        -w "$web_root" \
+        --server letsencrypt \
+        --keylength ec-256
+    issue_status=$?
+    set -e
+
+    # 0 = issued, 2 = a valid cert already exists and acme.sh skipped renewal
+    if [[ $issue_status -ne 0 && $issue_status -ne 2 ]]; then
+        echo -e "${red}[${script_name}] Issuing failed for ${domain} (exit ${issue_status}), skipping.${nc}"
+        failed+=("$domain")
+        continue
+    fi
+
+    domain_dir="${ssl_root}/${domain}"
+
+    echo -e "${green}[${script_name}] Installing certificate to ${domain_dir}...${nc}"
+    $sudo mkdir -p "$domain_dir"
+    # owned by the issuing user so unattended renewals can rewrite the files
+    $sudo chown "$(id -un):$(id -gn)" "$domain_dir"
+    $sudo chmod 750 "$domain_dir"
+
+    # --install-cert both copies the files now and records the destination in
+    # acme.sh's config, which is what makes future renewals land here too
+    "$acme" --install-cert \
+        -d "$domain" \
+        --ecc \
+        --key-file "${domain_dir}/privkey.pem" \
+        --fullchain-file "${domain_dir}/fullchain.pem" \
+        --cert-file "${domain_dir}/cert.pem" \
+        --ca-file "${domain_dir}/chain.pem" \
+        --reloadcmd "$reload_cmd"
+
+    chmod 640 "${domain_dir}/privkey.pem"
+    installed+=("$domain")
+done
+
+if [[ ${#installed[@]} -eq 0 ]]; then
+    echo -e "${red}[${script_name}] No certificates were installed.${nc}"
+    exit 1
+fi
+
+echo -e "${green}[${script_name}] Ensuring the acme.sh renewal cron job is installed...${nc}"
+"$acme" --install-cronjob || true
+crontab -l 2>/dev/null | grep acme || true
+
+check_passwordless_reload() {
+    # -k ignores the password cached earlier in this run, so this tests the
+    # sudoers rules themselves — which is what a cron renewal will face.
+    # The probe is the real reload: harmless, and the reload is wanted anyway.
+    sudo -k -n "$reload_bin" "${reload_args[@]}" >/dev/null 2>&1
+}
+
+if [[ -n "$sudo" ]]; then
+    echo -e "${green}[${script_name}] Checking that an unattended renewal can reload nginx...${nc}"
+
+    if check_passwordless_reload; then
+        echo -e "${green}[${script_name}] Passwordless sudo works, renewals will reload nginx.${nc}"
+    else
+        sudoers_file="/etc/sudoers.d/${script_name}"
+        sudoers_rule="$(id -un) ALL=(root) NOPASSWD: ${reload_bin} ${reload_args[*]}"
+        sudoers_tmp="$(mktemp)"
+
+        echo -e "${yellow}[${script_name}] Passwordless sudo failed, so a renewal from cron cannot reload nginx.${nc}"
+        echo -e "${yellow}[${script_name}] This can be fixed by granting that one command, and nothing else:${nc}"
+        echo
+        echo "  ${sudoers_rule}"
+        echo
+        echo "  # written with:"
+        echo "  echo '<rule above>' > ${sudoers_tmp}"
+        echo "  sudo visudo -cf ${sudoers_tmp}"
+        echo "  sudo install -m 0440 -o root -g root ${sudoers_tmp} ${sudoers_file}"
+        echo
+
+        if [[ ! -t 0 ]]; then
+            echo -e "${yellow}[${script_name}] Not running interactively, skipping. Run those by hand to fix it.${nc}"
+        else
+            read -p "Write this sudoers rule? (y/n) " -n 1 -r
+            echo
+
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                if ! sudo grep -qE '^[@#]includedir[[:space:]]+/etc/sudoers\.d' /etc/sudoers; then
+                    echo -e "${red}[${script_name}] /etc/sudoers does not include /etc/sudoers.d, the rule would be ignored. Aborting.${nc}"
+                else
+                    echo "$sudoers_rule" > "$sudoers_tmp"
+
+                    # syntax check before anything lands in /etc/sudoers.d: a
+                    # malformed file there breaks sudo for every command
+                    if ! sudo visudo -cf "$sudoers_tmp"; then
+                        echo -e "${red}[${script_name}] Rule failed visudo's syntax check, nothing was written.${nc}"
+                    else
+                        sudo install -m 0440 -o root -g root "$sudoers_tmp" "$sudoers_file"
+                        echo -e "${green}[${script_name}] Wrote ${sudoers_file}${nc}"
+
+                        if check_passwordless_reload; then
+                            echo -e "${green}[${script_name}] Passwordless reload now works.${nc}"
+                        else
+                            echo -e "${red}[${script_name}] Rule installed but the reload still asks for a password, check ${sudoers_file}.${nc}"
+                        fi
+                    fi
+                fi
+            fi
+        fi
+
+        rm -f "$sudoers_tmp"
+    fi
+fi
+
+echo
+echo -e "${green}[${script_name}] Installed certificates for: ${installed[*]}${nc}"
+echo "Point nginx at them with:"
+for domain in "${installed[@]}"; do
+    echo
+    echo "  # ${domain}"
+    echo "  ssl_certificate     ${ssl_root}/${domain}/fullchain.pem;"
+    echo "  ssl_certificate_key ${ssl_root}/${domain}/privkey.pem;"
+done
+echo
+
+if [[ ${#failed[@]} -gt 0 ]]; then
+    echo -e "${red}[${script_name}] Failed for: ${failed[*]}${nc}"
+    exit 1
+fi
+
+echo -e "${green}[${script_name}] All done! Reload nginx once its config points at the new paths.${nc}"
+exit 0
