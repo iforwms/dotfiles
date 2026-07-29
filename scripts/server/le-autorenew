@@ -90,6 +90,17 @@ fi
 
 reload_cmd="${sudo:+sudo }${reload_bin} ${reload_args[*]}"
 
+# where acme.sh keeps its certs, so the store can be checked before installing
+acme_home="$(dirname "$acme")"
+cert_home="$acme_home"
+account_conf="${acme_home}/account.conf"
+if [[ -f "$account_conf" ]]; then
+    conf_cert_home="$(grep -E "^CERT_HOME=" "$account_conf" | tail -1 | cut -d= -f2- | tr -d "'\"" || true)"
+    if [[ -n "$conf_cert_home" ]]; then
+        cert_home="$conf_cert_home"
+    fi
+fi
+
 echo -e "${green}[${script_name}] Using ${acme}${nc}"
 
 installed=()
@@ -114,6 +125,28 @@ for domain in "${domains[@]}"; do
         continue
     fi
 
+    # acme.sh copies these out of its own store, so check they are actually
+    # there first: a store missing its key fails inside acme.sh with nothing
+    # but a bare "cat: ... No such file or directory"
+    store_dir="${cert_home}/${domain}_ecc"
+    store_key="${store_dir}/${domain}.key"
+    store_fullchain="${store_dir}/fullchain.cer"
+    store_incomplete=""
+
+    [[ -f "$store_key" ]] || store_incomplete+=" ${store_key}"
+    [[ -f "$store_fullchain" ]] || store_incomplete+=" ${store_fullchain}"
+
+    if [[ -n "$store_incomplete" ]]; then
+        echo -e "${red}[${script_name}] acme.sh's store for ${domain} is incomplete, missing:${nc}"
+        for missing in $store_incomplete; do
+            echo -e "${red}    ${missing}${nc}"
+        done
+        echo -e "${red}[${script_name}] Nothing can be installed from it. Restore the missing files, or reissue with:${nc}"
+        echo -e "${red}    ${acme} --issue -d ${domain} -w ${web_root} --server letsencrypt --keylength ec-256 --force${nc}"
+        failed+=("$domain")
+        continue
+    fi
+
     domain_dir="${ssl_root}/${domain}"
 
     echo -e "${green}[${script_name}] Installing certificate to ${domain_dir}...${nc}"
@@ -124,6 +157,7 @@ for domain in "${domains[@]}"; do
 
     # --install-cert both copies the files now and records the destination in
     # acme.sh's config, which is what makes future renewals land here too
+    set +e
     "$acme" --install-cert \
         -d "$domain" \
         --ecc \
@@ -132,19 +166,36 @@ for domain in "${domains[@]}"; do
         --cert-file "${domain_dir}/cert.pem" \
         --ca-file "${domain_dir}/chain.pem" \
         --reloadcmd "$reload_cmd"
+    install_status=$?
+    set -e
+
+    # one bad domain must not abort the run, or later domains and the cron job
+    # below never get their turn
+    if [[ $install_status -ne 0 ]]; then
+        echo -e "${red}[${script_name}] Installing failed for ${domain} (exit ${install_status}).${nc}"
+        echo -e "${red}[${script_name}] ${domain_dir} may hold a partial copy, check it before pointing nginx at it.${nc}"
+        failed+=("$domain")
+        continue
+    fi
 
     chmod 640 "${domain_dir}/privkey.pem"
     installed+=("$domain")
 done
 
+# always, even if every domain failed: renewal being automated is the whole
+# point of the script, and it is independent of today's certificates
+echo -e "${green}[${script_name}] Ensuring the acme.sh renewal cron job is installed...${nc}"
+"$acme" --install-cronjob || true
+if crontab -l 2>/dev/null | grep acme; then
+    :
+else
+    echo -e "${yellow}[${script_name}] No acme.sh entry in $(id -un)'s crontab, renewals are NOT automated.${nc}"
+fi
+
 if [[ ${#installed[@]} -eq 0 ]]; then
     echo -e "${red}[${script_name}] No certificates were installed.${nc}"
     exit 1
 fi
-
-echo -e "${green}[${script_name}] Ensuring the acme.sh renewal cron job is installed...${nc}"
-"$acme" --install-cronjob || true
-crontab -l 2>/dev/null | grep acme || true
 
 check_passwordless_reload() {
     # -k ignores the password cached earlier in this run, so this tests the
