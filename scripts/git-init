@@ -27,11 +27,11 @@ if [[ -z "$project_name" ]]; then
   exit 1
 fi
 
-if [[ "$1" == *"-"* ]]; then
-  echo -e "${RED}[${script_name}] Project name cannot contain hyphens, only underscores, aborting...${NC}"
-  echo -e "${YELLOW}[${script_name}] ${usage}${NC}"
-  exit 1
-fi
+# if [[ "$1" == *"-"* ]]; then
+#   echo -e "${RED}[${script_name}] Project name cannot contain hyphens, only underscores, aborting...${NC}"
+#   echo -e "${YELLOW}[${script_name}] ${usage}${NC}"
+#   exit 1
+# fi
 
 mkdir -p "$repo_path"
 read -p "Do you wish to create default directory structure? (y/n) " -n 1 -r make_dirs
