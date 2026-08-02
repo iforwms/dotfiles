@@ -10,32 +10,64 @@ nc='\033[0m'
 script_name=le-autorenew
 ssl_root=/etc/nginx/ssl
 
-usage="usage: ${script_name} <web_root> <domain> [domain_2 ...]
+usage="usage: ${script_name} [web_root] <domain> [domain_2 ...]
 
 Issues a Let's Encrypt certificate for each domain (webroot validation against
 <web_root>), installs it into ${ssl_root}/<domain>/ and registers that path with
 acme.sh, so every renewal from then on is written there and nginx is reloaded.
 
-example:
-  ${script_name} /var/www/husfokus/public husfokus.com www.husfokus.com"
+A wildcard domain is validated over DNS-01 instead, so it needs no web root, and
+is issued together with its apex (a wildcard does not cover it) under the apex's
+name. It needs a DNS provider hook in ACME_DNS, plus that provider's credentials
+in the environment the first time — acme.sh saves them for renewals. Quote the
+wildcard, or the shell will try to expand it.
 
-web_root="$1"
-domains=("${@:2}")
+Set ACME_CHALLENGE_ALIAS to validate through a delegated zone, for a provider
+whose API is unusable or too privileged to hand over. Point the challenge at the
+alias zone once, by hand, and only that zone is ever written to:
 
-if [[ "$web_root" == "-h" || "$web_root" == "--help" ]]; then
+  _acme-challenge.husfokus.com.  CNAME  _acme-challenge.<alias_zone>.
+
+examples:
+  ${script_name} /var/www/husfokus/public husfokus.com www.husfokus.com
+  CF_Token=... ACME_DNS=dns_cf ${script_name} '*.husfokus.com'
+  CF_Token=... ACME_DNS=dns_cf ACME_CHALLENGE_ALIAS=acme.example.net ${script_name} '*.husfokus.com'"
+
+if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     echo "$usage"
     exit 0
 fi
 
-if [[ "$#" -lt 2 ]]; then
-    echo -e "${red}[${script_name}] Please supply a web root directory and at least one domain.${nc}"
+# a leading '*.' is a domain, never a path, so the web root can simply be left
+# out when the first argument is a wildcard
+if [[ "$1" == \*.* ]]; then
+    web_root=""
+    domains=("$@")
+else
+    web_root="$1"
+    domains=("${@:2}")
+fi
+
+if [[ ${#domains[@]} -eq 0 ]]; then
+    echo -e "${red}[${script_name}] Please supply at least one domain, and a web root for any that is not a wildcard.${nc}"
     echo "$usage"
     exit 1
 fi
 
-if [[ ! -d "$web_root" ]]; then
+if [[ -n "$web_root" && ! -d "$web_root" ]]; then
     echo -e "${red}[${script_name}] Web root '${web_root}' does not exist, aborting.${nc}"
     exit 1
+fi
+
+# only the wildcards can do without one, so anything else is a missing argument
+if [[ -z "$web_root" ]]; then
+    for domain in "${domains[@]}"; do
+        if [[ "$domain" != \*.* ]]; then
+            echo -e "${red}[${script_name}] '${domain}' is validated over HTTP-01 and needs a web root, which was not given.${nc}"
+            echo "$usage"
+            exit 1
+        fi
+    done
 fi
 
 # acme.sh has to run as the user that owns the account, so this script is run
@@ -103,16 +135,75 @@ fi
 
 echo -e "${green}[${script_name}] Using ${acme}${nc}"
 
+# a wildcard can only be validated over DNS-01, so it needs a provider hook.
+# acme.sh writes the credentials it was handed into account.conf as SAVED_*,
+# which is enough to recognise a provider already used on this box.
+dns_hook="${ACME_DNS:-}"
+
+if [[ -z "$dns_hook" && -f "$account_conf" ]]; then
+    for pair in CF_Token:dns_cf CF_Key:dns_cf Ali_Key:dns_ali AWS_ACCESS_KEY_ID:dns_aws \
+        DP_Id:dns_dp GD_Key:dns_gd DO_API_KEY:dns_dgon NAMESILO_Key:dns_namesilo \
+        HE_Username:dns_he LUA_Key:dns_lua; do
+        if grep -qE "^SAVED_${pair%%:*}=" "$account_conf"; then
+            dns_hook="${pair##*:}"
+            echo -e "${green}[${script_name}] Using DNS hook ${dns_hook}, inferred from saved credentials.${nc}"
+            break
+        fi
+    done
+fi
+
+# with the challenge delegated by a permanent CNAME, the TXT record is written
+# in the alias zone instead, so the hook's credentials never need any power
+# over the real zone
+challenge_alias="${ACME_CHALLENGE_ALIAS:-}"
+
+if [[ -n "$challenge_alias" ]]; then
+    echo -e "${green}[${script_name}] Validating through the alias zone ${challenge_alias}.${nc}"
+fi
+
+for domain in "${domains[@]}"; do
+    if [[ "$domain" == \*.* && -z "$dns_hook" ]]; then
+        echo -e "${red}[${script_name}] '${domain}' needs DNS-01 validation, but no DNS provider hook is set.${nc}"
+        echo -e "${red}[${script_name}] Set ACME_DNS to the acme.sh hook and export its credentials once, e.g.:${nc}"
+        echo
+        echo "  CF_Token=<token> ACME_DNS=dns_cf ${script_name} ${web_root:+${web_root} }'${domain}'"
+        echo
+        echo "  # every hook and the variables it wants:"
+        echo "  ${acme} --dnshelp"
+        echo
+        echo -e "${red}[${script_name}] acme.sh saves the credentials, so later runs and renewals only need ACME_DNS.${nc}"
+        exit 1
+    fi
+done
+
 installed=()
 failed=()
 
 for domain in "${domains[@]}"; do
-    echo -e "${green}[${script_name}] Issuing certificate for ${domain}...${nc}"
+    # a wildcard does not cover its own apex, and naming the cert after the apex
+    # also keeps a '*' out of the install path, so the two are issued together
+    if [[ "$domain" == \*.* ]]; then
+        cert_name="${domain#*.}"
+        issue_args=(-d "$cert_name" -d "$domain" --dns "$dns_hook")
+        # quoted, because the hint below is meant to be pasted into a shell
+        issue_hint="-d ${cert_name} -d '${domain}' --dns ${dns_hook}"
+
+        if [[ -n "$challenge_alias" ]]; then
+            issue_args+=(--challenge-alias "$challenge_alias")
+            issue_hint+=" --challenge-alias ${challenge_alias}"
+        fi
+
+        echo -e "${green}[${script_name}] Issuing certificate for ${domain} and ${cert_name} over DNS-01...${nc}"
+    else
+        cert_name="$domain"
+        issue_args=(-d "$domain" -w "$web_root")
+        issue_hint="${issue_args[*]}"
+        echo -e "${green}[${script_name}] Issuing certificate for ${domain}...${nc}"
+    fi
 
     set +e
     "$acme" --issue \
-        -d "$domain" \
-        -w "$web_root" \
+        "${issue_args[@]}" \
         --server letsencrypt \
         --keylength ec-256
     issue_status=$?
@@ -128,8 +219,8 @@ for domain in "${domains[@]}"; do
     # acme.sh copies these out of its own store, so check they are actually
     # there first: a store missing its key fails inside acme.sh with nothing
     # but a bare "cat: ... No such file or directory"
-    store_dir="${cert_home}/${domain}_ecc"
-    store_key="${store_dir}/${domain}.key"
+    store_dir="${cert_home}/${cert_name}_ecc"
+    store_key="${store_dir}/${cert_name}.key"
     store_fullchain="${store_dir}/fullchain.cer"
     store_incomplete=""
 
@@ -137,17 +228,17 @@ for domain in "${domains[@]}"; do
     [[ -f "$store_fullchain" ]] || store_incomplete+=" ${store_fullchain}"
 
     if [[ -n "$store_incomplete" ]]; then
-        echo -e "${red}[${script_name}] acme.sh's store for ${domain} is incomplete, missing:${nc}"
+        echo -e "${red}[${script_name}] acme.sh's store for ${cert_name} is incomplete, missing:${nc}"
         for missing in $store_incomplete; do
             echo -e "${red}    ${missing}${nc}"
         done
         echo -e "${red}[${script_name}] Nothing can be installed from it. Restore the missing files, or reissue with:${nc}"
-        echo -e "${red}    ${acme} --issue -d ${domain} -w ${web_root} --server letsencrypt --keylength ec-256 --force${nc}"
+        echo -e "${red}    ${acme} --issue ${issue_hint} --server letsencrypt --keylength ec-256 --force${nc}"
         failed+=("$domain")
         continue
     fi
 
-    domain_dir="${ssl_root}/${domain}"
+    domain_dir="${ssl_root}/${cert_name}"
 
     echo -e "${green}[${script_name}] Installing certificate to ${domain_dir}...${nc}"
     $sudo mkdir -p "$domain_dir"
@@ -159,7 +250,7 @@ for domain in "${domains[@]}"; do
     # acme.sh's config, which is what makes future renewals land here too
     set +e
     "$acme" --install-cert \
-        -d "$domain" \
+        -d "$cert_name" \
         --ecc \
         --key-file "${domain_dir}/privkey.pem" \
         --fullchain-file "${domain_dir}/fullchain.pem" \
@@ -179,7 +270,7 @@ for domain in "${domains[@]}"; do
     fi
 
     chmod 640 "${domain_dir}/privkey.pem"
-    installed+=("$domain")
+    installed+=("$cert_name")
 done
 
 # always, even if every domain failed: renewal being automated is the whole
