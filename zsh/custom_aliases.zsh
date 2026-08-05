@@ -69,6 +69,9 @@ alias scrs='sudo systemctl restart'
 alias scs='sudo systemctl status'
 
 
+alias ds='domea-sql'
+
+
 # Apt
 alias iap='sudo apt install'
 alias uap='sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y'

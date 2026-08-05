@@ -227,3 +227,5 @@ export PATH="/Users/ifor/Library/Application Support/Herd/bin/":$PATH
 export HERD_PHP_74_INI_SCAN_DIR="/Users/ifor/Library/Application Support/Herd/config/php/74/"
 export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
 export PATH="$JAVA_HOME/bin:$PATH"
+
+export HEALTHCHECK_ENV_FILE="/Users/ifor/code/husfokus/.env.development.local"
