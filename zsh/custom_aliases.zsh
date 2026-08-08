@@ -69,7 +69,7 @@ alias scrs='sudo systemctl restart'
 alias scs='sudo systemctl status'
 
 
-alias ds='domea-sql'
+alias ds="${HOME}/code/husfokus/src/v2/scripts/domea-sql"
 
 
 # Apt
