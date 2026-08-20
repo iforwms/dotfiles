@@ -229,3 +229,13 @@ export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
 export PATH="$JAVA_HOME/bin:$PATH"
 
 export HEALTHCHECK_ENV_FILE="/Users/ifor/code/husfokus/.env.development.local"
+
+# Domea iOS
+export ASC_KEY_ID=S7JJDH35KA
+export ASC_ISSUER_ID=41ccdb7a-b559-4657-8c47-fd6b057c7a04
+export ASC_KEY_PATH=$PWD/fastlane/AuthKey_S7JJDH35KA.p8
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+export ASC_DEMO_USER=appreview@domea.io
+export ASC_DEMO_PASSWORD='husfokus123'
+
+export FASTLANE_HIDE_CHANGELOG=true

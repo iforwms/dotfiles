@@ -28,6 +28,21 @@ retry() {
 }
 
 # ----------------------------
+# Argument parsing
+# ----------------------------
+force=0
+positional=()
+
+for arg in "$@"; do
+  case "$arg" in
+    -f|--force) force=1 ;;
+    *) positional+=("$arg") ;;
+  esac
+done
+
+set -- ${positional[@]+"${positional[@]}"}
+
+# ----------------------------
 # Profile selection
 # ----------------------------
 profile="${1:-domino}"
@@ -53,7 +68,7 @@ else
 fi
 
 if [ -z "$domain" ]; then
-  fail "Usage: $0 <domain> [VOD Service ID] [Contact ID]"
+  fail "Usage: $0 [--force] <domain> [VOD Service ID] [Contact ID]"
 fi
 
 CONFIG_FILE="$HOME/.aliyun/config.json"
@@ -77,9 +92,6 @@ Ali_Secret=$(jq -r --arg p "$aliyunProfile" '
 
 export Ali_Key Ali_Secret
 
-echo $Ali_Secret
-echo $Ali_Key
-
 # ----------------------------
 # Dependencies
 # ----------------------------
@@ -101,6 +113,7 @@ echo "  VOD ID         : $vodId"
 echo "  Contact ID     : $contactId"
 echo "  Aliyun Profile : $aliyunProfile"
 echo "  Region         : $aliyunRegion"
+echo "  Force renewal  : $([[ "$force" -eq 1 ]] && echo yes || echo no)"
 echo ""
 
 read -r -p "Proceed? (y/Y): " confirm
@@ -116,6 +129,12 @@ KEY_FILE="${ACME_DIR}/${domain}.key"
 
 issue_cert() {
   local ca="$1"
+  local rc=0
+  local force_arg=()
+
+  if [[ "$force" -eq 1 ]]; then
+    force_arg=(--force)
+  fi
 
   log "Issuing certificate using CA: $ca"
 
@@ -123,7 +142,16 @@ issue_cert() {
     -d "$domain" \
     --dns dns_ali \
     --server "$ca" \
-    --debug 2 || return 1
+    ${force_arg[@]+"${force_arg[@]}"} \
+    --debug 2 || rc=$?
+
+  # acme.sh exits 2 (RENEW_SKIP) when the existing cert is still valid.
+  # That is not a failure: the cert on disk is good and can be redeployed.
+  if [[ "$rc" -eq 2 ]]; then
+    log "Certificate not due for renewal; reusing existing cert (pass --force to renew anyway)"
+  elif [[ "$rc" -ne 0 ]]; then
+    return 1
+  fi
 
   [[ -f "$CERT_FILE" ]] || return 1
   [[ -f "$KEY_FILE" ]] || return 1

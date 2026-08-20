@@ -70,6 +70,7 @@ alias scs='sudo systemctl status'
 
 
 alias ds="${HOME}/code/husfokus/src/v2/scripts/domea-sql"
+alias dm="${HOME}/code/husfokus/src/v2/scripts/domea-migrate"
 
 
 # Apt
