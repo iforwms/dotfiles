@@ -235,7 +235,9 @@ export ASC_KEY_ID=S7JJDH35KA
 export ASC_ISSUER_ID=41ccdb7a-b559-4657-8c47-fd6b057c7a04
 export ASC_KEY_PATH=$PWD/fastlane/AuthKey_S7JJDH35KA.p8
 export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
-export ASC_DEMO_USER=appreview@domea.io
-export ASC_DEMO_PASSWORD='husfokus123'
 
 export FASTLANE_HIDE_CHANGELOG=true
+
+
+# Herd injected PHP 8.5 configuration.
+export HERD_PHP_85_INI_SCAN_DIR="/Users/ifor/Library/Application Support/Herd/config/php/85"

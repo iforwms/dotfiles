@@ -68,10 +68,10 @@ alias scr='sudo systemctl reload'
 alias scrs='sudo systemctl restart'
 alias scs='sudo systemctl status'
 
-
+# Domea
 alias ds="${HOME}/code/husfokus/src/v2/scripts/domea-sql"
 alias dm="${HOME}/code/husfokus/src/v2/scripts/domea-migrate"
-
+alias iosv="bundle exec fastlane ios versions"
 
 # Apt
 alias iap='sudo apt install'
@@ -156,6 +156,19 @@ alias cab="cargo build"
 alias cabr="cargo build --release"
 alias car="cargo run"
 alias cac="cargo check"
+
+function ytd() {
+  yt-dlp \
+    -f "bv*[height<=720]+ba/b[height<=720]" \
+    --merge-output-format mp4 \
+    --continue \
+    --ignore-errors \
+    --concurrent-fragments 5 \
+    --cookies-from-browser firefox \
+    -o "%(uploader)s/%(title)s.%(ext)s" \
+    "$1"
+}
+alias ytd='noglob ytd'
 
 # Android
 alias apk="./gradlew assembleDebug && scp ./app/build/outputs/apk/debug/app-debug.apk clients:~/code/iforwms/public/music"
