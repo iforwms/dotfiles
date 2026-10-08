@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -o pipefail
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
@@ -8,7 +10,7 @@ script_name=backup-db
 
 password_file="${HOME}/mysql_pass"
 if [[ ! -r "$password_file" ]]; then
-  echo -e "${RED}[${script_name}] Cannot find MySQL password file, aborting.${NC}"
+  echo -e "${RED}[${script_name}] Cannot find MySQL password file, aborting.${NC}" >&2
   exit 1
 fi
 
@@ -20,23 +22,32 @@ now=$(date +"%F")
 password=$(cat "$password_file")
 
 if [[ -z "$databases" ]]; then
-  databases=$(mysql -h $hostname -u $user -p$password -s -N -e "SHOW DATABASES;" | \
-    grep -v "information_schema\|mysql\|performance_schema\|sys")
+  if ! all_databases=$(mysql -h $hostname -u $user -p$password -s -N -e "SHOW DATABASES;"); then
+    echo -e "${RED}[${script_name}] Cannot list databases as ${user}, aborting.${NC}" >&2
+    exit 1
+  fi
+  databases=$(echo "$all_databases" | grep -vxE "information_schema|mysql|performance_schema|sys")
+fi
+
+if [[ -z "$databases" ]]; then
+  echo -e "${RED}[${script_name}] No databases to back up, aborting.${NC}" >&2
+  exit 1
 fi
 
 mkdir -p $backup_dir 2>/dev/null
 
 echo -e "${GREEN}[${script_name}] Backing up databases...${NC}"
 
+failed=()
 for db in $databases; do
   file="${backup_dir}/${db}.sql.gz"
   filedate=
 
   [ -f "$file" ] && filedate=$(date -r "$file" +"%F")
   [ "$filedate" == "$now" ] && [[ -z $1 ]] && continue
-  [ -f "$file" ] && mv "$file" "${file}.old"
 
-  mysqldump \
+  # Dump to a temp file so a failed dump never replaces the last good one.
+  if mysqldump \
     --single-transaction \
     --routines \
     --quick \
@@ -44,10 +55,19 @@ for db in $databases; do
     -u $user \
     -p$password \
     -B "$db" | \
-    gzip > "$file"
-
-  rm -f "${file}.old"
+    gzip > "${file}.tmp"; then
+    mv "${file}.tmp" "$file"
+  else
+    rm -f "${file}.tmp"
+    failed+=("$db")
+    echo -e "${RED}[${script_name}] Failed to back up ${db}, kept the previous dump.${NC}" >&2
+  fi
 done
+
+if (( ${#failed[@]} )); then
+  echo -e "${RED}[${script_name}] Backup FAILED for: ${failed[*]}${NC}" >&2
+  exit 1
+fi
 
 echo -e "${GREEN}[${script_name}] Backup success!${NC}"
 exit 0
