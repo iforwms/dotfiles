@@ -69,8 +69,8 @@ alias scrs='sudo systemctl restart'
 alias scs='sudo systemctl status'
 
 # Domea
-alias ds="${HOME}/code/husfokus/src/v2/scripts/domea-sql"
-alias dm="${HOME}/code/husfokus/src/v2/scripts/domea-migrate"
+alias ds="${HOME}/code/husfokus/scripts/domea-sql"
+alias dm="${HOME}/code/husfokus/scripts/domea-migrate"
 alias iosv="bundle exec fastlane ios versions"
 
 # Apt
