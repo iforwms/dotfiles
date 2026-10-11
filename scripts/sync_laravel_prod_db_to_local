@@ -1,0 +1,213 @@
+#!/usr/bin/env bash
+#
+# Overwrites the local database of the Laravel project in the current
+# directory with a copy of production's. The server is only ever read: the
+# dump is taken there with the credentials in its own .env and streamed back,
+# so no password crosses the wire or appears on a command line.
+#
+# Supports sqlite and mysql/mariadb. Run it from the local project root.
+
+set -euo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+script_name=sync_laravel_prod_db_to_local
+usage="Usage: ${script_name} <ssh_host> <remote_project_path> (run from the local project root)"
+
+server="${1:-}"
+remote_dir="${2:-}"
+remote_dir="${remote_dir%/}"
+local_dir="$PWD"
+work_dir=''
+staged_db=''
+
+fail() {
+  echo -e "${RED}[${script_name}] $*${NC}" >&2
+  exit 1
+}
+
+cleanup() {
+  if [[ -n "$work_dir" ]]; then rm -rf "$work_dir"; fi
+  if [[ -n "$staged_db" ]]; then rm -f "$staged_db"; fi
+}
+
+# Prints KEY's value from the .env file FILE, unquoted, or nothing when unset.
+env_value() {
+  local file="$1" key="$2" line value
+  if [[ ! -r "$file" ]]; then
+    echo -e "${RED}[${script_name}] Cannot read ${file}, aborting.${NC}" >&2
+    return 1
+  fi
+  line=$(grep -E "^[[:space:]]*(export[[:space:]]+)?${key}[[:space:]]*=" "$file" | tail -n 1 || true)
+  value=${line#*=}
+  value=${value%$'\r'}
+  value=${value#"${value%%[![:space:]]*}"}
+  case "$value" in
+    \"*) value=${value#\"}; value=${value%%\"*} ;;
+    \'*) value=${value#\'}; value=${value%%\'*} ;;
+    *)   value=${value%%[[:space:]]#*}; value=${value%"${value##*[![:space:]]}"} ;;
+  esac
+  printf '%s' "$value"
+}
+
+# Prints where DIR's .env keeps its SQLite file; blank is Laravel's default.
+sqlite_path() {
+  local dir="$1" database
+  database=$(env_value "${dir}/.env" DB_DATABASE)
+  case "$database" in
+    '') echo "${dir}/database/database.sqlite" ;;
+    /*) echo "$database" ;;
+    *)  echo "${dir}/${database}" ;;
+  esac
+}
+
+# Writes a MySQL option file for DIR's .env to FILE.
+write_mysql_options() {
+  local env="$1/.env" file="$2" host port socket user password
+  host=$(env_value "$env" DB_HOST)
+  port=$(env_value "$env" DB_PORT)
+  socket=$(env_value "$env" DB_SOCKET)
+  user=$(env_value "$env" DB_USERNAME)
+  password=$(env_value "$env" DB_PASSWORD)
+  password=${password//\\/\\\\}
+  password=${password//\"/\\\"}
+  {
+    echo '[client]'
+    echo "host=${host:-127.0.0.1}"
+    echo "port=${port:-3306}"
+    if [[ -n "$socket" ]]; then echo "socket=${socket}"; fi
+    echo "user=${user:-root}"
+    echo "password=\"${password}\""
+  } > "$file"
+}
+
+# Runs on the server: writes a gzipped copy of DIR's database to stdout.
+# SQLite goes through .backup so a write landing mid-copy cannot tear it.
+dump_database() {
+  local dir="$1" connection="$2" database tmp
+  tmp=$(mktemp)
+  trap "rm -f '${tmp}'" EXIT
+  case "$connection" in
+    sqlite)
+      database=$(sqlite_path "$dir")
+      sqlite3 -readonly "$database" ".backup '${tmp}'" </dev/null
+      gzip -c "$tmp"
+      ;;
+    mysql|mariadb)
+      database=$(env_value "${dir}/.env" DB_DATABASE)
+      write_mysql_options "$dir" "$tmp"
+      mysqldump --defaults-extra-file="$tmp" --single-transaction --quick --no-tablespaces "$database" </dev/null | gzip -c
+      ;;
+  esac
+}
+
+# Runs a command on the server with the helpers above defined there.
+on_server() {
+  ssh "$server" bash -s <<EOF
+set -euo pipefail
+$(declare -p RED NC script_name)
+$(declare -f env_value sqlite_path write_mysql_options dump_database)
+$(printf '%q ' "$@")
+EOF
+}
+
+# Prod's queued jobs are prod's to run. A local worker would run them a second
+# time, against the same mailboxes and APIs.
+report_emptied_jobs() {
+  local count="$1"
+  if (( count )); then
+    echo -e "${YELLOW}[${script_name}] Emptied the jobs table: ${count} job(s) were queued on prod and are still prod's to run.${NC}"
+  fi
+}
+
+import_sqlite() {
+  local database mode
+  database=$(sqlite_path "$local_dir")
+  staged_db=$(mktemp "${database}.sync.XXXXXX")
+  gunzip -c "${work_dir}/dump.gz" > "$staged_db"
+  if [[ "$(sqlite3 "$staged_db" 'PRAGMA quick_check;' </dev/null)" != ok ]]; then
+    fail "The downloaded database fails its integrity check; ${database} left as it was."
+  fi
+  if [[ "$(sqlite3 "$staged_db" "SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'jobs';" </dev/null)" == 1 ]]; then
+    report_emptied_jobs "$(sqlite3 "$staged_db" 'SELECT count(*) FROM jobs; DELETE FROM jobs;' </dev/null)"
+  fi
+  mode=$(stat -f %Lp "$database" 2>/dev/null || echo 644)
+  chmod "$mode" "$staged_db"
+  # A stale WAL from the old file would be replayed into the new one.
+  rm -f "${database}-wal" "${database}-shm" "${database}-journal"
+  mv -f "$staged_db" "$database"
+  staged_db=''
+  echo -e "${GREEN}[${script_name}] Replaced ${database#"${local_dir}/"}.${NC}"
+}
+
+import_mysql() {
+  local database options
+  database=$(env_value "${local_dir}/.env" DB_DATABASE)
+  options="${work_dir}/client.cnf"
+  write_mysql_options "$local_dir" "$options"
+  mysql --defaults-extra-file="$options" -e "DROP DATABASE IF EXISTS \`${database//\`/\`\`}\`; CREATE DATABASE \`${database//\`/\`\`}\`;"
+  gunzip -c "${work_dir}/dump.gz" | mysql --defaults-extra-file="$options" "$database"
+  if [[ "$(mysql --defaults-extra-file="$options" -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'jobs';" "$database")" == 1 ]]; then
+    report_emptied_jobs "$(mysql --defaults-extra-file="$options" -N -e 'SELECT COUNT(*) FROM jobs; DELETE FROM jobs;' "$database")"
+  fi
+  echo -e "${GREEN}[${script_name}] Replaced database ${database}.${NC}"
+}
+
+if [[ -z "$server" || -z "$remote_dir" ]]; then
+  echo -e "${RED}[${script_name}] Missing ssh host or remote project path, aborting...${NC}"
+  echo -e "${YELLOW}[${script_name}] ${usage}${NC}"
+  exit 1
+fi
+
+if [[ ! -f "${local_dir}/artisan" || ! -f "${local_dir}/.env" ]]; then
+  echo -e "${RED}[${script_name}] ${local_dir} is not a Laravel project with a .env, aborting...${NC}"
+  echo -e "${YELLOW}[${script_name}] ${usage}${NC}"
+  exit 1
+fi
+
+if [[ "$(env_value "${local_dir}/.env" APP_ENV)" == production ]]; then
+  fail "${local_dir}/.env says APP_ENV=production, refusing to overwrite its database."
+fi
+
+echo -e "${GREEN}[${script_name}] Reading ${server}:${remote_dir}/.env...${NC}"
+prod_connection=$(on_server env_value "${remote_dir}/.env" DB_CONNECTION)
+prod_connection=${prod_connection:-sqlite}
+local_connection=$(env_value "${local_dir}/.env" DB_CONNECTION)
+local_connection=${local_connection:-sqlite}
+
+if [[ "$prod_connection" != "$local_connection" ]]; then
+  fail "Prod uses ${prod_connection} but this checkout uses ${local_connection}, aborting."
+fi
+
+case "$local_connection" in
+  sqlite)        local_client=sqlite3 ;;
+  mysql|mariadb) local_client=mysql ;;
+  *)             fail "Unsupported DB_CONNECTION '${local_connection}', aborting." ;;
+esac
+
+if ! command -v "$local_client" &>/dev/null; then
+  fail "${local_client} not found on this machine, aborting."
+fi
+
+trap cleanup EXIT
+work_dir=$(mktemp -d "${TMPDIR:-/tmp}/${script_name}.XXXXXX")
+
+echo -e "${GREEN}[${script_name}] Dumping the ${prod_connection} database on ${server}...${NC}"
+on_server dump_database "$remote_dir" "$prod_connection" > "${work_dir}/dump.gz"
+
+# Nothing local is touched until the whole dump has arrived intact.
+if ! gzip -t "${work_dir}/dump.gz" 2>/dev/null; then
+  fail "The dump arrived incomplete, local database left as it was."
+fi
+echo -e "${GREEN}[${script_name}] Downloaded $(du -h "${work_dir}/dump.gz" | cut -f1 | tr -d ' '), loading it...${NC}"
+
+case "$local_connection" in
+  sqlite)        import_sqlite ;;
+  mysql|mariadb) import_mysql ;;
+esac
+
+echo -e "${GREEN}[${script_name}] All done!${NC}"
+exit 0
