@@ -157,7 +157,30 @@ alias cabr="cargo build --release"
 alias car="cargo run"
 alias cac="cargo check"
 
+# -s: burn English subtitles into the video (with HandBrakeCLI), falling back to
+#     auto-generated English if none were uploaded
 function ytd() {
+  local -a burn_subs sub_opts en_subs
+  local out="%(uploader)s/%(title)s.%(ext)s" lang tmp raw srt video
+  zparseopts -D -E -- s=burn_subs
+
+  if (( $#burn_subs )); then
+    en_subs=(${(f)"$(yt-dlp --skip-download --cookies-from-browser firefox --print '%(subtitles)j' "$1" 2>/dev/null \
+      | jq -r 'keys[] | select(test("^en($|-)"))' 2>/dev/null)"})
+    lang=${en_subs[(r)en]:-$en_subs[1]}
+    if [[ -n $lang ]]; then
+      sub_opts=(--write-subs --sub-langs "$lang")
+    else
+      lang=en
+      sub_opts=(--write-auto-subs --sub-langs en)
+    fi
+    # ttml converts to clean srt (YouTube's vtt auto-captions repeat each line)
+    tmp=$(mktemp -d)
+    sub_opts+=(--sub-format "ttml/best" --convert-subs srt --print-to-file after_move:filepath "$tmp/path")
+    # Download under a temporary name so re-running never burns subtitles in twice
+    out="%(uploader)s/%(title)s.nosubs.%(ext)s"
+  fi
+
   yt-dlp \
     -f "bv*[height<=720]+ba/b[height<=720]" \
     --merge-output-format mp4 \
@@ -165,8 +188,35 @@ function ytd() {
     --ignore-errors \
     --concurrent-fragments 5 \
     --cookies-from-browser firefox \
-    -o "%(uploader)s/%(title)s.%(ext)s" \
+    "${sub_opts[@]}" \
+    -o "$out" \
     "$1"
+  local rc=$?
+
+  [[ -n $tmp ]] || return $rc
+  [[ -f $tmp/path ]] && raw=$(<$tmp/path)
+  srt=${raw:r}.$lang.srt
+  video=${raw%.nosubs.*}.mp4
+
+  if [[ ! -f $raw ]]; then
+    : # download failed, yt-dlp has already said why
+  elif [[ ! -f $srt ]]; then
+    echo "ytd: no English subtitles found, keeping the video without them" >&2
+    mv -f "$raw" "$video"
+  else
+    # HandBrake splits --srt-file on commas, so give it a safe filename
+    cp "$srt" "$tmp/subs.srt"
+    if HandBrakeCLI -i "$raw" -o "$video" \
+        -e x264 -q 22 --encoder-preset veryfast --crop-mode none \
+        -E copy --audio-fallback av_aac \
+        --srt-file "$tmp/subs.srt" --srt-codeset UTF-8 --srt-burn -O 2>"$tmp/handbrake.log"; then
+      rm -f "$raw" "$srt"
+    else
+      tail -5 "$tmp/handbrake.log" >&2
+      echo "ytd: burning subtitles failed, kept $raw and $srt" >&2
+    fi
+  fi
+  rm -rf "$tmp"
 }
 alias ytd='noglob ytd'
 
