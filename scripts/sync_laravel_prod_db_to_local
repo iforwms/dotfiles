@@ -23,6 +23,7 @@ remote_dir="${remote_dir%/}"
 local_dir="$PWD"
 work_dir=''
 staged_db=''
+mysql_container=''
 
 fail() {
   echo -e "${RED}[${script_name}] $*${NC}" >&2
@@ -32,6 +33,9 @@ fail() {
 cleanup() {
   if [[ -n "$work_dir" ]]; then rm -rf "$work_dir"; fi
   if [[ -n "$staged_db" ]]; then rm -f "$staged_db"; fi
+  if [[ -n "$mysql_container" ]]; then
+    docker exec "$mysql_container" rm -f "/tmp/${script_name}.cnf" &>/dev/null || true
+  fi
 }
 
 # Prints KEY's value from the .env file FILE, unquoted, or nothing when unset.
@@ -51,6 +55,17 @@ env_value() {
     *)   value=${value%%[[:space:]]#*}; value=${value%"${value##*[![:space:]]}"} ;;
   esac
   printf '%s' "$value"
+}
+
+# Prints DIR's DB_CONNECTION, falling back like Laravel does to the default in
+# its config/database.php (sqlite since Laravel 11, mysql before).
+db_connection() {
+  local dir="$1" connection
+  connection=$(env_value "${dir}/.env" DB_CONNECTION)
+  if [[ -z "$connection" ]]; then
+    connection=$(sed -nE "s/.*'default'[[:space:]]*=>[[:space:]]*env\('DB_CONNECTION',[[:space:]]*'([a-z]+)'\).*/\1/p" "${dir}/config/database.php" 2>/dev/null | head -n 1)
+  fi
+  printf '%s' "${connection:-sqlite}"
 }
 
 # Prints where DIR's .env keeps its SQLite file; blank is Laravel's default.
@@ -93,6 +108,10 @@ dump_database() {
   case "$connection" in
     sqlite)
       database=$(sqlite_path "$dir")
+      if [[ ! -r "$database" ]]; then
+        echo -e "${RED}[${script_name}] No SQLite database at ${database}, aborting.${NC}" >&2
+        return 1
+      fi
       sqlite3 -readonly "$database" ".backup '${tmp}'" </dev/null
       gzip -c "$tmp"
       ;;
@@ -109,7 +128,7 @@ on_server() {
   ssh "$server" bash -s <<EOF
 set -euo pipefail
 $(declare -p RED NC script_name)
-$(declare -f env_value sqlite_path write_mysql_options dump_database)
+$(declare -f env_value db_connection sqlite_path write_mysql_options dump_database)
 $(printf '%q ' "$@")
 EOF
 }
@@ -143,17 +162,48 @@ import_sqlite() {
   echo -e "${GREEN}[${script_name}] Replaced ${database#"${local_dir}/"}.${NC}"
 }
 
-import_mysql() {
-  local database options
-  database=$(env_value "${local_dir}/.env" DB_DATABASE)
-  options="${work_dir}/client.cnf"
-  write_mysql_options "$local_dir" "$options"
-  mysql --defaults-extra-file="$options" -e "DROP DATABASE IF EXISTS \`${database//\`/\`\`}\`; CREATE DATABASE \`${database//\`/\`\`}\`;"
-  gunzip -c "${work_dir}/dump.gz" | mysql --defaults-extra-file="$options" "$database"
-  if [[ "$(mysql --defaults-extra-file="$options" -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'jobs';" "$database")" == 1 ]]; then
-    report_emptied_jobs "$(mysql --defaults-extra-file="$options" -N -e 'SELECT COUNT(*) FROM jobs; DELETE FROM jobs;' "$database")"
+# Local MySQL servers often run in Docker with no client on the host. Prints
+# the running container that publishes the local DB_PORT, if there is one.
+find_mysql_container() {
+  local host port
+  host=$(env_value "${local_dir}/.env" DB_HOST)
+  port=$(env_value "${local_dir}/.env" DB_PORT)
+  case "${host:-127.0.0.1}" in
+    127.0.0.1|localhost) ;;
+    *) return 0 ;;
+  esac
+  if command -v docker &>/dev/null; then
+    docker ps --filter "publish=${port:-3306}" --format '{{.Names}}' 2>/dev/null | head -n 1
   fi
-  echo -e "${GREEN}[${script_name}] Replaced database ${database}.${NC}"
+}
+
+# Runs mysql against the local database: the host's client, or the one inside
+# the container, which reaches its server over the socket instead of the port.
+local_mysql() {
+  if [[ -n "$mysql_container" ]]; then
+    docker exec -i "$mysql_container" mysql --defaults-extra-file="/tmp/${script_name}.cnf" "$@"
+  else
+    mysql --defaults-extra-file="${work_dir}/client.cnf" "$@"
+  fi
+}
+
+import_mysql() {
+  local database
+  database=$(env_value "${local_dir}/.env" DB_DATABASE)
+  if [[ -z "$database" ]]; then
+    fail "The local .env has no DB_DATABASE, aborting."
+  fi
+  write_mysql_options "$local_dir" "${work_dir}/client.cnf"
+  if [[ -n "$mysql_container" ]]; then
+    grep -vE '^(host|port|socket)=' "${work_dir}/client.cnf" > "${work_dir}/container.cnf"
+    docker cp "${work_dir}/container.cnf" "${mysql_container}:/tmp/${script_name}.cnf" >/dev/null
+  fi
+  local_mysql -e "DROP DATABASE IF EXISTS \`${database//\`/\`\`}\`; CREATE DATABASE \`${database//\`/\`\`}\`;" </dev/null
+  gunzip -c "${work_dir}/dump.gz" | local_mysql "$database"
+  if [[ "$(local_mysql -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'jobs';" "$database" </dev/null)" == 1 ]]; then
+    report_emptied_jobs "$(local_mysql -N -e 'SELECT COUNT(*) FROM jobs; DELETE FROM jobs;' "$database" </dev/null)"
+  fi
+  echo -e "${GREEN}[${script_name}] Replaced database ${database}${mysql_container:+ in container ${mysql_container}}.${NC}"
 }
 
 if [[ -z "$server" || -z "$remote_dir" ]]; then
@@ -173,24 +223,31 @@ if [[ "$(env_value "${local_dir}/.env" APP_ENV)" == production ]]; then
 fi
 
 echo -e "${GREEN}[${script_name}] Reading ${server}:${remote_dir}/.env...${NC}"
-prod_connection=$(on_server env_value "${remote_dir}/.env" DB_CONNECTION)
-prod_connection=${prod_connection:-sqlite}
-local_connection=$(env_value "${local_dir}/.env" DB_CONNECTION)
-local_connection=${local_connection:-sqlite}
+prod_connection=$(on_server db_connection "$remote_dir")
+local_connection=$(db_connection "$local_dir")
 
 if [[ "$prod_connection" != "$local_connection" ]]; then
   fail "Prod uses ${prod_connection} but this checkout uses ${local_connection}, aborting."
 fi
 
 case "$local_connection" in
-  sqlite)        local_client=sqlite3 ;;
-  mysql|mariadb) local_client=mysql ;;
-  *)             fail "Unsupported DB_CONNECTION '${local_connection}', aborting." ;;
+  sqlite)
+    if ! command -v sqlite3 &>/dev/null; then
+      fail "sqlite3 not found on this machine, aborting."
+    fi
+    ;;
+  mysql|mariadb)
+    if ! command -v mysql &>/dev/null; then
+      mysql_container=$(find_mysql_container)
+      if [[ -z "$mysql_container" ]]; then
+        fail "No mysql client here and no running container publishes the local DB_PORT, aborting."
+      fi
+    fi
+    ;;
+  *)
+    fail "Unsupported DB_CONNECTION '${local_connection}', aborting."
+    ;;
 esac
-
-if ! command -v "$local_client" &>/dev/null; then
-  fail "${local_client} not found on this machine, aborting."
-fi
 
 trap cleanup EXIT
 work_dir=$(mktemp -d "${TMPDIR:-/tmp}/${script_name}.XXXXXX")
