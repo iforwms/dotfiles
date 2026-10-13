@@ -9,12 +9,14 @@ NC='\033[0m'
 # REPLACE='\e[1A\e[K' # To go N lines up: \e[<N>A (\e[K clears the line)
 
 script_name=generate-favicon
-usage="usage: ${script_name} <image_path> [output_path] [api_key]"
+usage="usage: ${script_name} <image_path> [output_path] [url_path] [app_name]"
 
-api_url=https://realfavicongenerator.net/api/favicon
+# The realfavicongenerator.net REST API has been retired, its official CLI generates everything locally
+realfavicon_cli=realfavicon@0.9.3
 icon_path="$1"
 output_path="${2:-${HOME}/Downloads/favicon-temp}"
-api_key="$3"
+url_path="${3:-/}" # URL prefix the files are served from, e.g. /static
+app_name="$4"
 
 if ! [[ -e "$icon_path" ]]; then
   echo -e "${RED}[${script_name}] Image not found, aborting...${NC}"
@@ -22,8 +24,9 @@ if ! [[ -e "$icon_path" ]]; then
   exit 1
 fi
 
-if [[ -z "$api_key" ]]; then
-  api_key="$(cat /Users/ifor/Documents/backup/realfavicon-api)"
+if ! command -v npx > /dev/null; then
+  echo -e "${RED}[${script_name}] npx not found, install Node.js first...${NC}"
+  exit 1
 fi
 
 if ! [[ -e "$output_path" ]]; then
@@ -31,48 +34,65 @@ if ! [[ -e "$output_path" ]]; then
   mkdir -p "$output_path"
 fi
 
+# The CLI concatenates this with the file names as is, so it needs leading and trailing slashes
+[[ "$url_path" == /* ]] || url_path="/${url_path}"
+[[ "$url_path" == */ ]] || url_path="${url_path}/"
 
-echo -e "${GREEN}[${script_name}] Converting image to base64...${NC}"
-base64_image=$(base64 "${icon_path}" --wrap=0)
+if [[ -z "$app_name" ]]; then
+  app_name="$(basename "$(git -C "$output_path" rev-parse --show-toplevel 2> /dev/null || realpath "$output_path")")"
+fi
 
-echo -e "${GREEN}[${script_name}] Making API request...${NC}"
-result=$(curl "$api_url" \
-  --header 'Content-Type: application/json' \
-  --data "{
-    \"favicon_generation\": {
-      \"api_key\": \"${api_key}\",
-      \"master_picture\": {
-        \"type\": \"inline\",
-        \"content\": \"${base64_image}\"
+tmp_dir="$(mktemp -d)"
+trap 'rm -rf "$tmp_dir"' EXIT
+
+# The CLI's SVG parser crashes on xml:* attributes (e.g. xml:space="preserve"), which are safe to drop
+if [[ "$icon_path" == *.svg ]]; then
+  sed -E 's/[[:space:]]xml:[a-z]+="[^"]*"//g' "$icon_path" > "${tmp_dir}/icon.svg"
+  icon_path="${tmp_dir}/icon.svg"
+fi
+
+echo -e "${GREEN}[${script_name}] Writing settings (app name: ${app_name}, URL path: ${url_path})...${NC}"
+jq --null-input --arg path "$url_path" --arg name "$app_name" '
+  def transformation($type; $radius): {
+    type: $type,
+    backgroundColor: "#ffffff",
+    backgroundRadius: $radius,
+    imageScale: 0.7,
+    brightness: 1
+  };
+  {
+    icon: {
+      desktop: {
+        regularIconTransformation: transformation("none"; 0.7),
+        darkIconType: "none",
+        darkIconTransformation: transformation("none"; 0.7)
       },
-      \"files_location\": {
-        \"type\": \"root\"
+      touch: {
+        transformation: transformation("background"; 0),
+        appTitle: $name
       },
-      \"callback\": {
-        \"type\": \"none\"
+      webAppManifest: {
+        transformation: transformation("background"; 0),
+        name: $name,
+        shortName: $name,
+        backgroundColor: "#ffffff",
+        themeColor: "#ffffff"
       }
-    }
-  }"
-)
+    },
+    path: $path
+  }' > "${tmp_dir}/settings.json"
 
-urls=$(echo "$result" | jq --raw-output '.favicon_generation_result.favicon.files_urls[]')
-echo -e "${GREEN}[${script_name}] Downloading assets...${NC}"
-for url in $urls; do
-  echo -e "${GREEN}[${script_name}] Downloading ${url}...${NC}"
-  wget "$url" --directory-prefix="${output_path}/"
-done
+echo -e "${GREEN}[${script_name}] Generating favicon files...${NC}"
+npx --yes "$realfavicon_cli" generate \
+  "$icon_path" \
+  "${tmp_dir}/settings.json" \
+  "${tmp_dir}/markups.json" \
+  "$output_path"
 
-echo -e "${GREEN}[${script_name}] All done!${NC}"
+echo -e "${GREEN}[${script_name}] All done! Files written to ${output_path}${NC}"
 
 echo 'Add the following to your page head
-
-<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-<link rel="shortcut icon" href="/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="APP_NAME" />
-<link rel="manifest" href="/site.webmanifest" />'
+'
+jq --raw-output '.markups[]' "${tmp_dir}/markups.json"
 
 exit 0
-
-

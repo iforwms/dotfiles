@@ -157,6 +157,23 @@ alias cabr="cargo build --release"
 alias car="cargo run"
 alias cac="cargo check"
 
+ss() {
+  if pgrep -f 'sticker\.py serve' >/dev/null; then
+    open http://127.0.0.1:8765/
+    return
+  fi
+  local cmd="cd ~/code/sticker-printer && ./sticker serve"
+  [ $# -gt 0 ] && cmd+=" $(printf '%q ' "$@")"
+  osascript - "$cmd" <<'EOF'
+on run argv
+  tell application "Terminal"
+    activate
+    do script (item 1 of argv)
+  end tell
+end run
+EOF
+}
+
 # -s: burn English subtitles into the video (with HandBrakeCLI), falling back to
 #     auto-generated English if none were uploaded
 function ytd() {
