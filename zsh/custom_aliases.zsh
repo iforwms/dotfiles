@@ -158,8 +158,13 @@ alias car="cargo run"
 alias cac="cargo check"
 
 ss() {
-  if pgrep -f 'sticker\.py serve' >/dev/null; then
+  if curl -s -o /dev/null --max-time 1 http://127.0.0.1:8765/; then
     open http://127.0.0.1:8765/
+    return
+  fi
+  # Already in Terminal.app (and not tmux, which loses Bluetooth access): run it right here.
+  if [[ $TERM_PROGRAM == Apple_Terminal && -z $TMUX ]]; then
+    (cd ~/code/sticker-printer && ./sticker serve "$@")
     return
   fi
   local cmd="cd ~/code/sticker-printer && ./sticker serve"
