@@ -181,13 +181,14 @@ EOF
 
 # -s: burn English subtitles into the video (with HandBrakeCLI), falling back to
 #     auto-generated English if none were uploaded
+# Other flags go straight to yt-dlp, e.g. ytd --playlist-items 37: <url>
 function ytd() {
   local -a burn_subs sub_opts en_subs
   local out="%(uploader)s/%(title)s.%(ext)s" lang tmp raw srt video
   zparseopts -D -E -- s=burn_subs
 
   if (( $#burn_subs )); then
-    en_subs=(${(f)"$(yt-dlp --skip-download --cookies-from-browser firefox --print '%(subtitles)j' "$1" 2>/dev/null \
+    en_subs=(${(f)"$(yt-dlp --skip-download --cookies-from-browser firefox --print '%(subtitles)j' "${argv[-1]}" 2>/dev/null \
       | jq -r 'keys[] | select(test("^en($|-)"))' 2>/dev/null)"})
     lang=${en_subs[(r)en]:-$en_subs[1]}
     if [[ -n $lang ]]; then
@@ -212,7 +213,7 @@ function ytd() {
     --cookies-from-browser firefox \
     "${sub_opts[@]}" \
     -o "$out" \
-    "$1"
+    "$@"
   local rc=$?
 
   [[ -n $tmp ]] || return $rc
