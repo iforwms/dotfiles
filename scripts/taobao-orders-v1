@@ -33,6 +33,14 @@ fi
 echo -e "${GREEN}[${script_name}] Uploading JSON file to server...${NC}"
 rsync -avc "${json_file}.json" "${json_file}-raw.json" "${server}:${remote_dir}"
 
+# Parcels not bought on Taobao, through kuaidi100 (which only answers from
+# China); the server has the manual orders
+echo -e "${GREEN}[${script_name}] Tracking manual orders...${NC}"
+if rsync -a "${server}:${remote_dir}/manual-orders.json" "${local_dir}/db/"; then
+  /usr/local/opt/php@8.1/bin/php "${local_dir}/manual-tracking.php" &&
+    rsync -avc "${local_dir}/db/manual-tracking.json" "${server}:${remote_dir}"
+fi
+
 echo -e "${GREEN}[${script_name}] All done!${NC}"
 exit 0
 
