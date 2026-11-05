@@ -321,7 +321,11 @@ alias nah='git reset --hard && git clean -df'
 function gq() {
   git add .
   git commit -m "Quick commit - $(date '+%Y/%m/%d %H:%M')"
-  git push
+  if ! git push; then
+    local RED='\033[0;31m' NC='\033[0m' script_name=gq
+    echo -e "${RED}[${script_name}] Git push failed, aborting...${NC}"
+    return 1
+  fi
   ./deploy-remote $1
 }
 
