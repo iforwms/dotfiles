@@ -335,14 +335,9 @@ function ggs() {
     $HOME/.dotfiles/scripts/globalGitStatus $HOME/.dotfiles
     $HOME/.dotfiles/scripts/globalGitStatus $HOME/obsidian
 
-    $HOME/.dotfiles/scripts/globalGitStatus $HOME/code/expednet/moodle/mod/aliyun
-    $HOME/.dotfiles/scripts/globalGitStatus $HOME/code/expednet/moodle/payment/gateway/alipay
-    $HOME/.dotfiles/scripts/globalGitStatus $HOME/code/expednet/moodle/payment/gateway/blueocean
-    $HOME/.dotfiles/scripts/globalGitStatus $HOME/code/expednet/moodle/payment/gateway/wechat
-
-    $HOME/darts-hub/darts-caller
-
-    find -L $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -exec $HOME/.dotfiles/scripts/globalGitStatus {} \;
+    find -L $HOME/code -mindepth 1 -maxdepth 6 \
+        \( -name node_modules -o -name vendor -o -name .cache -o -name build -o -name dist \) -prune \
+        -o -type d -name .git -prune -exec $HOME/.dotfiles/scripts/globalGitStatus {} \;
 
     pass git status
 }
@@ -354,15 +349,9 @@ function ggp() {
     $HOME/.dotfiles/scripts/globalGitPull $HOME/.dotfiles
     $HOME/.dotfiles/scripts/globalGitPull $HOME/obsidian
 
-    $HOME/.dotfiles/scripts/globalGitPull $HOME/code/expednet/moodle/mod/aliyun
-    $HOME/.dotfiles/scripts/globalGitPull $HOME/code/expednet/moodle/payment/gateway/alipay
-    $HOME/.dotfiles/scripts/globalGitPull $HOME/code/expednet/moodle/payment/gateway/blueocean
-    $HOME/.dotfiles/scripts/globalGitPull $HOME/code/expednet/moodle/payment/gateway/wechat
-
-    $HOME/darts-hub/darts-caller
-
-    find -L $HOME/code -mindepth 1 -maxdepth 4 -type d -name .git -prune -exec $HOME/.dotfiles/scripts/globalGitPull {} \;
-     # | sed s/.git// | xargs -I % git -C % pull
+    find -L $HOME/code -mindepth 1 -maxdepth 6 \
+        \( -name node_modules -o -name vendor -o -name .cache -o -name build -o -name dist \) -prune \
+        -o -type d -name .git -prune -exec $HOME/.dotfiles/scripts/globalGitPull {} \;
 }
 
 function gitPurge() {
