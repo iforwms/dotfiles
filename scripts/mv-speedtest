@@ -1,0 +1,384 @@
+#!/usr/bin/env python3
+"""
+Benchmark Mullvad relays x anti-censorship modes to find the fastest combo.
+
+For every (location, mode) pair it:
+  1. sets the anti-censorship mode (off / quic / shadowsocks / lwo / udp2tcp ...)
+  2. sets the relay location and reconnects
+  3. measures latency, download and upload through the tunnel (Cloudflare speed endpoints)
+
+Your original location + mode are restored at the end (also on Ctrl-C).
+
+Examples:
+  # Find the 5 lowest-latency cities first (briefly disconnects the VPN to ping relays)
+  ./mullvad_speedtest.py --scan 5
+
+  # Test specific locations (country, "country city", or a hostname)
+  ./mullvad_speedtest.py -l "jp osa" -l "jp tyo" -l sg -l "kr seo"
+
+  # Only compare modes on one location
+  ./mullvad_speedtest.py -l "jp tyo" --modes off,quic,shadowsocks,lwo,udp2tcp
+"""
+import argparse
+import csv
+import json
+import os
+import re
+import statistics
+import subprocess
+import sys
+import tempfile
+import time
+from concurrent.futures import ThreadPoolExecutor
+
+DL_URL = "https://speed.cloudflare.com/__down?bytes={}"
+UL_URL = "https://speed.cloudflare.com/__up"
+DEFAULT_MODES = "off,quic,shadowsocks,lwo"
+
+
+# ---------------------------------------------------------------- mullvad helpers
+
+def mv(*args, check=True, timeout=60):
+    r = subprocess.run(["mullvad", *args], capture_output=True, text=True, timeout=timeout)
+    if check and r.returncode != 0:
+        raise RuntimeError("mullvad {} failed: {}".format(" ".join(args), (r.stderr or r.stdout).strip()))
+    return r.stdout
+
+
+def status():
+    try:
+        return json.loads(mv("status", "-j"))
+    except Exception:
+        return {"state": "unknown"}
+
+
+def current_mode():
+    m = re.search(r"^mode:\s*(\S+)", mv("anti-censorship", "get"), re.M)
+    return m.group(1) if m else "auto"
+
+
+def current_location_args():
+    """Turn 'Location: city osa, jp' into ['jp', 'osa'] for `relay set location`."""
+    m = re.search(r"Location:\s*(.+)", mv("relay", "get"))
+    if not m:
+        return None
+    text = m.group(1).strip()
+    if text == "any":
+        return ["any"]
+    kind, _, rest = text.partition(" ")
+    parts = [p.strip() for p in rest.split(",")]
+    if kind == "country":
+        return [parts[0]]
+    if kind == "city":
+        return [parts[-1], parts[0]]
+    if kind == "hostname":
+        return [parts[0]]
+    return None
+
+
+def relay_cities():
+    """Return [(country, city, city_name, first_ipv4)] from `mullvad relay list`."""
+    out = []
+    country = city = city_name = None
+    for line in mv("relay", "list").splitlines():
+        m = re.match(r"^\S.*\((\w\w)\)\s*$", line)
+        if m:
+            country = m.group(1)
+            continue
+        m = re.match(r"^\t(\S.*?) \((\w{3})\) @", line)
+        if m:
+            city_name, city = m.group(1), m.group(2)
+            continue
+        m = re.match(r"^\t\t(\S+-wg-\S+) \((\d+\.\d+\.\d+\.\d+)", line)
+        if m and city:
+            out.append((country, city, city_name, m.group(2)))
+            city = None  # one relay per city is enough for a ping
+    return out
+
+
+def wait_connected(expect_prefix, expect_mode, timeout):
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        s = status()
+        if s.get("state") == "connected":
+            d = s.get("details", {})
+            host = d.get("location", {}).get("hostname") or ""
+            obf = (d.get("endpoint") or {}).get("obfuscation")
+            obf_type = ""
+            if isinstance(obf, dict):
+                inner = next(iter(obf.values()), {})
+                obf_type = (inner.get("obfuscation_type") or "").lower() if isinstance(inner, dict) else ""
+            ok_host = host.startswith(expect_prefix) or expect_prefix == ""
+            ok_mode = expect_mode in ("auto",) or (expect_mode == "off" and not obf_type) \
+                or (expect_mode != "off" and expect_mode.replace("-", "") in obf_type.replace("-", "").replace("_", ""))
+            if ok_host and ok_mode:
+                return host, obf_type or "none"
+        time.sleep(0.5)
+    return None, None
+
+
+# ---------------------------------------------------------------- measurement
+
+def curl(args, timeout):
+    r = subprocess.run(["curl", "-s", "-o", "/dev/null", *args], capture_output=True, text=True, timeout=timeout)
+    return r.stdout.strip()
+
+
+def latency_and_loss(host="1.1.1.1", count=20):
+    """Ping through the tunnel. Returns (avg_ms or None, loss_percent)."""
+    try:
+        r = subprocess.run(["ping", "-c", str(count), "-i", "0.2", "-W", "1000", "-q", host],
+                           capture_output=True, text=True, timeout=count + 10)
+    except Exception:
+        return None, 100.0
+    m = re.search(r"([\d.]+)% packet loss", r.stdout)
+    loss = float(m.group(1)) if m else 100.0
+    m = re.search(r"= [\d.]+/([\d.]+)/", r.stdout)
+    return (float(m.group(1)) if m else None), loss
+
+
+def _rate(out):
+    """bytes/sec from '<bytes> <seconds>' (works even when curl hits --max-time)."""
+    try:
+        size, secs = (float(x) for x in out.split())
+        return size / secs if secs > 0 else 0.0
+    except Exception:
+        return 0.0
+
+
+def download_mbps(seconds, streams):
+    # Cloudflare rejects requests of >= 100 MB (HTTP 403), so fetch 50 MB chunks
+    # back-to-back in each stream until the time budget is used up.
+    def one(_):
+        deadline = time.time() + seconds
+        got = 0.0
+        start = time.time()
+        while True:
+            left = deadline - time.time()
+            if left < 0.5:
+                break
+            try:
+                out = curl(["--max-time", "{:.1f}".format(left), "-w", "%{size_download} %{http_code}",
+                            DL_URL.format(50_000_000)], left + 10)
+                size, code = out.split()
+                if code not in ("200", "000"):
+                    break
+                got += float(size)
+            except Exception:
+                break
+        elapsed = time.time() - start
+        return got / elapsed if elapsed > 0 else 0.0
+    with ThreadPoolExecutor(streams) as ex:
+        total = sum(ex.map(one, range(streams)))
+    return total * 8 / 1e6
+
+
+def upload_mbps(seconds, streams, payload):
+    # Only count uploads the server confirmed (HTTP 200). curl's size_upload on a
+    # timed-out request includes bytes still sitting in the local socket buffer,
+    # which wildly overstates upload on slow links.
+    chunk = os.path.getsize(payload)
+    def one(_):
+        deadline = time.time() + seconds
+        got = 0.0
+        start = time.time()
+        while True:
+            left = deadline - time.time()
+            if left < 0.5:
+                break
+            try:
+                code = curl(["--max-time", "{:.1f}".format(left), "-X", "POST", "--data-binary", "@" + payload,
+                             "-w", "%{http_code}", UL_URL], left + 10)
+            except Exception:
+                break
+            if code != "200":
+                break
+            got += chunk
+        elapsed = time.time() - start
+        return got / elapsed if elapsed > 0 else 0.0
+    with ThreadPoolExecutor(streams) as ex:
+        total = sum(ex.map(one, range(streams)))
+    return total * 8 / 1e6
+
+
+def ping_ms(ip):
+    try:
+        r = subprocess.run(["ping", "-c", "3", "-i", "0.2", "-W", "1000", "-q", ip],
+                           capture_output=True, text=True, timeout=10)
+        m = re.search(r"= [\d.]+/([\d.]+)/", r.stdout)
+        return float(m.group(1)) if m else None
+    except Exception:
+        return None
+
+
+# ---------------------------------------------------------------- main
+
+def scan(n):
+    print("Scanning: disconnecting VPN briefly to ping one relay in every city...")
+    print("  (other apps will be unprotected for ~10 seconds)")
+    cities = relay_cities()
+    mv("disconnect")
+    time.sleep(1.5)
+    try:
+        with ThreadPoolExecutor(32) as ex:
+            pings = list(ex.map(lambda c: ping_ms(c[3]), cities))
+    finally:
+        mv("connect")
+    ranked = sorted([(p, c) for p, c in zip(pings, cities) if p is not None], key=lambda x: x[0])
+    if not ranked:
+        sys.exit("No relay answered ping (is lockdown mode / a firewall blocking ICMP?). Use -l instead.")
+    print("\nNearest cities by ping:")
+    for p, (cc, city, name, _) in ranked[:max(n, 10)]:
+        print("  {:6.1f} ms  {} {}  ({})".format(p, cc, city, name))
+    print()
+    return ["{} {}".format(cc, city) for _, (cc, city, _, _) in ranked[:n]]
+
+
+def restore(orig_mode, orig_loc, timeout):
+    """Put back the known-good settings and wait until the tunnel is up again.
+    A failed mode leaves Mullvad stuck in 'Connecting', which blocks ALL traffic,
+    so this runs after every failure, not only at the end."""
+    try:
+        mv("anti-censorship", "set", "mode", orig_mode)
+        if orig_loc:
+            mv("relay", "set", "location", *orig_loc)
+        mv("reconnect", check=False)
+        if status().get("state") == "disconnected":
+            mv("connect", check=False)
+        host, _ = wait_connected("", "auto", timeout)
+        if host:
+            return True
+        # original combo is flaky too: let Mullvad pick whatever works
+        mv("anti-censorship", "set", "mode", "auto")
+        mv("reconnect", check=False)
+        host, _ = wait_connected("", "auto", timeout)
+        if host:
+            print("  (original settings would not connect; left on mode 'auto')")
+        return bool(host)
+    except Exception as e:
+        print("  restore error: {}".format(e))
+        return False
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("-l", "--location", action="append", default=[],
+                    help='location to test: "se", "se got" or "se-got-wg-001" (repeatable)')
+    ap.add_argument("--scan", type=int, metavar="N", help="auto-pick the N lowest-ping cities")
+    ap.add_argument("--modes", default=DEFAULT_MODES,
+                    help="comma list of: off,quic,shadowsocks,lwo,udp2tcp,wireguard-port (default: %(default)s)")
+    ap.add_argument("--seconds", type=int, default=8, help="duration of each download/upload test (default: 8)")
+    ap.add_argument("--streams", type=int, default=4, help="parallel connections per test (default: 4)")
+    ap.add_argument("--no-upload", action="store_true", help="skip the upload test")
+    ap.add_argument("--connect-timeout", type=int, default=30)
+    ap.add_argument("--csv", default="results.csv", help="where to write results (default: %(default)s)")
+    args = ap.parse_args()
+
+    locations = list(args.location)
+    if args.scan:
+        locations += scan(args.scan)
+    if not locations:
+        ap.error("give at least one -l LOCATION or use --scan N")
+    modes = [m.strip() for m in args.modes.split(",") if m.strip()]
+
+    orig_mode = current_mode()
+    orig_loc = current_location_args()
+    orig_state = status().get("state")
+    print("Saved current settings: mode={} location={}".format(orig_mode, " ".join(orig_loc or ["?"])))
+    print("Testing {} locations x {} modes = {} runs (~{}s each)\n".format(
+        len(locations), len(modes), len(locations) * len(modes), args.seconds * (1 if args.no_upload else 2) + 10))
+
+    payload = tempfile.NamedTemporaryFile(delete=False)
+    payload.write(os.urandom(2 * 1024 * 1024))  # 2 MB per upload request
+    payload.close()
+
+    results = []
+    try:
+        for loc in locations:
+            loc_args = loc.split()
+            # prefix to verify we really landed on the requested relay
+            if len(loc_args) == 1 and "-" in loc_args[0]:
+                prefix = loc_args[0]
+            elif loc_args[0] == "any":
+                prefix = ""
+            else:
+                prefix = "-".join(loc_args[:2]) + "-"
+            for mode in modes:
+                label = "{:<14} {:<13}".format(loc, mode)
+                print(label, end=" ", flush=True)
+                row = {"location": loc, "mode": mode, "relay": "", "latency_ms": "", "loss_pct": "",
+                       "down_mbps": "", "up_mbps": "", "error": ""}
+                try:
+                    mv("anti-censorship", "set", "mode", mode)
+                    mv("relay", "set", "location", *loc_args)
+                    mv("reconnect", check=False)
+                    if status().get("state") == "disconnected":
+                        mv("connect")
+                    host, _ = wait_connected(prefix, mode, args.connect_timeout)
+                    if not host:
+                        raise RuntimeError("did not connect within {}s".format(args.connect_timeout))
+                    time.sleep(1)  # let the tunnel settle
+                    row["relay"] = host
+                    lat, loss = latency_and_loss()
+                    row["loss_pct"] = loss
+                    if lat is None:
+                        raise RuntimeError("connected but no traffic through tunnel")
+                    row["latency_ms"] = round(lat, 1)
+                    row["down_mbps"] = round(download_mbps(args.seconds, args.streams), 2)
+                    if not args.no_upload:
+                        row["up_mbps"] = round(upload_mbps(args.seconds, args.streams, payload.name), 2)
+                    print("{:<16} {:>7} ms  loss {:>4}%  down {:>7} Mbps  up {:>7} Mbps".format(
+                        host, row["latency_ms"], row["loss_pct"], row["down_mbps"],
+                        row["up_mbps"] if row["up_mbps"] != "" else "-"))
+                except Exception as e:
+                    row["error"] = str(e)
+                    print("FAILED: {}".format(e))
+                    print("  -> falling back to original settings so the network isn't left blocked...", flush=True)
+                    if not restore(orig_mode, orig_loc, args.connect_timeout):
+                        results.append(row)
+                        print("  !! could not get the VPN back up; stopping tests.")
+                        raise KeyboardInterrupt
+                results.append(row)
+    except KeyboardInterrupt:
+        print("\nInterrupted.")
+    finally:
+        os.unlink(payload.name)
+        print("\nRestoring original settings...")
+        if orig_state == "disconnected":
+            try:
+                mv("anti-censorship", "set", "mode", orig_mode)
+                if orig_loc:
+                    mv("relay", "set", "location", *orig_loc)
+                mv("disconnect")
+            except Exception as e:
+                print("  could not fully restore: {}".format(e))
+        elif restore(orig_mode, orig_loc, args.connect_timeout):
+            print("  VPN connected: {}".format(status().get("details", {}).get("location", {}).get("hostname")))
+        else:
+            print("  !! VPN is NOT connected. Open the Mullvad app or run: mullvad anti-censorship set mode auto && mullvad reconnect")
+
+    if not results:
+        return
+    with open(args.csv, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(results[0].keys()))
+        w.writeheader()
+        w.writerows(results)
+
+    ok = sorted([r for r in results if not r["error"]], key=lambda r: -r["down_mbps"])
+    print("\n=== Ranked by download ===")
+    print("{:<14} {:<13} {:<16} {:>8} {:>6} {:>10} {:>10}".format("location", "mode", "relay", "ping ms", "loss%", "down Mbps", "up Mbps"))
+    for r in ok:
+        print("{:<14} {:<13} {:<16} {:>8} {:>6} {:>10} {:>10}".format(
+            r["location"], r["mode"], r["relay"], r["latency_ms"], r["loss_pct"], r["down_mbps"], r["up_mbps"] if r["up_mbps"] != "" else "-"))
+    failed = [r for r in results if r["error"]]
+    for r in failed:
+        print("{:<14} {:<13} FAILED ({})".format(r["location"], r["mode"], r["error"]))
+    if ok:
+        b = ok[0]
+        print("\nFastest: {} with mode '{}'  ->  mullvad relay set location {} && mullvad anti-censorship set mode {}".format(
+            b["location"], b["mode"], b["location"], b["mode"]))
+    print("Results saved to {}".format(args.csv))
+
+
+if __name__ == "__main__":
+    main()
