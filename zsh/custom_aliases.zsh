@@ -329,6 +329,8 @@ function gq() {
   ./deploy-remote $1
 }
 
+alias ass="adb -s A2VCBB1A28014462 exec-out screencap -p > 'android-screenshot-$(date '+%Y%m%d%H%M%S').png'"
+
 # alias apgi='git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached'
 # find ~/code -mindepth 1 -maxdepth 4 -type d -name .git -execdir git status -s \;
 function ggs() {
