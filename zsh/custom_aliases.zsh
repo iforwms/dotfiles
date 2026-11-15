@@ -36,6 +36,59 @@ alias deploy='sudo -u www-data ./deploy'
 
 alias seqrename='/bin/ls -1prt | grep -v "/$" | cat -n | while read n f; do mv -n "${f}" "$(printf "%04d" $n).${f#*.}"; done'
 
+# Copy photos + videos off a USB-connected GoPro (libmtp: brew install libmtp).
+# gphoto2 can't: on a HERO13 it claims interface 0 (USB network), MTP is interface 2.
+# Skips files already in ~/Downloads/gopro with the same size; leaves .LRV/.THM proxies.
+# Lists everything first, then shows a live line: file %, total %, MB/s and ETA.
+gopro() {
+  setopt local_options local_traps no_monitor no_notify
+  zmodload zsh/datetime
+  mkdir -p ~/Downloads/gopro && cd ~/Downloads/gopro || return
+
+  local -a ids sizes names
+  local id size name total=0
+  echo "listing files on camera..."
+  while read -r id size name; do
+    if [[ -f $name && $(stat -f%z "$name") == "$size" ]]; then echo "skip $name"; continue; fi
+    ids+=$id sizes+=$size names+=$name
+    (( total += size ))
+  done < <(mtp-files 2>/dev/null \
+    | awk '/^File ID:/{id=$3} /Filename:/{name=$2} /File size/{print id, $3, name}' \
+    | grep -E '\.(JPG|MP4|GPR|360)$')
+  (( ${#ids} )) || { echo "nothing new"; return; }
+  echo "get ${#ids} files, $((total / 1048576)) MB"
+
+  local i n=${#ids} pid cur done_bytes=0 got eta failed=0
+  local -F start=$EPOCHREALTIME elapsed rate
+  trap '[[ -n $pid ]] && kill $pid 2>/dev/null; print; return 130' INT
+  for (( i = 1; i <= n; i++ )); do
+    name=${names[i]} size=${sizes[i]}
+    mtp-getfile "${ids[i]}" "$name" </dev/null >/dev/null 2>&1 &
+    pid=$!
+    while kill -0 $pid 2>/dev/null; do
+      cur=$(stat -f%z "$name" 2>/dev/null || echo 0)
+      (( got = done_bytes + cur, elapsed = EPOCHREALTIME - start ))
+      (( rate = elapsed > 0 ? got / elapsed : 0 ))
+      (( eta = rate > 0 ? (total - got) / rate : 0 ))
+      printf '\r\e[K[%d/%d] %s %3d%%  |  total %3d%%  %d/%d MB  |  %.1f MB/s  |  ETA %d:%02d' \
+        $i $n "$name" $(( size ? cur * 100 / size : 100 )) $(( got * 100 / total )) \
+        $(( got / 1048576 )) $(( total / 1048576 )) $(( rate / 1048576 )) $(( eta / 60 )) $(( eta % 60 ))
+      sleep 1
+    done
+    if wait $pid; then
+      printf '\r\e[Kgot  %s (%d MB)\n' "$name" $(( size / 1048576 ))
+    else
+      printf '\r\e[KFAILED %s\n' "$name"; (( failed++ ))
+    fi
+    (( done_bytes += size ))
+  done
+  pid=
+  (( elapsed = EPOCHREALTIME - start ))
+  printf 'done: %d MB in %d:%02d (%.1f MB/s)\n' $(( total / 1048576 )) \
+    $(( ${elapsed%.*} / 60 )) $(( ${elapsed%.*} % 60 )) $(( total / 1048576.0 / elapsed ))
+  (( failed )) && echo "$failed FAILED"
+}
+
 if command -v eza &> /dev/null; then
   eza_params=(
     '--git' '--icons' '--group' '--group-directories-first'
