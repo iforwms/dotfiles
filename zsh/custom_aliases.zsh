@@ -43,7 +43,8 @@ alias seqrename='/bin/ls -1prt | grep -v "/$" | cat -n | while read n f; do mv -
 gopro() {
   setopt local_options local_traps no_monitor no_notify
   zmodload zsh/datetime
-  mkdir -p ~/Downloads/gopro && cd ~/Downloads/gopro || return
+  output_dir="${HOME}/Movies/gopro"
+  mkdir -p "$output_dir" && cd "$output_dir" || return
 
   local -a ids sizes names
   local id size name total=0
@@ -121,6 +122,7 @@ alias scr='sudo systemctl reload'
 alias scrs='sudo systemctl restart'
 alias scs='sudo systemctl status'
 
+alias sts="cd ${HOME}/code/sticker-printer/ && ./sticker serve"
 # Domea
 alias ds="${HOME}/code/husfokus/scripts/domea-sql"
 alias dm="${HOME}/code/husfokus/scripts/domea-migrate"
@@ -382,7 +384,10 @@ function gq() {
   ./deploy-remote $1
 }
 
-alias ass="adb -s A2VCBB1A28014462 exec-out screencap -p > 'android-screenshot-$(date '+%Y%m%d%H%M%S').png'"
+function ass() {
+  adb -s A2VCBB1A28014462 exec-out screencap -p > "${HOME}/Downloads/android-screenshot-$(date '+%Y%m%d%H%M%S').png"
+}
+
 
 # alias apgi='git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached'
 # find ~/code -mindepth 1 -maxdepth 4 -type d -name .git -execdir git status -s \;
