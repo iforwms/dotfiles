@@ -10,10 +10,37 @@ log() {
   echo "[$(date '+%F %T')] $*"
 }
 
+LOG_FILE="$HOME/Library/Logs/renew-vod-ssl.log"
+last_error=""
+
 fail() {
+  last_error="$*"
   log "ERROR: $*"
   exit 1
 }
+
+# macOS alert. Clicking it opens the cron log.
+alert() {
+  local title="$1" message="$2"
+  log "ALERT: $title: $message"
+  if command -v terminal-notifier >/dev/null 2>&1; then
+    terminal-notifier -title "$title" -message "$message" \
+      -sound Basso -group "renew-vod-ssl-${domain:-}" \
+      -open "file://$LOG_FILE" >/dev/null 2>&1 || true
+  else
+    osascript -e "display notification \"${message//\"/\\\"}\" with title \"${title//\"/\\\"}\" sound name \"Basso\"" >/dev/null 2>&1 || true
+  fi
+}
+
+# In unattended (--yes) runs, any non-zero exit raises an alert.
+on_exit() {
+  local rc=$?
+  if [[ "$rc" -ne 0 && "${yes:-0}" -eq 1 ]]; then
+    alert "SSL renewal failed: ${domain:-unknown domain}" \
+      "${last_error:-exited with status $rc}"
+  fi
+}
+trap on_exit EXIT
 
 retry() {
   local n=0
@@ -204,6 +231,12 @@ if [[ "$force" -ne 1 && "$redeploy" -ne 1 ]]; then
 
   if [[ -n "$localFp" && "$localFp" == "$liveFp" ]]; then
     log "VOD already serves the current cert ($(openssl x509 -noout -enddate < "$CERT_FILE")); nothing to deploy"
+
+    # acme.sh renews ~30 days before expiry. If the live cert is inside
+    # 14 days, the acme.sh cron itself isn't renewing.
+    if ! openssl x509 -noout -checkend $((14 * 86400)) < "$CERT_FILE" >/dev/null; then
+      fail "cert expires $(openssl x509 -noout -enddate < "$CERT_FILE" | cut -d= -f2) and acme.sh hasn't renewed it"
+    fi
     exit 0
   fi
 
