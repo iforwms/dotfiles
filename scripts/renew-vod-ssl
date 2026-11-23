@@ -3,6 +3,9 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+# cron runs with a bare PATH; aliyun and openssl live in Homebrew.
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
 log() {
   echo "[$(date '+%F %T')] $*"
 }
@@ -30,12 +33,16 @@ retry() {
 # ----------------------------
 # Argument parsing
 # ----------------------------
-force=0
+force=0     # --force:    re-issue the cert even if it isn't due
+yes=0       # --yes:      skip the confirmation prompt (for cron)
+redeploy=0  # --redeploy: upload/deploy even if VOD already serves this cert
 positional=()
 
 for arg in "$@"; do
   case "$arg" in
     -f|--force) force=1 ;;
+    -y|--yes) yes=1 ;;
+    --redeploy) redeploy=1 ;;
     *) positional+=("$arg") ;;
   esac
 done
@@ -66,6 +73,9 @@ else
   aliyunProfile="$4"
   aliyunRegion="$5"
 fi
+
+# VOD domain APIs (used by the direct-attach fallback) live in cn-shanghai.
+vodRegion="${VOD_REGION:-cn-shanghai}"
 
 if [ -z "$domain" ]; then
   fail "Usage: $0 [--force] <domain> [VOD Service ID] [Contact ID]"
@@ -116,8 +126,10 @@ echo "  Region         : $aliyunRegion"
 echo "  Force renewal  : $([[ "$force" -eq 1 ]] && echo yes || echo no)"
 echo ""
 
-read -r -p "Proceed? (y/Y): " confirm
-[[ "$confirm" =~ ^[Yy]$ ]] || exit 0
+if [[ "$yes" -ne 1 ]]; then
+  read -r -p "Proceed? (y/Y): " confirm
+  [[ "$confirm" =~ ^[Yy]$ ]] || exit 0
+fi
 
 # ----------------------------
 # ACME ISSUANCE (with fallback CA)
@@ -172,6 +184,32 @@ fi
 
 log "Certificate issued successfully"
 
+# ----------------------------
+# Skip if VOD already serves this cert
+# ----------------------------
+# Lets this run daily from cron: it only uploads/deploys when acme.sh has
+# renewed the cert on disk (or a previous deploy failed).
+fingerprint() {
+  openssl x509 -noout -fingerprint -sha256 2>/dev/null | cut -d= -f2
+}
+
+if [[ "$force" -ne 1 && "$redeploy" -ne 1 ]]; then
+  localFp=$(fingerprint < "$CERT_FILE")
+  liveFp=$(aliyun vod DescribeVodDomainCertificateInfo \
+    --profile "$aliyunProfile" \
+    --region "$vodRegion" \
+    --DomainName "$domain" 2>/dev/null \
+    | jq -r '.CertInfos.CertInfo[0].ServerCertificate // empty' \
+    | fingerprint || true)
+
+  if [[ -n "$localFp" && "$localFp" == "$liveFp" ]]; then
+    log "VOD already serves the current cert ($(openssl x509 -noout -enddate < "$CERT_FILE")); nothing to deploy"
+    exit 0
+  fi
+
+  log "VOD cert differs from the one on disk; deploying"
+fi
+
 fullchain="$(cat "$CERT_FILE")"
 key="$(cat "$KEY_FILE")"
 
@@ -196,35 +234,80 @@ log "New Certificate ID: $certId"
 # ----------------------------
 # Create deployment job
 # ----------------------------
+certName="${domain}_${now}"
+
+# Fallback: attach the uploaded CAS cert straight to the VOD domain.
+# This skips CAS deployment jobs, which need deployment quota
+# (they fail with InsufficientQuota when it runs out).
+attach_to_vod_directly() {
+  log "Attaching certificate $certId directly to VOD domain $domain..."
+
+  aliyun vod SetVodDomainSSLCertificate \
+    --profile "$aliyunProfile" \
+    --region "$vodRegion" \
+    --DomainName "$domain" \
+    --SSLProtocol on \
+    --CertType cas \
+    --CertId "$certId" \
+    --CertName "$certName" \
+    --CertRegion "$aliyunRegion" >/dev/null || fail "Direct VOD attach failed too"
+
+  local info
+  info=$(aliyun vod DescribeVodDomainCertificateInfo \
+    --profile "$aliyunProfile" \
+    --region "$vodRegion" \
+    --DomainName "$domain")
+
+  local liveId liveExpiry
+  liveId=$(echo "$info" | jq -r '.CertInfos.CertInfo[0].CertId')
+  liveExpiry=$(echo "$info" | jq -r '.CertInfos.CertInfo[0].CertExpireTime')
+
+  [[ "$liveId" == "$certId" ]] || fail "VOD domain still shows cert $liveId, expected $certId"
+
+  log "VOD domain now uses cert $certId (expires $liveExpiry)"
+}
+
 log "Creating deployment job..."
 
 randomJobName=$(openssl rand -hex 4)
 jobName="deploy-video-certificate-$randomJobName"
 
-job=$(aliyun cas CreateDeploymentJob \
+jobId=""
+if job=$(aliyun cas CreateDeploymentJob \
   --profile "$aliyunProfile" \
   --region "$aliyunRegion" \
   --JobType user \
   --CertIds "$certId" \
   --Name "$jobName" \
   --ResourceIds "$vodId" \
-  --ContactIds "$contactId")
+  --ContactIds "$contactId"); then
+  jobId=$(echo "$job" | jq -e -r '.JobId') || jobId=""
+fi
 
-jobId=$(echo "$job" | jq -e -r '.JobId') || fail "Missing JobId"
+if [[ -n "$jobId" ]]; then
+  log "Setting job status to pending..."
 
-log "Setting job status to pending..."
+  if aliyun cas UpdateDeploymentJobStatus \
+    --profile "$aliyunProfile" \
+    --region "$aliyunRegion" \
+    --JobId "$jobId" \
+    --Status pending; then
+    log "Deployment job created: $jobId"
 
-aliyun cas UpdateDeploymentJobStatus \
-  --profile "$aliyunProfile" \
-  --region "$aliyunRegion" \
-  --JobId "$jobId" \
-  --Status pending
+    echo
+    echo "Check status with:"
+    echo "aliyun cas --profile $aliyunProfile --region $aliyunRegion DescribeDeploymentJob --JobId $jobId"
+    exit 0
+  fi
 
-# ----------------------------
-# Final output
-# ----------------------------
-log "Deployment job created: $jobId"
+  log "Could not start deployment job $jobId; removing it"
+  aliyun cas DeleteDeploymentJob \
+    --profile "$aliyunProfile" \
+    --region "$aliyunRegion" \
+    --JobId "$jobId" >/dev/null || log "Could not delete job $jobId (delete it in the console)"
+else
+  log "Could not create deployment job"
+fi
 
-echo
-echo "Check status with:"
-echo "aliyun cas --profile $aliyunProfile --region $aliyunRegion DescribeDeploymentJob --JobId $jobId"
+log "Falling back to direct VOD attach..."
+attach_to_vod_directly
