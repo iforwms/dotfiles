@@ -183,6 +183,7 @@ alias knot=$DOTFILES/scripts/animated-knots
 alias dnsReset="sudo killall -HUP mDNSResponder"
 alias a="php artisan"
 alias aw="sudo -u www-data php artisan"
+alias wpw="sudo -u www-data wp"
 alias ams="php artisan migrate:fresh --seed"
 alias amm="php artisan make:model"
 
