@@ -136,17 +136,11 @@ def is_mi(ip):
         return None
 
 
-def local_ip():
-    # Prefer the Wi-Fi/Ethernet address: with a VPN on, the default route points elsewhere.
-    import subprocess
-
-    for iface in ("en0", "en1", "en2"):
-        ip = subprocess.run(["ipconfig", "getifaddr", iface], capture_output=True, text=True).stdout.strip()
-        if ip:
-            return ip
+def route_ip(dest):
+    """The local address the OS would use to reach `dest` (UDP connect sends nothing)."""
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        s.connect(("8.8.8.8", 80))
+        s.connect((dest, 80))
         return s.getsockname()[0]
     except OSError:
         return None
@@ -154,11 +148,33 @@ def local_ip():
         s.close()
 
 
-def scan_subnet():
-    me = local_ip()
-    if not me:
+def local_ips():
+    """Candidate addresses of this machine on the home network, best first."""
+    import shutil
+    import subprocess
+
+    ips = []
+    # macOS: ask for the Wi-Fi/Ethernet address directly; with a VPN on,
+    # the default route points at the VPN instead.
+    if shutil.which("ipconfig") and sys.platform == "darwin":
+        for iface in ("en0", "en1", "en2"):
+            ip = subprocess.run(["ipconfig", "getifaddr", iface], capture_output=True, text=True).stdout.strip()
+            if ip:
+                ips.append(ip)
+    # Everywhere else (Linux, Termux on Android): the route towards common home-router
+    # ranges picks the Wi-Fi interface, then fall back to the default route.
+    for dest in ("192.168.1.1", "192.168.0.1", "10.0.0.1", "8.8.8.8"):
+        ip = route_ip(dest)
+        if ip and not ip.startswith("127."):
+            ips.append(ip)
+    return list(dict.fromkeys(ips))
+
+
+def scan_subnet(extra_hosts=()):
+    bases = [ip.rsplit(".", 1)[0] for ip in [*extra_hosts, *local_ips()]]
+    bases = list(dict.fromkeys(bases))
+    if not bases:
         return []
-    base = me.rsplit(".", 1)[0]
 
     def probe(ip):
         try:
@@ -168,8 +184,12 @@ def scan_subnet():
         name = is_mi(ip)
         return (name, ip) if name else None
 
-    with concurrent.futures.ThreadPoolExecutor(128) as ex:
-        return [h for h in ex.map(probe, [f"{base}.{i}" for i in range(1, 255)]) if h]
+    for base in bases:
+        with concurrent.futures.ThreadPoolExecutor(128) as ex:
+            found = [h for h in ex.map(probe, [f"{base}.{i}" for i in range(1, 255)]) if h]
+        if found:
+            return found
+    return []
 
 
 def pick_host(args, cfg):
@@ -178,7 +198,8 @@ def pick_host(args, cfg):
     if cfg.get("host") and is_mi(cfg["host"]):
         return cfg["host"]
     print("Looking for your Mi TV on the network…")
-    found = scan_subnet()
+    # the TV's last known address may have changed, but its subnet probably hasn't
+    found = scan_subnet([cfg["host"]] if cfg.get("host") else [])
     if not found:
         sys.exit("Nothing found. Is the TV on and on the same Wi-Fi? Or pass --host <ip>.")
     if len(found) == 1:
