@@ -47,14 +47,33 @@ KEYMAP = {
 VOLUME_KEYS = {"+": "volumeup", "=": "volumeup", "-": "volumedown"}
 SOURCES = {"1": "hdmi1", "2": "hdmi2", "3": "hdmi3", "a": "av"}
 
-HELP = """
-  arrows       move           enter/space  OK
-  b / ⌫        back           h            home
-  m            menu           p            power (off)
-  + / -        volume up/down v            set volume to a number
-  o            open an app    1 2 3 / a    HDMI 1-3 / AV input
-  q            quit
-"""
+# (keys, what they do), laid out in as many columns as the terminal width allows
+HELP = [
+    ("arrows", "move"),
+    ("enter", "OK"),
+    ("b bksp", "back"),
+    ("h", "home"),
+    ("m", "menu"),
+    ("p", "power off"),
+    ("+ -", "volume"),
+    ("v", "set volume"),
+    ("o", "open app"),
+    ("1 2 3 a", "HDMI / AV"),
+    ("q", "quit"),
+]
+
+
+def help_lines(width):
+    kw = max(len(k) for k, _ in HELP)
+    lw = max(len(l) for _, l in HELP)
+    cell, gap, indent = kw + 1 + lw, 3, 2
+    # at most 2 so related keys stay side by side (move/OK, back/home, …)
+    cols = max(1, min(2, (width - indent + gap) // (cell + gap)))
+    rows = []
+    for i in range(0, len(HELP), cols):
+        cells = [f"{k:<{kw}} {l:<{lw}}" for k, l in HELP[i : i + cols]]
+        rows.append(" " * indent + (" " * gap).join(cells).rstrip())
+    return rows
 
 
 class MiTV:
@@ -235,38 +254,48 @@ def out(s):
     sys.stdout.flush()
 
 
-def volume_text(tv):
-    vol, mx = tv.volume()
+def volume_text(vol, mx, width):
     if vol is None:
         return "volume  ?"
-    width = 25
-    filled = round(width * vol / (mx or 100))
-    return f"volume {vol:>3}/{mx}  {GREEN}{'█' * filled}{DIM}{'░' * (width - filled)}{RESET}"
+    bar = max(5, min(25, width - 20))  # "  volume  18/50  " takes ~17 columns
+    filled = round(bar * vol / (mx or 100))
+    return f"volume {vol:>3}/{mx}  {GREEN}{'█' * filled}{DIM}{'░' * (bar - filled)}{RESET}"
 
 
 class Screen:
-    def __init__(self, tv, title):
+    def __init__(self, tv, name, host):
         self.tv = tv
-        self.title = title
+        self.name, self.host = name, host
         self.last = ""
-        self.vol = volume_text(tv)
+        self.body = None
+        self.refresh_volume()
 
     def draw(self, body=None):
         """Header, help, volume, blank line, last action; `body` replaces the last two for menus."""
-        lines = [f"  {BOLD}{self.title}{RESET}", ""]
-        lines += [f"{DIM}{l}{RESET}" for l in HELP.strip("\n").splitlines()]
-        lines += ["", f"  {self.vol}", ""]
+        import shutil
+
+        self.body = body
+        width = shutil.get_terminal_size().columns
+        title = f"{self.name}  ·  {self.host}"
+        lines = [f"  {BOLD}{title}{RESET}"] if len(title) + 2 <= width else [f"  {BOLD}{self.name}{RESET}", f"  {self.host}"]
+        lines.append("")
+        lines += [f"{DIM}{l}{RESET}" for l in help_lines(width)]
+        lines += ["", f"  {volume_text(*self.vol, width)}", ""]
         lines += body if body is not None else [f"  {self.last}"]
         out(HOME_CLEAR + "\r\n".join(lines))
 
     def refresh_volume(self):
-        self.vol = volume_text(self.tv)
+        self.vol = self.tv.volume()
 
 
-def interactive(tv, title):
+def interactive(tv, name, host):
+    import signal
+
     fd = sys.stdin.fileno()
     old = termios.tcgetattr(fd)
-    scr = Screen(tv, title)
+    scr = Screen(tv, name, host)
+    # redraw to fit when the window (or phone screen) is resized or rotated
+    signal.signal(signal.SIGWINCH, lambda *_: scr.draw(scr.body))
 
     def ask(body, prompt):
         scr.draw(body + ["", f"  {prompt}"])
@@ -355,7 +384,7 @@ def main():
         r = tv.open_app(hit[1])
         print(f"opening {hit[0]}" if r.get("msg") == "success" else f"TV said: {r}")
     else:
-        interactive(tv, f"{tv.info().get('devicename', 'Mi TV')}  ·  {host}")
+        interactive(tv, tv.info().get("devicename", "Mi TV"), host)
 
 
 if __name__ == "__main__":
