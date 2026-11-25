@@ -53,7 +53,7 @@ HELP = """
   m            menu           p            power (off)
   + / -        volume up/down v            set volume to a number
   o            open an app    1 2 3 / a    HDMI 1-3 / AV input
-  ?            this help      q            quit
+  q            quit
 """
 
 
@@ -195,12 +195,18 @@ def read_key():
     return ch
 
 
-# Screen layout at the bottom of the terminal (the cursor stays on the key line):
-#
-#   volume  18/50  [#########................]
-#
-#   up
-UP2, DOWN2, CLEAR = "\x1b[2A", "\x1b[2B", "\r\x1b[2K"
+# Full-screen UI: drawn on the terminal's alternate screen and redrawn in place,
+# so key presses don't pile up and the terminal is left as it was on quit.
+ALT_ON, ALT_OFF = "\x1b[?1049h", "\x1b[?1049l"
+CUR_HIDE, CUR_SHOW = "\x1b[?25l", "\x1b[?25h"
+HOME_CLEAR = "\x1b[H\x1b[2J"
+BOLD, DIM, GREEN, RED, RESET = "\x1b[1m", "\x1b[2m", "\x1b[32m", "\x1b[31m", "\x1b[0m"
+
+KEY_LABELS = {
+    "up": "↑ up", "down": "↓ down", "left": "← left", "right": "→ right",
+    "enter": "OK", "back": "back", "home": "home", "menu": "menu", "power": "power",
+    "volumeup": "volume +", "volumedown": "volume −",
+}
 
 
 def out(s):
@@ -208,90 +214,94 @@ def out(s):
     sys.stdout.flush()
 
 
-def status(msg):
-    """Write the last key / action on the key line."""
-    out(f"{CLEAR}{msg}")
-
-
 def volume_text(tv):
     vol, mx = tv.volume()
     if vol is None:
-        return "volume ?"
+        return "volume  ?"
     width = 25
     filled = round(width * vol / (mx or 100))
-    return f"volume {vol:>3}/{mx}  [{'#' * filled}{'.' * (width - filled)}]"
+    return f"volume {vol:>3}/{mx}  {GREEN}{'█' * filled}{DIM}{'░' * (width - filled)}{RESET}"
 
 
-def show_volume(tv):
-    """Redraw the volume line two lines above the key line."""
-    out(f"{UP2}{CLEAR}{volume_text(tv)}{DOWN2}\r")
+class Screen:
+    def __init__(self, tv, title):
+        self.tv = tv
+        self.title = title
+        self.last = ""
+        self.vol = volume_text(tv)
+
+    def draw(self, body=None):
+        """Header, help, volume, blank line, last action; `body` replaces the last two for menus."""
+        lines = [f"  {BOLD}{self.title}{RESET}", ""]
+        lines += [f"{DIM}{l}{RESET}" for l in HELP.strip("\n").splitlines()]
+        lines += ["", f"  {self.vol}", ""]
+        lines += body if body is not None else [f"  {self.last}"]
+        out(HOME_CLEAR + "\r\n".join(lines))
+
+    def refresh_volume(self):
+        self.vol = volume_text(self.tv)
 
 
-def draw_panel(tv, msg=""):
-    """Draw volume line, blank line and key line from the cursor's current (fresh) line."""
-    out(f"{CLEAR}{volume_text(tv)}\n{CLEAR}\n{CLEAR}{msg}")
-
-
-def interactive(tv):
+def interactive(tv, title):
     fd = sys.stdin.fileno()
     old = termios.tcgetattr(fd)
+    scr = Screen(tv, title)
 
-    def ask(prompt):
+    def ask(body, prompt):
+        scr.draw(body + ["", f"  {prompt}"])
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
+        out(CUR_SHOW)
         try:
-            return input(prompt).strip()
+            return input().strip()
         finally:
+            out(CUR_HIDE)
             tty.setcbreak(fd)
 
-    print(HELP)
+    out(ALT_ON + CUR_HIDE)
     try:
         tty.setcbreak(fd)
-        draw_panel(tv)
+        scr.draw()
         while True:
             k = read_key()
             if k in ("q", "\x03"):
                 break
             try:
-                if k == "?":
-                    print("\n" + HELP)
-                    draw_panel(tv)
-                elif k in SOURCES:
+                if k in SOURCES:
                     tv.source(SOURCES[k])
-                    status(f"input → {SOURCES[k]}")
+                    scr.last = f"input → {SOURCES[k]}"
                 elif k in VOLUME_KEYS:
                     tv.key(VOLUME_KEYS[k])
-                    status(VOLUME_KEYS[k])
+                    scr.last = KEY_LABELS[VOLUME_KEYS[k]]
                     time.sleep(0.1)
-                    show_volume(tv)
+                    scr.refresh_volume()
                 elif k == "v":
                     _, mx = tv.volume()
-                    n = ask(f"\n\nSet volume to (0-{mx}): ")
+                    n = ask([], f"set volume to (0-{mx}), Enter to cancel: ")
                     if n.isdigit():
-                        print("setting volume…")
+                        scr.last = "setting volume…"
+                        scr.draw()
                         tv.set_volume(int(n))
-                        draw_panel(tv, f"volume → {n}")
-                    else:
-                        draw_panel(tv)
+                        scr.refresh_volume()
+                        scr.last = f"volume → {n}"
                 elif k == "o":
                     apps = tv.apps()
-                    print("\n")
-                    for i, (name, pkg) in enumerate(apps, 1):
-                        print(f"  {i:>2}. {name}  ({pkg})")
-                    n = ask("Open which? (number, Enter to cancel): ")
-                    msg = ""
+                    menu = [f"  {i:>2}. {name}" for i, (name, _) in enumerate(apps, 1)]
+                    n = ask(menu, "open which? (number, Enter to cancel): ")
                     if n.isdigit() and 1 <= int(n) <= len(apps):
                         name, pkg = apps[int(n) - 1]
                         r = tv.open_app(pkg)
-                        msg = f"opening {name}" if r.get("msg") == "success" else f"TV said: {r}"
-                    draw_panel(tv, msg)
+                        scr.last = f"opening {name}" if r.get("msg") == "success" else f"{RED}TV said: {r}{RESET}"
                 elif k in KEYMAP:
                     tv.key(KEYMAP[k])
-                    status(KEYMAP[k])
+                    scr.last = KEY_LABELS.get(KEYMAP[k], KEYMAP[k])
+                else:
+                    continue
             except Exception as e:
-                status(f"error: {e}")
+                scr.last = f"{RED}error: {e}{RESET}"
+            scr.draw()
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
-        print()
+        out(CUR_SHOW + ALT_OFF)
 
 
 def main():
@@ -324,8 +334,7 @@ def main():
         r = tv.open_app(hit[1])
         print(f"opening {hit[0]}" if r.get("msg") == "success" else f"TV said: {r}")
     else:
-        print(f"Connected to {tv.info().get('devicename', 'Mi TV')} at {host}")
-        interactive(tv)
+        interactive(tv, f"{tv.info().get('devicename', 'Mi TV')}  ·  {host}")
 
 
 if __name__ == "__main__":
