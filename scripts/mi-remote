@@ -1,0 +1,335 @@
+#!/usr/bin/env python3
+"""mi-remote — control a Xiaomi Mi TV from the Mac's keyboard.
+
+Uses the TV's local HTTP control API (port 6095). No pairing needed;
+Mac and TV just have to be on the same Wi-Fi. Standard library only.
+
+  mi-remote              # find the TV, then open the keyboard remote
+  mi-remote --host IP    # skip discovery
+  mi-remote --key home   # send one key and exit
+  mi-remote --volume 20  # set the volume and exit
+  mi-remote --apps       # list installed apps
+  mi-remote --app vlc    # open an app (name or package, partial match ok)
+"""
+
+import argparse
+import concurrent.futures
+import json
+import os
+import socket
+import sys
+import termios
+import time
+import tty
+import urllib.error
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+PORT = 6095
+CONFIG = Path.home() / ".config" / "mi-remote" / "config.json"
+
+# key on the Mac -> Mi keycode
+KEYMAP = {
+    "\x1b[A": "up",
+    "\x1b[B": "down",
+    "\x1b[C": "right",
+    "\x1b[D": "left",
+    "\r": "enter",
+    "\n": "enter",
+    " ": "enter",
+    "\x7f": "back",  # backspace
+    "b": "back",
+    "h": "home",
+    "m": "menu",
+    "p": "power",
+}
+VOLUME_KEYS = {"+": "volumeup", "=": "volumeup", "-": "volumedown"}
+SOURCES = {"1": "hdmi1", "2": "hdmi2", "3": "hdmi3", "a": "av"}
+
+HELP = """
+  arrows       move           enter/space  OK
+  b / ⌫        back           h            home
+  m            menu           p            power (off)
+  + / -        volume up/down v            set volume to a number
+  o            open an app    1 2 3 / a    HDMI 1-3 / AV input
+  ?            this help      q            quit
+"""
+
+
+class MiTV:
+    def __init__(self, host):
+        self.host = host
+
+    def _get(self, path, retries=3, **params):
+        url = f"http://{self.host}:{PORT}/{path}?{urllib.parse.urlencode(params)}"
+        for attempt in range(retries):
+            try:
+                with urllib.request.urlopen(url, timeout=4) as r:
+                    body = r.read().decode(errors="ignore")
+                break
+            except urllib.error.HTTPError as e:
+                # the TV's web server now and then answers 404 to valid requests; retry
+                if e.code != 404 or attempt == retries - 1:
+                    raise
+                time.sleep(0.2)
+        try:
+            return json.loads(body)
+        except ValueError:
+            return {"raw": body}
+
+    def info(self):
+        return self._get("request", action="isalive").get("data", {})
+
+    def key(self, code):
+        return self._get("controller", action="keyevent", keycode=code)
+
+    def source(self, src):
+        return self._get("controller", action="changesource", source=src)
+
+    def volume(self):
+        d = self._get("controller", action="getvolume").get("data", {})
+        return d.get("volume"), d.get("maxVolume")
+
+    def set_volume(self, target):
+        """No direct 'set' command exists, so step up/down and read back."""
+        vol, mx = self.volume()
+        target = max(0, min(int(target), mx or 100))
+        for _ in range(3 * (mx or 100)):
+            if vol == target:
+                break
+            self.key("volumeup" if vol < target else "volumedown")
+            time.sleep(0.08)
+            new, _ = self.volume()
+            if new == vol:  # didn't move (e.g. at a limit, or the volume bar was just opening)
+                time.sleep(0.25)
+                new, _ = self.volume()
+            vol = new
+        return vol, mx
+
+    def apps(self):
+        data = self._get("controller", action="getinstalledapp", count=999, changeIcon=1)
+        return [(a["AppName"], a["PackageName"]) for a in data.get("data", {}).get("AppInfo", [])]
+
+    def open_app(self, package):
+        return self._get("controller", action="startapp", type="packagename", packagename=package)
+
+
+def find_app(apps, query):
+    q = query.lower()
+    for name, pkg in apps:
+        if q in (name.lower(), pkg.lower()):
+            return name, pkg
+    hits = [(n, p) for n, p in apps if q in n.lower() or q in p.lower()]
+    return hits[0] if len(hits) == 1 else None
+
+
+def load_config():
+    return json.loads(CONFIG.read_text()) if CONFIG.exists() else {}
+
+
+def is_mi(ip):
+    try:
+        data = MiTV(ip).info()
+        return data.get("devicename") or "Mi TV"
+    except Exception:
+        return None
+
+
+def local_ip():
+    # Prefer the Wi-Fi/Ethernet address: with a VPN on, the default route points elsewhere.
+    import subprocess
+
+    for iface in ("en0", "en1", "en2"):
+        ip = subprocess.run(["ipconfig", "getifaddr", iface], capture_output=True, text=True).stdout.strip()
+        if ip:
+            return ip
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("8.8.8.8", 80))
+        return s.getsockname()[0]
+    except OSError:
+        return None
+    finally:
+        s.close()
+
+
+def scan_subnet():
+    me = local_ip()
+    if not me:
+        return []
+    base = me.rsplit(".", 1)[0]
+
+    def probe(ip):
+        try:
+            socket.create_connection((ip, PORT), timeout=0.6).close()
+        except OSError:
+            return None
+        name = is_mi(ip)
+        return (name, ip) if name else None
+
+    with concurrent.futures.ThreadPoolExecutor(128) as ex:
+        return [h for h in ex.map(probe, [f"{base}.{i}" for i in range(1, 255)]) if h]
+
+
+def pick_host(args, cfg):
+    if args.host:
+        return args.host
+    if cfg.get("host") and is_mi(cfg["host"]):
+        return cfg["host"]
+    print("Looking for your Mi TV on the network…")
+    found = scan_subnet()
+    if not found:
+        sys.exit("Nothing found. Is the TV on and on the same Wi-Fi? Or pass --host <ip>.")
+    if len(found) == 1:
+        return found[0][1]
+    for i, (name, ip) in enumerate(found, 1):
+        print(f"  {i}. {name}  {ip}")
+    return found[int(input("Which one? ")) - 1][1]
+
+
+def read_key():
+    ch = os.read(sys.stdin.fileno(), 1).decode(errors="ignore")
+    if ch == "\x1b":
+        ch += os.read(sys.stdin.fileno(), 2).decode(errors="ignore")
+    return ch
+
+
+# Screen layout at the bottom of the terminal (the cursor stays on the key line):
+#
+#   volume  18/50  [#########................]
+#
+#   up
+UP2, DOWN2, CLEAR = "\x1b[2A", "\x1b[2B", "\r\x1b[2K"
+
+
+def out(s):
+    sys.stdout.write(s)
+    sys.stdout.flush()
+
+
+def status(msg):
+    """Write the last key / action on the key line."""
+    out(f"{CLEAR}{msg}")
+
+
+def volume_text(tv):
+    vol, mx = tv.volume()
+    if vol is None:
+        return "volume ?"
+    width = 25
+    filled = round(width * vol / (mx or 100))
+    return f"volume {vol:>3}/{mx}  [{'#' * filled}{'.' * (width - filled)}]"
+
+
+def show_volume(tv):
+    """Redraw the volume line two lines above the key line."""
+    out(f"{UP2}{CLEAR}{volume_text(tv)}{DOWN2}\r")
+
+
+def draw_panel(tv, msg=""):
+    """Draw volume line, blank line and key line from the cursor's current (fresh) line."""
+    out(f"{CLEAR}{volume_text(tv)}\n{CLEAR}\n{CLEAR}{msg}")
+
+
+def interactive(tv):
+    fd = sys.stdin.fileno()
+    old = termios.tcgetattr(fd)
+
+    def ask(prompt):
+        termios.tcsetattr(fd, termios.TCSADRAIN, old)
+        try:
+            return input(prompt).strip()
+        finally:
+            tty.setcbreak(fd)
+
+    print(HELP)
+    try:
+        tty.setcbreak(fd)
+        draw_panel(tv)
+        while True:
+            k = read_key()
+            if k in ("q", "\x03"):
+                break
+            try:
+                if k == "?":
+                    print("\n" + HELP)
+                    draw_panel(tv)
+                elif k in SOURCES:
+                    tv.source(SOURCES[k])
+                    status(f"input → {SOURCES[k]}")
+                elif k in VOLUME_KEYS:
+                    tv.key(VOLUME_KEYS[k])
+                    status(VOLUME_KEYS[k])
+                    time.sleep(0.1)
+                    show_volume(tv)
+                elif k == "v":
+                    _, mx = tv.volume()
+                    n = ask(f"\n\nSet volume to (0-{mx}): ")
+                    if n.isdigit():
+                        print("setting volume…")
+                        tv.set_volume(int(n))
+                        draw_panel(tv, f"volume → {n}")
+                    else:
+                        draw_panel(tv)
+                elif k == "o":
+                    apps = tv.apps()
+                    print("\n")
+                    for i, (name, pkg) in enumerate(apps, 1):
+                        print(f"  {i:>2}. {name}  ({pkg})")
+                    n = ask("Open which? (number, Enter to cancel): ")
+                    msg = ""
+                    if n.isdigit() and 1 <= int(n) <= len(apps):
+                        name, pkg = apps[int(n) - 1]
+                        r = tv.open_app(pkg)
+                        msg = f"opening {name}" if r.get("msg") == "success" else f"TV said: {r}"
+                    draw_panel(tv, msg)
+                elif k in KEYMAP:
+                    tv.key(KEYMAP[k])
+                    status(KEYMAP[k])
+            except Exception as e:
+                status(f"error: {e}")
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old)
+        print()
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--host", help="TV IP address")
+    ap.add_argument("--key", help="send one key (up, down, left, right, enter, back, home, menu, volumeup, volumedown, power) and exit")
+    ap.add_argument("--volume", type=int, help="set the volume to this level and exit")
+    ap.add_argument("--apps", action="store_true", help="list installed apps and exit")
+    ap.add_argument("--app", help="open an app by name or package and exit")
+    args = ap.parse_args()
+
+    cfg = load_config()
+    host = pick_host(args, cfg)
+    tv = MiTV(host)
+    CONFIG.parent.mkdir(parents=True, exist_ok=True)
+    CONFIG.write_text(json.dumps({**cfg, "host": host}, indent=2))
+
+    if args.key:
+        print(tv.key(args.key))
+    elif args.volume is not None:
+        vol, mx = tv.set_volume(args.volume)
+        print(f"volume {vol}/{mx}")
+    elif args.apps:
+        for name, pkg in tv.apps():
+            print(f"{name}  ({pkg})")
+    elif args.app:
+        hit = find_app(tv.apps(), args.app)
+        if not hit:
+            sys.exit(f"No single app matches '{args.app}'. Try --apps.")
+        r = tv.open_app(hit[1])
+        print(f"opening {hit[0]}" if r.get("msg") == "success" else f"TV said: {r}")
+    else:
+        print(f"Connected to {tv.info().get('devicename', 'Mi TV')} at {host}")
+        interactive(tv)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        pass
