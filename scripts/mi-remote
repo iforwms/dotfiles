@@ -10,6 +10,7 @@ Mac and TV just have to be on the same Wi-Fi. Standard library only.
   mi-remote --volume 20  # set the volume and exit
   mi-remote --apps       # list installed apps
   mi-remote --app vlc    # open an app (name or package, partial match ok)
+  mi-remote --info       # show what the TV reports about itself
 """
 
 import argparse
@@ -59,6 +60,7 @@ HELP = [
     ("v", "set volume"),
     ("o", "open app"),
     ("1 2 3 a", "HDMI / AV"),
+    ("i", "TV info"),
     ("q", "quit"),
 ]
 
@@ -132,6 +134,26 @@ class MiTV:
 
     def open_app(self, package):
         return self._get("controller", action="startapp", type="packagename", packagename=package)
+
+    def system_info(self):
+        """Everything the TV reports about itself, as (label, value) pairs."""
+        sysinfo = self._get("controller", action="getsysteminfo").get("data", {})
+        alive = self.info()
+        vol, mx = self.volume()
+        rows = [
+            ("name", sysinfo.get("devicename") or alive.get("devicename")),
+            ("address", alive.get("ip")),
+            ("platform", sysinfo.get("ptf") or alive.get("platform")),
+            ("build", alive.get("build")),
+            ("version", alive.get("version")),
+            ("code version", sysinfo.get("codever")),
+            ("Wi-Fi MAC", sysinfo.get("wifimac")),
+            ("Ethernet MAC", sysinfo.get("ethmac")),
+            ("device ID", sysinfo.get("deviceid")),
+            ("volume", f"{vol}/{mx}" if vol is not None else None),
+            ("features", ", ".join(alive.get("feature", [])) or None),
+        ]
+        return [(k, v) for k, v in rows if v not in (None, "")]
 
 
 def find_app(apps, query):
@@ -341,6 +363,21 @@ def interactive(tv, name, host):
                         name, pkg = apps[int(n) - 1]
                         r = tv.open_app(pkg)
                         scr.last = f"opening {name}" if r.get("msg") == "success" else f"{RED}TV said: {r}{RESET}"
+                elif k == "i":
+                    import shutil
+
+                    rows = tv.system_info()
+                    w = max(len(label) for label, _ in rows)
+                    room = max(8, shutil.get_terminal_size().columns - w - 4)
+
+                    def fit(v):
+                        v = str(v)
+                        return v if len(v) <= room else v[: room - 1] + "…"
+
+                    scr.refresh_volume()
+                    # shown until the next key press
+                    scr.draw([f"  {DIM}{label:<{w}}{RESET}  {fit(value)}" for label, value in rows])
+                    continue
                 elif k in KEYMAP:
                     tv.key(KEYMAP[k])
                     scr.last = KEY_LABELS.get(KEYMAP[k], KEYMAP[k])
@@ -361,6 +398,7 @@ def main():
     ap.add_argument("--volume", type=int, help="set the volume to this level and exit")
     ap.add_argument("--apps", action="store_true", help="list installed apps and exit")
     ap.add_argument("--app", help="open an app by name or package and exit")
+    ap.add_argument("--info", action="store_true", help="show what the TV reports about itself and exit")
     args = ap.parse_args()
 
     cfg = load_config()
@@ -374,6 +412,11 @@ def main():
     elif args.volume is not None:
         vol, mx = tv.set_volume(args.volume)
         print(f"volume {vol}/{mx}")
+    elif args.info:
+        rows = tv.system_info()
+        w = max(len(label) for label, _ in rows)
+        for label, value in rows:
+            print(f"{label:<{w}}  {value}")
     elif args.apps:
         for name, pkg in tv.apps():
             print(f"{name}  ({pkg})")
