@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+
+# Pull camera photos and screenshots from the phone over adb into
+# ~/Downloads/phone-images-YYYYMMDDHHMMSS/{camera,screenshots}.
+# Uses the one connected non-emulator device; set ANDROID_SERIAL to pick another.
+
+set -eo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+script_name=phone-images
+usage="usage: ${script_name} [days]   days back besides today (default 0 = today only)"
+
+camera_dirs=(/sdcard/DCIM/Camera)
+screenshot_dirs=(/sdcard/Pictures/Screenshots /sdcard/DCIM/Screenshots)
+
+days="${1:-0}"
+if ! [[ "$days" =~ ^[0-9]+$ ]]; then
+  echo -e "${RED}[${script_name}] ${usage}${NC}"
+  exit 1
+fi
+
+if [[ -z "$ANDROID_SERIAL" ]]; then
+  phones=$(adb devices | awk 'NR > 1 && $2 == "device" && $1 !~ /^emulator-/ { print $1 }')
+  count=$(printf '%s' "$phones" | grep -c . || true)
+  if [[ "$count" -ne 1 ]]; then
+    echo -e "${RED}[${script_name}] Expected one connected phone, found ${count}. Set ANDROID_SERIAL to pick one.${NC}"
+    adb devices
+    exit 1
+  fi
+  export ANDROID_SERIAL="$phones"
+fi
+
+# Minutes since local midnight, $days days ago (+1 so files at midnight count)
+midnight=$(date -v-"${days}"d -v0H -v0M -v0S +%s)
+minutes=$(( ($(date +%s) - midnight) / 60 + 1 ))
+
+out_dir="$HOME/Downloads/phone-images-$(date +%Y%m%d%H%M%S)"
+
+# pull_recent <subdir> <phone dir>...
+pull_recent() {
+  local sub="$1"
+  shift
+  local dest="${out_dir}/${sub}"
+  local files=()
+  local dir file
+
+  mkdir -p "$dest"
+  shopt -s nocasematch
+  for dir in "$@"; do
+    while IFS= read -r file; do
+      file="${file%$'\r'}"
+      if [[ "$file" =~ \.(jpe?g|png|heic|heif|webp|dng)$ ]]; then
+        files+=("$file")
+      fi
+    done < <(adb shell "[ -d '${dir}' ] && find '${dir}' -maxdepth 1 -type f -mmin -${minutes}" < /dev/null || true)
+  done
+  shopt -u nocasematch
+
+  if [[ ${#files[@]} -eq 0 ]]; then
+    echo -e "${GREEN}[${script_name}] ${sub}: none${NC}"
+    return
+  fi
+
+  echo -e "${GREEN}[${script_name}] ${sub}: pulling ${#files[@]}...${NC}"
+  adb pull -a "${files[@]}" "$dest"
+}
+
+if [[ "$days" -eq 0 ]]; then
+  echo -e "${GREEN}[${script_name}] Fetching today's images from ${ANDROID_SERIAL}${NC}"
+else
+  echo -e "${GREEN}[${script_name}] Fetching images since $(date -r "$midnight" +%Y-%m-%d) from ${ANDROID_SERIAL}${NC}"
+fi
+
+pull_recent camera "${camera_dirs[@]}"
+pull_recent screenshots "${screenshot_dirs[@]}"
+
+echo -e "${GREEN}[${script_name}] Saved to ${out_dir}${NC}"
