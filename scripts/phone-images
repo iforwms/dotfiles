@@ -11,13 +11,13 @@ GREEN='\033[0;32m'
 NC='\033[0m'
 
 script_name=phone-images
-usage="usage: ${script_name} [days]   days back besides today (default 0 = today only)"
+usage="usage: ${script_name} [hours]   images from the last N hours (default 24)"
 
 camera_dirs=(/sdcard/DCIM/Camera)
 screenshot_dirs=(/sdcard/Pictures/Screenshots /sdcard/DCIM/Screenshots)
 
-days="${1:-0}"
-if ! [[ "$days" =~ ^[0-9]+$ ]]; then
+hours="${1:-24}"
+if ! [[ "$hours" =~ ^[1-9][0-9]*$ ]]; then
   echo -e "${RED}[${script_name}] ${usage}${NC}"
   exit 1
 fi
@@ -33,9 +33,7 @@ if [[ -z "$ANDROID_SERIAL" ]]; then
   export ANDROID_SERIAL="$phones"
 fi
 
-# Minutes since local midnight, $days days ago (+1 so files at midnight count)
-midnight=$(date -v-"${days}"d -v0H -v0M -v0S +%s)
-minutes=$(( ($(date +%s) - midnight) / 60 + 1 ))
+minutes=$(( hours * 60 ))
 
 out_dir="$HOME/Downloads/phone-images-$(date +%Y%m%d%H%M%S)"
 
@@ -68,11 +66,7 @@ pull_recent() {
   adb pull -a "${files[@]}" "$dest"
 }
 
-if [[ "$days" -eq 0 ]]; then
-  echo -e "${GREEN}[${script_name}] Fetching today's images from ${ANDROID_SERIAL}${NC}"
-else
-  echo -e "${GREEN}[${script_name}] Fetching images since $(date -r "$midnight" +%Y-%m-%d) from ${ANDROID_SERIAL}${NC}"
-fi
+echo -e "${GREEN}[${script_name}] Fetching images from the last ${hours}h (since $(date -v-"${hours}"H '+%Y-%m-%d %H:%M')) from ${ANDROID_SERIAL}${NC}"
 
 pull_recent camera "${camera_dirs[@]}"
 pull_recent screenshots "${screenshot_dirs[@]}"
