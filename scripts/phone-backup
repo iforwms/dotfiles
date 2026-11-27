@@ -1,0 +1,483 @@
+#!/usr/bin/env bash
+
+# Back up the phone's shared storage (/sdcard) over adb into
+# ~/Downloads/phone-backup-<serial>, keeping the phone's folder layout.
+#
+# Safe to stop and re-run: a file is skipped when the backup already has it with
+# the same size and timestamp, so an interrupted backup carries on where it stopped.
+# Anything missing, half-copied or changed on the phone is (re)copied. Pulled files
+# keep the phone's timestamps. Files deleted on the phone stay in the backup.
+# Android/data, Android/obb (unreadable over adb) and .thumbnails are skipped.
+#
+# --apps also saves the private data (databases, files, settings) of every app adb
+# can read it from, i.e. debug builds, as _app-data/<app>.tar. These are made whole
+# each run (no skipping) and leave out cache/ and code_cache/. Close an app first
+# so its database is not mid-write.
+#
+# --select opens a file tree with sizes to tick what to back up; w there saves the
+# selection as a named preset, and --preset NAME runs one on any phone. Presets are
+# +/- folder and file rules (see phone-backup-select.py) kept in ~/.config/phone-backup;
+# paths a phone does not have are ignored. --select --preset NAME edits or makes
+# that preset and saves it back. Left-out folders already in the backup are kept.
+#
+# Uses the only connected device, or asks which one when several are connected
+# (say the phone and an emulator); set ANDROID_SERIAL to skip the question.
+
+set -o pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+script_name=phone-backup
+usage="usage: ${script_name} [-n] [-s] [-p NAME] [-a] [-c] [phone_dir]
+       ${script_name} -l
+  phone_dir         folder under /sdcard to back up, e.g. DCIM (default: all of /sdcard)
+  -n, --dry-run     only list what would be copied
+  -s, --select      pick the folders and files to back up in a tree with sizes
+                    (space ticks, w saves the selection as a preset, enter goes on)
+  -p, --preset NAME back up what preset NAME selects; with -s, edit (or make) it
+  -l, --list-presets  show the saved presets and their rules
+  -a, --apps     also save the private data of debug-build apps to _app-data/<app>.tar
+  -c, --checksum  also compare MD5s of files that look up to date and recopy any
+                  that differ (slow: reads every file on the phone and the Mac)"
+
+batch_max=100 # files per adb pull call (always from one folder)
+
+info() { printf "${GREEN}[%s] %s${NC}\n" "$script_name" "$*"; }
+warn() { printf "${YELLOW}[%s] %s${NC}\n" "$script_name" "$*" >&2; }
+fail() { printf "${RED}[%s] %s${NC}\n" "$script_name" "$*" >&2; }
+
+human() {
+  awk -v b="$1" 'BEGIN {
+    split("B KB MB GB TB", u); i = 1
+    while (b >= 1024 && i < 5) { b /= 1024; i++ }
+    printf (i == 1 ? "%d %s" : "%.1f %s"), b, u[i]
+  }'
+}
+
+dry_run=0
+checksum=0
+apps=0
+select_dirs=0
+preset=
+src=/sdcard
+presets_dir="${XDG_CONFIG_HOME:-$HOME/.config}/phone-backup"
+script_dir="$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")" && pwd)"
+
+list_presets() {
+  local f found=0
+  for f in "$presets_dir"/*.preset; do
+    [[ -e "$f" ]] || continue
+    found=1
+    printf "${GREEN}%s${NC}  %s\n" "$(basename "$f" .preset)" "$(grep -v '^#' "$f" | paste -sd ' ' -)"
+  done
+  (( found )) || echo "No presets yet in ${presets_dir}. Make one with: ${script_name} --select (then w)"
+}
+
+while (( $# )); do
+  case "$1" in
+    -n|--dry-run) dry_run=1 ;;
+    -c|--checksum) checksum=1 ;;
+    -a|--apps) apps=1 ;;
+    -s|--select) select_dirs=1 ;;
+    -p|--preset)
+      if [[ -z "$2" || "$2" == -* ]]; then
+        fail "--preset needs a name."
+        exit 1
+      fi
+      preset="$2"
+      shift
+      ;;
+    -l|--list-presets) list_presets; exit 0 ;;
+    -h|--help) echo "$usage"; exit 0 ;;
+    -*) fail "$usage"; exit 1 ;;
+    *) src="$1" ;;
+  esac
+  shift
+done
+
+preset_file=
+if [[ -n "$preset" ]]; then
+  if ! [[ "$preset" =~ ^[A-Za-z0-9._-]+$ ]]; then
+    fail "Preset names use letters, digits, . _ and - only."
+    exit 1
+  fi
+  preset_file="${presets_dir}/${preset}.preset"
+  if [[ ! -f "$preset_file" ]] && (( ! select_dirs )); then
+    fail "No preset called '${preset}'. Make it with: ${script_name} --select --preset ${preset}"
+    list_presets
+    exit 1
+  fi
+fi
+
+src="${src%/}"
+[[ "$src" == /* ]] || src="/sdcard/${src}"
+if [[ "$src" != /sdcard && "$src" != /sdcard/* ]] || [[ "$src" == *"'"* ]]; then
+  fail "phone_dir must be a folder under /sdcard (and contain no single quotes)."
+  exit 1
+fi
+
+# The device to back up: the only one connected, or a numbered pick when several are.
+# Plain `adb` refuses to choose and fails with "more than one device".
+pick_device() {
+  local devices serial state rest i choice
+  while :; do
+    devices=()
+    while read -r serial state rest; do
+      [[ "$state" == device ]] && devices+=("$serial")
+      [[ "$state" == unauthorized ]] && warn "${serial} is waiting: unlock it and allow USB debugging."
+    done < <(adb devices | tail -n +2)
+    (( ${#devices[@]} )) && break
+    if [[ ! -t 0 ]]; then
+      fail "No phone found."
+      exit 1
+    fi
+    read -r -p "No phone found. Connect it, then press Enter to retry... " || exit 1
+  done
+  if (( ${#devices[@]} == 1 )); then
+    ANDROID_SERIAL=${devices[0]}
+    return
+  fi
+  if [[ ! -t 0 ]]; then
+    fail "Several devices are connected. Set ANDROID_SERIAL to pick one."
+    adb devices
+    exit 1
+  fi
+  echo "Several devices are connected:"
+  for i in "${!devices[@]}"; do
+    echo "  $((i + 1))) ${devices[$i]}  $(adb -s "${devices[$i]}" shell getprop ro.product.model </dev/null 2>/dev/null | tr -d '\r')"
+  done
+  until [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#devices[@]} )); do
+    read -r -p "Back up which one? [1-${#devices[@]}] " choice || exit 1
+  done
+  ANDROID_SERIAL=${devices[$((choice - 1))]}
+}
+
+[[ -n "$ANDROID_SERIAL" ]] || pick_device
+export ANDROID_SERIAL
+
+if [[ "$(adb get-state 2>/dev/null)" != device ]]; then
+  fail "${ANDROID_SERIAL} is not ready (unauthorized or offline)."
+  adb devices
+  exit 1
+fi
+
+dest="${HOME}/Downloads/phone-backup-${ANDROID_SERIAL//[^A-Za-z0-9._-]/_}"
+local_root="$dest"
+[[ "$src" == /sdcard/* ]] && local_root="${dest}/${src#/sdcard/}"
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+on_stop() {
+  # shellcheck disable=SC2046 # word splitting of job PIDs is intended
+  kill $(jobs -p) 2>/dev/null
+  rm -f "${dest}/_app-data/"*.tar.part "${presets_dir}"/*.preset.tmp
+  echo
+  fail "Stopped. Run ${script_name} again to carry on where it left off."
+  exit 130
+}
+trap on_stop INT TERM
+
+# Keep the Mac awake for as long as this script runs.
+caffeinate -i -w $$ &
+
+# --apps: tar each debug-build app's private data (/data/user/0/<app>) through run-as.
+# A new tar only replaces the previous one once it has arrived and reads back whole.
+backup_apps() {
+  local apps_dir="${dest}/_app-data"
+  local pkg kb part saved=0 failed_apps=()
+  local -a pkgs
+
+  info "Finding apps whose private data adb can read (debug builds)..."
+  mapfile -t pkgs < <(adb shell 'for p in $(pm list packages -3 | sed s/^package://); do run-as "$p" true 2>/dev/null && echo "$p"; done' </dev/null | tr -d '\r' | sort)
+  if (( ${#pkgs[@]} == 0 )); then
+    warn "No debug-build apps found, so no app data to save."
+    return
+  fi
+
+  if (( dry_run )); then
+    for pkg in "${pkgs[@]}"; do
+      kb=$(adb shell "run-as ${pkg} du -sk ." </dev/null 2>/dev/null | awk '{ print $1 }')
+      printf '%-8s %10s  %s\n' app "$(human $(( ${kb:-0} * 1024 )))" "_app-data/${pkg}.tar"
+    done
+    info "Dry run: would save the private data of ${#pkgs[@]} apps to ${apps_dir}"
+    return
+  fi
+
+  mkdir -p "$apps_dir"
+  for pkg in "${pkgs[@]}"; do
+    part="${apps_dir}/${pkg}.tar.part"
+    # dd collects tar's 512-byte writes into 1 MB ones before they cross the USB link.
+    adb exec-out "run-as ${pkg} tar -cf - --exclude=./cache --exclude=./code_cache . | dd obs=1048576 2>/dev/null" > "$part"
+    if [[ -s "$part" ]] && tar -tf "$part" >/dev/null 2>&1; then
+      mv "$part" "${apps_dir}/${pkg}.tar"
+      info "App data: ${pkg} ($(human "$(stat -f %z "${apps_dir}/${pkg}.tar")"))"
+      saved=$(( saved + 1 ))
+    else
+      rm -f "$part"
+      warn "App data: could not save ${pkg}, kept the previous copy if there is one."
+      failed_apps+=("$pkg")
+    fi
+  done
+
+  if (( ${#failed_apps[@]} )); then
+    warn "Saved the data of ${saved} apps; failed: ${failed_apps[*]}"
+  else
+    info "Saved the data of ${saved} apps to ${apps_dir}"
+  fi
+}
+
+# Same tree on the phone for listing and checksums.
+remote_find="find '${src}/' \\( -path /sdcard/Android/data -o -path /sdcard/Android/obb -o -name .thumbnails \\) -prune -o -type f"
+
+model=$(adb shell getprop ro.product.model </dev/null 2>/dev/null | tr -d '\r')
+info "Listing files under ${src} on ${model:-the phone} (${ANDROID_SERIAL})..."
+adb exec-out "${remote_find} -exec stat -c '%s %Y %n' {} + 2>/dev/null" > "$tmp/remote"
+if [[ ! -s "$tmp/remote" ]]; then
+  fail "No files found under ${src} (or the phone disconnected)."
+  exit 1
+fi
+
+: > "$tmp/local"
+if [[ -d "$local_root" ]]; then
+  info "Listing files already in ${local_root}..."
+  find "$local_root" -type f -exec stat -f '%z %m %N' {} + > "$tmp/local"
+fi
+
+# Which folders to back up: everything, a preset's rules, or what you tick in --select.
+rules="$tmp/rules"
+: > "$rules"
+[[ -f "$preset_file" ]] && cp "$preset_file" "$rules"
+if (( select_dirs )); then
+  if [[ ! -t 0 || ! -t 1 ]]; then
+    fail "--select needs a terminal."
+    exit 1
+  fi
+  if ! python3 "$script_dir/phone-backup-select.py" "$tmp/remote" "$rules" "$rules.new" "$presets_dir" "${src#/sdcard}"; then
+    fail "Cancelled, nothing saved or copied."
+    exit 1
+  fi
+  mv "$rules.new" "$rules"
+  if [[ -n "$preset_file" ]]; then
+    mkdir -p "$presets_dir"
+    { echo "# phone-backup preset: ${preset}"; grep -v '^# phone-backup preset' "$rules"; } > "$preset_file"
+    info "Saved preset ${preset} (${preset_file})"
+  fi
+fi
+if grep -q '^[+-] ' "$rules"; then
+  info "Selection${preset:+ (preset ${preset})}: $(grep '^[+-] ' "$rules" | paste -sd ' ' - | cut -c1-200)"
+fi
+
+(( apps )) && backup_apps
+
+# Decide what to copy. todo lines: "<new|changed> <size> <mtime> <path under /sdcard>";
+# uptodate lines (files that look already backed up): "<size> <mtime> <path under /sdcard>"
+read -r total total_bytes new new_bytes changed changed_bytes bad skipped skipped_bytes < <(
+  LC_ALL=C awk -v rf="$rules" -v lf="$tmp/local" -v uf="$tmp/uptodate" -v strip="$(( ${#dest} + 2 ))" '
+    function rest() { return substr($0, length($1) + length($2) + 3) }
+    # The same rules as phone-backup-select.py, most specific first: a file rule,
+    # "<dir>/*" for its folder, then the deepest "<dir>/" above it; no match = back up.
+    function backed_up(rel,   n, k, parts, dirs, dir) {
+      if (rel in rfile) return rfile[rel]
+      n = split(rel, parts, "/"); dir = ""; dirs[0] = ""
+      for (k = 1; k < n; k++) { dir = (k == 1 ? parts[1] : dir "/" parts[k]); dirs[k] = dir }
+      if (dir in rfiles) return rfiles[dir]
+      for (k = n - 1; k >= 0; k--) if (dirs[k] in rtree) return rtree[dirs[k]]
+      return 1
+    }
+    FILENAME == rf {
+      sign = substr($0, 1, 2); target = substr($0, 3)
+      if ((sign != "+ " && sign != "- ") || target == "") next
+      on = (sign == "+ ")
+      if (target == "/") rtree[""] = on
+      else if (target == "*") rfiles[""] = on
+      else if (target ~ /\/\*$/) rfiles[substr(target, 1, length(target) - 2)] = on
+      else if (target ~ /\/$/) { sub(/\/+$/, "", target); rtree[target] = on }
+      else rfile[target] = on
+      next
+    }
+    FILENAME == lf { rel = substr(rest(), strip); lsize[rel] = $1 + 0; lmtime[rel] = $2 + 0; next }
+    $1 !~ /^[0-9]+$/ || $2 !~ /^[0-9]+$/ || substr(rest(), 1, 8) != "/sdcard/" { bad++; next }
+    {
+      rel = substr(rest(), 9); size = $1 + 0; mtime = $2 + 0
+      if (!backed_up(rel)) { skipped++; skipped_bytes += size; next }
+      total++; total_bytes += size
+      if (!(rel in lsize)) { new++; new_bytes += size; print "new", size, mtime, rel }
+      else if (lsize[rel] != size || lmtime[rel] != mtime) { changed++; changed_bytes += size; print "changed", size, mtime, rel }
+      else print size, mtime, rel > uf
+    }
+    END {
+      printf "%.0f %.0f %.0f %.0f %.0f %.0f %.0f %.0f %.0f\n", total, total_bytes, new, new_bytes,
+        changed, changed_bytes, bad, skipped, skipped_bytes > "/dev/stderr"
+    }
+  ' "$rules" "$tmp/local" "$tmp/remote" 2>&1 >"$tmp/todo"
+)
+touch "$tmp/uptodate"
+
+# --checksum: hash the files that look up to date on both sides at once, with a
+# progress line, and recopy any whose contents differ.
+if (( checksum )) && [[ -s "$tmp/uptodate" ]]; then
+  check_files=$(wc -l < "$tmp/uptodate" | tr -d ' ')
+  check_bytes=$(awk '{ s += $1 } END { printf "%.0f", s }' "$tmp/uptodate")
+  info "Checksumming ${check_files} backed-up files ($(human "$check_bytes")) on the phone and the Mac..."
+
+  # Relative paths in, "<hash>  <path>" (toybox md5sum) / "<hash> <path>" (macOS md5 -r) out.
+  LC_ALL=C awk '{ printf "%s%c", substr($0, length($1) + length($2) + 3), 0 }' "$tmp/uptodate" > "$tmp/uptodate.0"
+  adb shell -T "cd /sdcard && xargs -0 md5sum 2>/dev/null" < "$tmp/uptodate.0" > "$tmp/remote.md5" &
+  remote_pid=$!
+  (cd "$dest" && xargs -0 md5 -r < "$tmp/uptodate.0") > "$tmp/local.md5" 2>/dev/null &
+  local_pid=$!
+
+  # Bytes hashed so far on each side: "<phone> <mac>"
+  hashed_bytes() {
+    LC_ALL=C awk -v uf="$tmp/uptodate" -v rf="$tmp/remote.md5" '
+      FILENAME == uf { size[substr($0, length($1) + length($2) + 3)] = $1; next }
+      FILENAME == rf { r += size[substr($0, 35)]; next }
+      { l += size[substr($0, 34)] }
+      END { printf "%.0f %.0f\n", r, l }
+    ' "$tmp/uptodate" "$tmp/remote.md5" "$tmp/local.md5"
+  }
+  progress_line() {
+    local r l den=$(( check_bytes > 0 ? check_bytes : 1 ))
+    read -r r l < <(hashed_bytes)
+    printf '[%s] Checksumming: phone %3d%% (%s)   mac %3d%% (%s) of %s' "$script_name" \
+      $(( r * 100 / den )) "$(human "$r")" $(( l * 100 / den )) "$(human "$l")" "$(human "$check_bytes")"
+  }
+
+  ticks=0
+  while kill -0 "$remote_pid" 2>/dev/null || kill -0 "$local_pid" 2>/dev/null; do
+    if [[ -t 2 ]]; then
+      printf "\r${GREEN}%s${NC}\033[K" "$(progress_line)" >&2
+    elif (( ticks % 15 == 0 )); then
+      printf "${GREEN}%s${NC}\n" "$(progress_line)" >&2 # not a terminal: a line every 30s
+    fi
+    ticks=$(( ticks + 1 ))
+    sleep 2
+  done
+  [[ -t 2 ]] && printf "\r${GREEN}%s${NC}\033[K\n" "$(progress_line)" >&2
+
+  if ! wait "$remote_pid"; then
+    if [[ "$(adb get-state 2>/dev/null)" != device ]]; then
+      fail "Lost the phone while checksumming. Reconnect it and run ${script_name} again."
+      exit 1
+    fi
+    warn "Some files could not be checksummed on the phone; they are left as they are."
+  fi
+
+  # Append mismatches to the todo list as changed files.
+  read -r mismatched mismatched_bytes < <(
+    LC_ALL=C awk -v uf="$tmp/uptodate" -v rf="$tmp/remote.md5" '
+      FILENAME == uf { rel = substr($0, length($1) + length($2) + 3); line[rel] = $0; size[rel] = $1; next }
+      FILENAME == rf { r[substr($0, 35)] = $1; next }
+      { rel = substr($0, 34); if ((rel in r) && r[rel] != $1) { n++; b += size[rel]; print "changed", line[rel] } }
+      END { printf "%.0f %.0f\n", n, b > "/dev/stderr" }
+    ' "$tmp/uptodate" "$tmp/remote.md5" "$tmp/local.md5" 2>&1 >>"$tmp/todo"
+  )
+  if (( mismatched )); then
+    warn "${mismatched} file(s) differ by checksum and will be recopied."
+    changed=$(( changed + mismatched ))
+    changed_bytes=$(( changed_bytes + mismatched_bytes ))
+  else
+    info "All checksums match."
+  fi
+fi
+
+todo_files=$(( new + changed ))
+todo_bytes=$(( new_bytes + changed_bytes ))
+info "Phone: ${total} files, $(human "$total_bytes"). Up to date: $(( total - todo_files )). New: ${new} ($(human "$new_bytes")). Changed: ${changed} ($(human "$changed_bytes"))."
+(( skipped )) && info "Left out by the selection: ${skipped} files ($(human "$skipped_bytes"))."
+(( bad )) && warn "Skipped ${bad} listing line(s) the script could not read (file names with line breaks?)."
+
+if (( todo_files == 0 )); then
+  info "Backup is up to date: ${dest}"
+  exit 0
+fi
+
+if (( dry_run )); then
+  LC_ALL=C sort -t' ' -k4 "$tmp/todo" | while IFS=' ' read -r kind size _ rel; do
+    printf '%-8s %10s  %s\n' "$kind" "$(human "$size")" "$rel"
+  done
+  info "Dry run, nothing copied. Would copy ${todo_files} files ($(human "$todo_bytes")) to ${dest}"
+  exit 0
+fi
+
+avail_kb=$(df -k "$HOME/Downloads" | awk 'NR == 2 { print $4 }')
+if (( todo_bytes / 1024 > avail_kb )); then
+  fail "Not enough space: need $(human "$todo_bytes"), $(human $(( avail_kb * 1024 ))) free."
+  exit 1
+fi
+
+mkdir -p "$dest"
+info "Copying ${todo_files} files ($(human "$todo_bytes")) to ${dest}"
+
+done_files=0
+done_bytes=0
+failed=()
+batch=()
+batch_sizes=()
+batch_mtimes=()
+batch_dir=
+batch_bytes=0
+
+# Pull the current batch (all files from one folder) in one adb call. If that fails,
+# retry the files that did not arrive complete one by one so one unreadable file
+# does not cost the rest of the folder.
+pull_batch() {
+  (( ${#batch[@]} )) || return 0
+
+  local local_dir="${dest}/${batch_dir}"
+  local pct=$(( todo_bytes > 0 ? (done_bytes + batch_bytes) * 100 / todo_bytes : 100 ))
+  local i f err
+
+  info "[${pct}%] $(human $(( done_bytes + batch_bytes )))/$(human "$todo_bytes")  ${batch_dir:-.}/ (${#batch[@]} files, $(human "$batch_bytes"))"
+  mkdir -p "$local_dir"
+
+  if ! err=$(adb pull -a "${batch[@]/#//sdcard/}" "${local_dir}/" 2>&1 >/dev/null); then
+    if [[ "$(adb get-state 2>/dev/null)" != device ]]; then
+      fail "Lost the phone. Reconnect it and run ${script_name} again to carry on."
+      exit 1
+    fi
+    for i in "${!batch[@]}"; do
+      f="${dest}/${batch[i]}"
+      [[ "$(stat -f '%z %m' "$f" 2>/dev/null)" == "${batch_sizes[i]} ${batch_mtimes[i]}" ]] && continue
+      if ! err=$(adb pull -a "/sdcard/${batch[i]}" "$f" 2>&1 >/dev/null); then
+        warn "Could not copy ${batch[i]}: ${err##*: }"
+        rm -f "$f"
+        failed+=("${batch[i]}")
+      fi
+    done
+  fi
+
+  done_files=$(( done_files + ${#batch[@]} ))
+  done_bytes=$(( done_bytes + batch_bytes ))
+  batch=()
+  batch_sizes=()
+  batch_mtimes=()
+  batch_bytes=0
+}
+
+while IFS=' ' read -r _ size mtime rel; do
+  dir=
+  [[ "$rel" == */* ]] && dir="${rel%/*}"
+  if [[ "$dir" != "$batch_dir" ]] || (( ${#batch[@]} >= batch_max )); then
+    pull_batch
+    batch_dir="$dir"
+  fi
+  batch+=("$rel")
+  batch_sizes+=("$size")
+  batch_mtimes+=("$mtime")
+  batch_bytes=$(( batch_bytes + size ))
+done < <(LC_ALL=C sort -t' ' -k4 "$tmp/todo")
+pull_batch
+
+elapsed="$(( SECONDS / 60 ))m $(( SECONDS % 60 ))s"
+if (( ${#failed[@]} )); then
+  fail "Copied $(( done_files - ${#failed[@]} )) files in ${elapsed}, ${#failed[@]} failed:"
+  printf '  %s\n' "${failed[@]}" >&2
+  fail "Run ${script_name} again to retry them. Saved to ${dest}"
+  exit 1
+fi
+
+info "Copied ${done_files} files ($(human "$done_bytes")) in ${elapsed}. Saved to ${dest}"
