@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """File picker for phone-backup: tick which phone folders and files to back up.
 
-usage: phone-backup-select.py <listing> <rules> <out> <presets dir> [scope]
-  listing      "<size> <mtime> /sdcard/<path>" lines, as phone-backup lists the phone
+usage: phone-backup-select.py [--name PRESET] <listing> <rules> <out> <presets dir> [scope]
+  --name       preset being edited; w starts with this name filled in
+  listing     "<size> <mtime> /sdcard/<path>" lines, as phone-backup lists the phone
   rules        selection to start from (a preset file; missing or empty = everything)
   out          where the chosen rules are written when you press enter
   presets dir  where w saves the selection as a named preset
@@ -17,8 +18,9 @@ wins: a file rule, then "<dir>/*" for its folder, then the deepest "<dir>/" abov
 A file no rule matches is backed up. Paths a phone does not have are ignored, so a
 preset works on any phone.
 
-Keys: arrows or hjkl to move/open/close, space to tick, a for all, w to save as a
-preset, enter to go on with this selection, q to cancel. Exits 0 after enter, 1 on q.
+Keys: arrows or hjkl to move/open/close, ctrl+d/ctrl+u (or ctrl+down/ctrl+up, page
+down/up) to scroll a page, space to tick, a for all, w to save as a preset, enter to go
+on with this selection, q to cancel. Exits 0 after enter, 1 on q.
 """
 
 import curses
@@ -332,27 +334,55 @@ def put(scr, y, text, attr=0):
         pass  # a line that runs past the edge of a tiny window
 
 
-def ask(scr, question):
-    lines, cols = scr.getmaxyx()
-    put(scr, lines - 1, fit(question, cols - 1), curses.A_BOLD)
-    curses.echo()
+def ask(scr, question, text=""):
+    """One-line input on the bottom row, starting with text already typed. Backspace
+    deletes, ctrl+u clears, enter answers, esc skips (returns "")."""
     curses.curs_set(1)
     try:
-        answer = scr.getstr(lines - 1, min(len(question), cols - 2), 60)
+        while True:
+            lines, cols = scr.getmaxyx()
+            put(scr, lines - 1, fit(question + text, cols - 1), curses.A_BOLD)
+            scr.move(lines - 1, min(width(question + text), cols - 2))
+            ch = scr.get_wch()
+            if ch in ("\n", "\r", curses.KEY_ENTER):
+                return text.strip()
+            if ch == "\x1b":
+                scr.nodelay(True)
+                rest = scr.getch()
+                while scr.getch() != -1:
+                    pass  # swallow the rest of an arrow key's escape sequence
+                scr.nodelay(False)
+                if rest == -1:
+                    return ""
+            elif ch in (curses.KEY_BACKSPACE, "\x7f", "\b"):
+                text = text[:-1]
+            elif ch == "\x15":
+                text = ""
+            elif isinstance(ch, str) and ch.isprintable() and len(text) < 60:
+                text += ch
     finally:
-        curses.noecho()
         curses.curs_set(0)
-    return answer.decode("utf-8", "replace").strip()
 
 
 ESCAPES = {"A": curses.KEY_UP, "B": curses.KEY_DOWN, "C": curses.KEY_RIGHT, "D": curses.KEY_LEFT,
-           "H": curses.KEY_HOME, "F": curses.KEY_END, "5~": curses.KEY_PPAGE, "6~": curses.KEY_NPAGE}
+           "H": curses.KEY_HOME, "F": curses.KEY_END, "5~": curses.KEY_PPAGE, "6~": curses.KEY_NPAGE,
+           "1;5A": curses.KEY_PPAGE, "1;5B": curses.KEY_NPAGE}  # ctrl+up / ctrl+down
+PAGE_KEYS = {4: curses.KEY_NPAGE, 21: curses.KEY_PPAGE,  # ctrl+d / ctrl+u
+             b"kDN5": curses.KEY_NPAGE, b"kUP5": curses.KEY_PPAGE}  # ctrl+down / ctrl+up
 
 
 def read_key(scr):
-    """getch, plus arrow keys that arrive as raw ESC [ x / ESC O x sequences (some
-    terminals and tmux send those even in keypad mode). A lone ESC stays 27."""
+    """getch, with ctrl+d/ctrl+u and ctrl+down/ctrl+up turned into page down/up, and
+    arrow keys that arrive as raw ESC [ x / ESC O x sequences (some terminals and tmux
+    send those even in keypad mode) decoded. A lone ESC stays 27."""
     key = scr.getch()
+    if key in PAGE_KEYS:
+        return PAGE_KEYS[key]
+    if key > 255:
+        try:
+            return PAGE_KEYS.get(curses.keyname(key), key)
+        except ValueError:
+            return key
     if key != 27:
         return key
     scr.nodelay(True)
@@ -367,14 +397,15 @@ def read_key(scr):
     return 27 if not seq else -1
 
 
-def picker(scr, root, scope, outside, presets_dir):
+def picker(scr, root, scope, outside, presets_dir, preset_name=""):
     curses.curs_set(0)
     curses.use_default_colors()
     curses.init_pair(1, curses.COLOR_GREEN, -1)
     curses.init_pair(2, curses.COLOR_YELLOW, -1)
     curses.init_pair(3, curses.COLOR_CYAN, -1)
     color = {"all": curses.color_pair(1), "some": curses.color_pair(2), "none": curses.A_DIM}
-    keys_help = " ↑↓ move  → open  ← close  space tick  a all  w save preset  enter go on  q cancel"
+    keys_help = (" ↑↓ move  ^d/^u page  → open  ← close  space tick  a all  w save preset"
+                 "  enter go on  q cancel")
 
     root.expanded = True
     node = root
@@ -441,7 +472,7 @@ def picker(scr, root, scope, outside, presets_dir):
             set_all(root, root.state() != "all")
             update(root)
         elif key == ord("w"):
-            name = ask(scr, " Save as preset (letters, digits, . _ -; empty to skip): ")
+            name = ask(scr, " Save as preset (letters, digits, . _ -; esc to skip): ", preset_name)
             if not name:
                 continue
             if not re.fullmatch(r"[A-Za-z0-9._-]+", name):
@@ -451,6 +482,7 @@ def picker(scr, root, scope, outside, presets_dir):
             path = os.path.join(presets_dir, name + ".preset")
             replaced = os.path.exists(path)
             write_rules(path, rules_for(root, scope, outside), name)
+            preset_name = name
             status = f" {'Replaced' if replaced else 'Saved'} preset '{name}' ({path})"
         elif key in (10, 13, curses.KEY_ENTER):
             return True
@@ -459,10 +491,14 @@ def picker(scr, root, scope, outside, presets_dir):
 
 
 def main():
-    if len(sys.argv) not in (5, 6):
+    args = sys.argv[1:]
+    preset_name = ""
+    if len(args) >= 2 and args[0] == "--name":
+        preset_name, args = args[1], args[2:]
+    if len(args) not in (4, 5):
         sys.exit(__doc__)
-    listing, rules_path, out_path, presets_dir = sys.argv[1:5]
-    scope = sys.argv[5].strip("/") if len(sys.argv) == 6 else ""
+    listing, rules_path, out_path, presets_dir = args[:4]
+    scope = args[4].strip("/") if len(args) == 5 else ""
 
     root = load_tree(listing)
     rules = parse_rules(rules_path)
@@ -471,7 +507,7 @@ def main():
 
     locale.setlocale(locale.LC_ALL, "")
     os.environ.setdefault("ESCDELAY", "25")
-    if not curses.wrapper(picker, root, scope, outside, presets_dir):
+    if not curses.wrapper(picker, root, scope, outside, presets_dir, preset_name):
         sys.exit(1)
     write_rules(out_path, rules_for(root, scope, outside))
 

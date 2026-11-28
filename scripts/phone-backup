@@ -26,7 +26,9 @@
 set -o pipefail
 
 RED='\033[0;31m'
+WHITE='\033[0;37m'
 GREEN='\033[0;32m'
+BOLD='\033[1m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
@@ -45,7 +47,8 @@ usage="usage: ${script_name} [-n] [-s] [-p NAME] [-a] [-c] [phone_dir]
 
 batch_max=100 # files per adb pull call (always from one folder)
 
-info() { printf "${GREEN}[%s] %s${NC}\n" "$script_name" "$*"; }
+info() { printf "${WHITE}[%s] %s${NC}\n" "$script_name" "$*"; }
+success() { printf "${GREEN}[%s] %s${NC}\n" "$script_name" "$*"; }
 warn() { printf "${YELLOW}[%s] %s${NC}\n" "$script_name" "$*" >&2; }
 fail() { printf "${RED}[%s] %s${NC}\n" "$script_name" "$*" >&2; }
 
@@ -71,7 +74,7 @@ list_presets() {
   for f in "$presets_dir"/*.preset; do
     [[ -e "$f" ]] || continue
     found=1
-    printf "${GREEN}%s${NC}  %s\n" "$(basename "$f" .preset)" "$(grep -v '^#' "$f" | paste -sd ' ' -)"
+    printf "${BOLD}%s${NC}  %s\n" "$(basename "$f" .preset)" "$(grep -v '^#' "$f" | paste -sd ' ' -)"
   done
   (( found )) || echo "No presets yet in ${presets_dir}. Make one with: ${script_name} --select (then w)"
 }
@@ -225,7 +228,7 @@ backup_apps() {
   if (( ${#failed_apps[@]} )); then
     warn "Saved the data of ${saved} apps; failed: ${failed_apps[*]}"
   else
-    info "Saved the data of ${saved} apps to ${apps_dir}"
+    success "Saved the data of ${saved} apps to ${apps_dir}"
   fi
 }
 
@@ -255,7 +258,8 @@ if (( select_dirs )); then
     fail "--select needs a terminal."
     exit 1
   fi
-  if ! python3 "$script_dir/phone-backup-select.py" "$tmp/remote" "$rules" "$rules.new" "$presets_dir" "${src#/sdcard}"; then
+  if ! python3 "$script_dir/phone-backup-select.py" ${preset:+--name "$preset"} \
+    "$tmp/remote" "$rules" "$rules.new" "$presets_dir" "${src#/sdcard}"; then
     fail "Cancelled, nothing saved or copied."
     exit 1
   fi
@@ -263,7 +267,7 @@ if (( select_dirs )); then
   if [[ -n "$preset_file" ]]; then
     mkdir -p "$presets_dir"
     { echo "# phone-backup preset: ${preset}"; grep -v '^# phone-backup preset' "$rules"; } > "$preset_file"
-    info "Saved preset ${preset} (${preset_file})"
+    success "Saved preset ${preset} (${preset_file})"
   fi
 fi
 if grep -q '^[+-] ' "$rules"; then
@@ -349,14 +353,14 @@ if (( checksum )) && [[ -s "$tmp/uptodate" ]]; then
   ticks=0
   while kill -0 "$remote_pid" 2>/dev/null || kill -0 "$local_pid" 2>/dev/null; do
     if [[ -t 2 ]]; then
-      printf "\r${GREEN}%s${NC}\033[K" "$(progress_line)" >&2
+      printf "\r${WHITE}%s${NC}\033[K" "$(progress_line)" >&2
     elif (( ticks % 15 == 0 )); then
-      printf "${GREEN}%s${NC}\n" "$(progress_line)" >&2 # not a terminal: a line every 30s
+      printf "${WHITE}%s${NC}\n" "$(progress_line)" >&2 # not a terminal: a line every 30s
     fi
     ticks=$(( ticks + 1 ))
     sleep 2
   done
-  [[ -t 2 ]] && printf "\r${GREEN}%s${NC}\033[K\n" "$(progress_line)" >&2
+  [[ -t 2 ]] && printf "\r${WHITE}%s${NC}\033[K\n" "$(progress_line)" >&2
 
   if ! wait "$remote_pid"; then
     if [[ "$(adb get-state 2>/dev/null)" != device ]]; then
@@ -380,7 +384,7 @@ if (( checksum )) && [[ -s "$tmp/uptodate" ]]; then
     changed=$(( changed + mismatched ))
     changed_bytes=$(( changed_bytes + mismatched_bytes ))
   else
-    info "All checksums match."
+    success "All checksums match."
   fi
 fi
 
@@ -391,7 +395,7 @@ info "Phone: ${total} files, $(human "$total_bytes"). Up to date: $(( total - to
 (( bad )) && warn "Skipped ${bad} listing line(s) the script could not read (file names with line breaks?)."
 
 if (( todo_files == 0 )); then
-  info "Backup is up to date: ${dest}"
+  success "Backup is up to date: ${dest}"
   exit 0
 fi
 
@@ -480,4 +484,4 @@ if (( ${#failed[@]} )); then
   exit 1
 fi
 
-info "Copied ${done_files} files ($(human "$done_bytes")) in ${elapsed}. Saved to ${dest}"
+success "Copied ${done_files} files ($(human "$done_bytes")) in ${elapsed}. Saved to ${dest}"
