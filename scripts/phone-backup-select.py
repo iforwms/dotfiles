@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""File picker for phone-backup: tick which phone folders and files to back up.
+"""File picker for phone-backup and phone-restore: tick which phone folders and files
+to back up (or restore).
 
-usage: phone-backup-select.py [--name PRESET] <listing> <rules> <out> <presets dir> [scope]
+usage: phone-backup-select.py [--name PRESET] [--restore] <listing> <rules> <out> <presets dir> [scope]
   --name       preset being edited; w starts with this name filled in
+  --restore    say "restore" instead of "back up" (phone-restore lists the backup)
   listing     "<size> <mtime> /sdcard/<path>" lines, as phone-backup lists the phone
   rules        selection to start from (a preset file; missing or empty = everything)
   out          where the chosen rules are written when you press enter
@@ -397,7 +399,7 @@ def read_key(scr):
     return 27 if not seq else -1
 
 
-def picker(scr, root, scope, outside, presets_dir, preset_name=""):
+def picker(scr, root, scope, outside, presets_dir, preset_name="", tool="phone-backup", verb="back up"):
     curses.curs_set(0)
     curses.use_default_colors()
     curses.init_pair(1, curses.COLOR_GREEN, -1)
@@ -425,7 +427,7 @@ def picker(scr, root, scope, outside, presets_dir, preset_name=""):
         top = min(max(top, cur - body + 1), cur)
 
         scr.erase()
-        head = (f" phone-backup: tick what to back up   Selected {human(root.sel_size)} of "
+        head = (f" {tool}: tick what to {verb}   Selected {human(root.sel_size)} of "
                 f"{human(root.total_size)} ({root.sel_files} of {root.total_files} files)")
         put(scr, 0, fit(head, cols - 1), curses.color_pair(3) | curses.A_BOLD)
         for i, (n, f, depth) in enumerate(visible[top:top + body]):
@@ -493,8 +495,14 @@ def picker(scr, root, scope, outside, presets_dir, preset_name=""):
 def main():
     args = sys.argv[1:]
     preset_name = ""
-    if len(args) >= 2 and args[0] == "--name":
-        preset_name, args = args[1], args[2:]
+    tool, verb = "phone-backup", "back up"
+    while args and args[0] in ("--name", "--restore"):
+        if args[0] == "--restore":
+            tool, verb, args = "phone-restore", "restore", args[1:]
+        elif len(args) >= 2:
+            preset_name, args = args[1], args[2:]
+        else:
+            sys.exit(__doc__)
     if len(args) not in (4, 5):
         sys.exit(__doc__)
     listing, rules_path, out_path, presets_dir = args[:4]
@@ -507,7 +515,7 @@ def main():
 
     locale.setlocale(locale.LC_ALL, "")
     os.environ.setdefault("ESCDELAY", "25")
-    if not curses.wrapper(picker, root, scope, outside, presets_dir, preset_name):
+    if not curses.wrapper(picker, root, scope, outside, presets_dir, preset_name, tool, verb):
         sys.exit(1)
     write_rules(out_path, rules_for(root, scope, outside))
 
