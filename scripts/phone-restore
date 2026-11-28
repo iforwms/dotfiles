@@ -52,10 +52,13 @@ usage="usage: ${script_name} [-n] [-s] [-p NAME] [-o] [-a] [-c] [-y] backup_dir 
 batch_max=100 # files per adb push call (always into one folder)
 stage=/sdcard/.phone-restore-part
 
-info() { printf "${WHITE}[%s] %s${NC}\n" "$script_name" "$*"; }
-success() { printf "${GREEN}[%s] %s${NC}\n" "$script_name" "$*"; }
-warn() { printf "${YELLOW}[%s] %s${NC}\n" "$script_name" "$*" >&2; }
-fail() { printf "${RED}[%s] %s${NC}\n" "$script_name" "$*" >&2; }
+# Messages first wipe the live progress line (see draw_progress) if one is showing.
+progress_shown=0
+clear_progress() { (( progress_shown )) && printf '\r\033[K' >&2; progress_shown=0; }
+info() { clear_progress; printf "${WHITE}[%s] %s${NC}\n" "$script_name" "$*"; }
+success() { clear_progress; printf "${GREEN}[%s] %s${NC}\n" "$script_name" "$*"; }
+warn() { clear_progress; printf "${YELLOW}[%s] %s${NC}\n" "$script_name" "$*" >&2; }
+fail() { clear_progress; printf "${RED}[%s] %s${NC}\n" "$script_name" "$*" >&2; }
 
 human() {
   awk -v b="$1" 'BEGIN {
@@ -504,11 +507,81 @@ restore_apps() {
 info "Copying ${todo_files} files ($(human "$todo_bytes")) to ${target}"
 
 done_files=0
+last_log=$SECONDS
+# Speed window for draw_progress: two samples of (time, bytes done) 10s apart.
+prev_t=$SECONDS prev_b=0 win_t=$SECONDS win_b=0
 done_bytes=0
 failed=()
 batch=()
 batch_bytes=0
 batch_dir=
+
+# The progress of the whole copy, on one line that is rewritten in place: files and
+# bytes done, the speed over the last 10-20 seconds with the time left at that speed
+# (left out while it would be absurd, e.g. during a run of tiny files), then the
+# folder being restored. $1: bytes of the current batch that have arrived so far. Not a
+# terminal: a plain line every 30s instead. Autowrap is off while drawing so a line
+# wider than the terminal is cut off rather than wrapped onto a second row.
+draw_progress() {
+  local got=${1:-0} all now rate left pct speed='' line
+  all=$(( done_bytes + got ))
+  now=$SECONDS
+  if (( now - win_t >= 10 )); then
+    prev_t=$win_t prev_b=$win_b win_t=$now win_b=$all
+  fi
+  pct=$(( todo_bytes > 0 ? all * 100 / todo_bytes : 100 ))
+  if (( now > prev_t )); then
+    rate=$(( (all - prev_b) / (now - prev_t) ))
+    speed="  $(human "$rate")/s"
+    if (( rate > 0 )); then
+      left=$(( (todo_bytes - all) / rate ))
+      if (( left < 3600 )); then
+        speed+=$(printf '  about %dm %02ds left' $(( left / 60 )) $(( left % 60 )))
+      elif (( left < 48 * 3600 )); then
+        speed+=$(printf '  about %dh %02dm left' $(( left / 3600 )) $(( left % 3600 / 60 )))
+      fi
+    fi
+  fi
+  line=$(printf '[%s] [%d%%] %s/%s files  %s/%s%s  %s/ %s of %s' "$script_name" "$pct" \
+    "$done_files" "$todo_files" "$(human "$all")" "$(human "$todo_bytes")" "$speed" \
+    "${batch_dir:-.}" "$(human "$got")" "$(human "$batch_bytes")")
+  if [[ -t 2 ]]; then
+    printf "\r\033[?7l${WHITE}%s${NC}\033[K\033[?7h" "$line" >&2
+    progress_shown=1
+  elif (( now - last_log >= 30 )); then
+    printf '%s\n' "$line" >&2
+    last_log=$now
+  fi
+}
+
+# Run a batch's adb call ("$@") in the background and redraw the progress line every
+# second while it runs, measured by the function named in $1 (it prints the bytes of
+# the batch that have arrived so far). Leaves the call's error output in err and
+# returns its exit status.
+with_progress() {
+  local measure=$1 pid rc ticks=0
+  shift
+  "$@" </dev/null >/dev/null 2>"$tmp/batch.err" &
+  pid=$!
+  while kill -0 "$pid" 2>/dev/null; do
+    sleep 0.1
+    ticks=$(( ticks + 1 ))
+    (( ticks % 10 )) && continue
+    kill -0 "$pid" 2>/dev/null || break
+    draw_progress "$("$measure")"
+  done
+  wait "$pid"
+  rc=$?
+  err=$(<"$tmp/batch.err")
+  return "$rc"
+}
+
+# Bytes of the current batch pushed so far: the staging folder starts empty for
+# each batch, so it is the size of what is in it.
+pushed_bytes() {
+  adb exec-out "find $(q "$stage") -type f -exec stat -c %s {} + 2>/dev/null" </dev/null 2>/dev/null |
+    awk -v max="$batch_bytes" '{ s += $1 } END { printf "%.0f\n", (s > max ? max : s) }'
+}
 
 # Push the current batch (all files into one folder) into the staging folder in one
 # adb call, then move what arrived into place in one shell call. If the push fails,
@@ -518,11 +591,10 @@ push_batch() {
   (( ${#batch[@]} )) || return 0
 
   local phone_dir="/sdcard${batch_dir:+/${batch_dir}}"
-  local pct=$(( todo_bytes > 0 ? (done_bytes + batch_bytes) * 100 / todo_bytes : 100 ))
   local rel name err size staged
   local -a files
 
-  info "[${pct}%] $(human $(( done_bytes + batch_bytes )))/$(human "$todo_bytes")  ${batch_dir:-.}/ (${#batch[@]} files, $(human "$batch_bytes"))"
+  draw_progress 0
   if ! err=$(adb shell "rm -rf $(q "$stage") && mkdir -p $(q "$stage") $(q "$phone_dir")" </dev/null 2>&1); then
     if [[ "$(adb get-state 2>/dev/null)" != device ]]; then
       fail "Lost the phone. Reconnect it and run ${script_name} again to carry on."
@@ -536,7 +608,7 @@ push_batch() {
   fi
 
   files=("${batch[@]/#/${backup}/}")
-  if ! err=$(adb push "${files[@]}" "${stage}/" 2>&1 >/dev/null); then
+  if ! with_progress pushed_bytes adb push "${files[@]}" "${stage}/"; then
     if [[ "$(adb get-state 2>/dev/null)" != device ]]; then
       fail "Lost the phone. Reconnect it and run ${script_name} again to carry on."
       exit 1
